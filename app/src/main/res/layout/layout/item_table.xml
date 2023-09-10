@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:id="@+id/parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<com.makeramen.roundedimageview.RoundedImageView
+    android:id="@+id/imv_table"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    android:layout_marginStart="16dp"
+    android:layout_width="150dp"
+    app:riv_corner_radius="4dp"
+    android:padding="8dp"
+    android:layout_height="100dp"
+    android:src="@drawable/eating_svgrepo_com"/>
+
+    <TextView
+        android:id="@+id/tb_pos"
+        app:layout_constraintStart_toStartOf="@id/imv_table"
+        app:layout_constraintTop_toTopOf="@id/imv_table"
+        android:text="1"
+        android:padding="4dp"
+        android:textStyle="bold"
+        android:layout_marginStart="4dp"
+        android:textSize="20sp"
+        android:textColor="@color/colorPrimary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+<ImageView
+    android:id="@+id/check"
+    app:layout_constraintTop_toTopOf="@id/tb_pos"
+    android:src="@drawable/ic_check_box"
+    android:visibility="invisible"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_marginEnd="8dp"
+    app:layout_constraintStart_toEndOf="@id/imv_table"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

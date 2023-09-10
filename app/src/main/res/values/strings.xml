@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Food App</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_account">Account</string>
+    <string name="api_default_error">có lỗi xảy ra</string>
+    <string name="text_all_has_error_timeout">Kết nối thất bại</string>
+    <string name="text_all_has_error_network">Lỗi kết nối mạng</string>
+    <string name="text_all_has_error_please_try">Có lỗi xảy ra, vui lòng thử lại</string>
+    <string name="str_authe">Sai tên tài khoản hoặc mật khẩu</string>
+    <string-array name="type">
+        <item>Coffee</item>
+        <item>Tea</item>
+        <item>Juice</item>
+        <item>Smoothie</item>
+    </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="not_receive_info">Không nhận được thông tin</string>
+    <string name="not_receive_info_err">Lỗi info</string>
+</resources>

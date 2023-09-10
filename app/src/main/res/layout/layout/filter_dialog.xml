@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="250dp"
+    android:layout_height="wrap_content"
+
+    android:background="@drawable/bg_loading"
+  >
+
+<EditText
+    android:id="@+id/edt_filter"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    android:background="@null"
+    android:hint="Nhập mật khẩu"
+    android:inputType="textPassword"
+    android:imeOptions="actionDone"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"/>
+   <View
+       android:id="@+id/view"
+       app:layout_constraintTop_toBottomOf="@id/edt_filter"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       android:background="@color/color_gray_black"
+       android:layout_width="match_parent"
+       android:layout_height="1dp"/>
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view">
+
+        <TextView
+            android:id="@+id/tv_cancel"
+            fontPath="fonts/helveticaneuebold.ttf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="Hủy bỏ"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/color_gray_black" />
+
+        <TextView
+            android:id="@+id/tv_acp"
+            fontPath="fonts/helveticaneuebold.ttf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Xác nhận"
+            android:textSize="16dp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
