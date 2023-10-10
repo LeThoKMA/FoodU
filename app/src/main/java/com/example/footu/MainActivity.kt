@@ -137,8 +137,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         pagerAdapter.addFragment(orderShipPickedFragment)
         binding.pagger2.offscreenPageLimit = pagerAdapter.itemCount
         binding.pagger2.adapter = pagerAdapter
-        binding.pagger2.isUserInputEnabled = true // disable swiping
-        if(intent.hasExtra("type")){
+        binding.pagger2.isUserInputEnabled = false // disable swiping
+        if (intent.hasExtra("type")) {
             binding.pagger2.currentItem = 1
             binding.navigation.selectedItemId = R.id.navigation_profile
         }

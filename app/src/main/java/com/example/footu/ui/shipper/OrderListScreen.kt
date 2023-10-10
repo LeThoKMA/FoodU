@@ -48,11 +48,20 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class OrderListScreen : BaseFragment<ActivityShipBinding>() {
 
-    var launcher: ActivityResultLauncher<Intent>? = null
+    private var launcher: ActivityResultLauncher<Intent>? = null
 
     private val viewModel: OrderSViewModel by viewModels()
     lateinit var adapter: OrdersAdapter
     var itemDelete: OrderShipModel? = null
+    private val newAdapter = NewOrdersAdapter(object : NewOnClickDetailCallBack {
+        override fun onClickDetail(item: OrderShipModel) {
+            itemDelete = item
+            val intent = Intent(binding.root.context, OrderDetailActivity::class.java)
+            intent.putExtra("item", item)
+            intent.putExtra("type", 0)
+            launcher?.launch(intent)
+        }
+    })
 
     override fun observerLiveData() {
         viewModel.viewModelScope.launch {
@@ -63,7 +72,7 @@ class OrderListScreen : BaseFragment<ActivityShipBinding>() {
                     } else {
                         binding.tvEmpty.visibility = View.GONE
                     }
-                    adapter.setData(it.orderList)
+                    newAdapter.submitList(it.orderList)
                 }
             }
         }
@@ -94,7 +103,7 @@ class OrderListScreen : BaseFragment<ActivityShipBinding>() {
                 }
             },
         )
-        binding.rvOrders.adapter = adapter
+        binding.rvOrders.adapter = newAdapter
     }
 
     override fun initListener() {

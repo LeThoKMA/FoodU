@@ -18,10 +18,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -36,13 +37,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -123,7 +127,12 @@ fun OrderDetailScreen(
     val annotatedString = buildAnnotatedString {
         append(phoneNumber)
         addStyle(
-            style = SpanStyle(textDecoration = TextDecoration.Underline),
+            style = SpanStyle(
+                textDecoration = TextDecoration.Underline,
+                fontSize = 20.sp,
+                color = Color.Red,
+                fontStyle = FontStyle.Italic,
+            ),
             start = 0,
             end = phoneNumber?.length ?: 0,
         )
@@ -162,50 +171,44 @@ fun OrderDetailScreen(
             .padding(paddingValues)
             .fillMaxSize(),
     ) {
-        Text(
-            text = item.customer.fullname ?: "",
-            modifier = Modifier.padding(3.dp),
-            fontSize = 18.sp,
-        )
+        DetailClientText(title = "Người đặt:", content = item.customer.fullname ?: "")
 
-        ClickableText(
-            text = annotatedString,
-            onClick = { offset ->
-                annotatedString.getStringAnnotations("ClickablePhone", start = offset, end = offset)
-                    .firstOrNull()?.let { annotation ->
-                    val phoneNumberr = annotation.item
-                    val intent = Intent(Intent.ACTION_DIAL)
-                    intent.data = Uri.parse("tel:$phoneNumberr")
-                    context.startActivity(intent)
-                }
-            },
-            modifier = Modifier.padding(3.dp),
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Số điện thoại:", modifier = Modifier.fillMaxWidth(0.35f), fontSize = 18.sp)
+            ClickableText(
+                text = annotatedString,
+                onClick = { offset ->
+                    annotatedString.getStringAnnotations(
+                        "ClickablePhone",
+                        start = offset,
+                        end = offset,
+                    )
+                        .firstOrNull()?.let { annotation ->
+                        val phoneNumberr = annotation.item
+                        val intent = Intent(Intent.ACTION_DIAL)
+                        intent.data = Uri.parse("tel:$phoneNumberr")
+                        context.startActivity(intent)
+                    }
+                },
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
 
-        Text(
-            text = item.totalPrice.formatToPrice(),
-            modifier = Modifier.padding(3.dp),
-            fontSize = 18.sp,
+            )
+        }
 
-        )
-        Text(
-            text = item.time,
-            modifier = Modifier.padding(3.dp),
-            fontSize = 18.sp,
-        )
+        DetailClientText(title = "Giá:", content = item.totalPrice.formatToPrice())
 
-        Text(
-            text = item.address,
-            modifier = Modifier.padding(3.dp),
-            fontSize = 18.sp,
-        )
+        DetailClientText(title = "Thời gian:", content = item.time)
 
+        DetailClientText(title = "Địa chỉ:", content = item.address)
 
         Row(modifier = Modifier.align(End)) {
-            Button(
-                onClick = { },
-            ) {
-                AndroidView(modifier = Modifier.wrapContentSize(), factory = { context ->
+            AndroidView(
+                modifier = Modifier.size(40.dp).clip(RoundedCornerShape(16.dp))
+                    .background(Color.Gray).padding(8.dp),
+                factory = { context ->
                     ZegoSendCallInvitationButton(context).apply {
                         setIsVideoCall(true)
                         resourceID = "zego_uikit_call"
@@ -218,31 +221,27 @@ fun OrderDetailScreen(
                             ),
                         )
                     }
-                })
-            }
+                },
+            )
 
-            Button(
-                onClick = { },
-            ) {
-                AndroidView(
-                    modifier = Modifier
-                        .wrapContentSize(),
-                    factory = { context ->
-                        ZegoSendCallInvitationButton(context).apply {
-                            setIsVideoCall(false)
-                            resourceID = "zego_uikit_call"
-                            setInvitees(
-                                Collections.singletonList(
-                                    ZegoUIKitUser(
-                                        item.customer.id.toString(),
-                                        item.customer.fullname.toString(),
-                                    ),
+            AndroidView(
+                modifier = Modifier.padding(start = 16.dp, end = 8.dp).size(40.dp)
+                    .clip(RoundedCornerShape(16.dp)).background(Color.Gray).padding(8.dp),
+                factory = { context ->
+                    ZegoSendCallInvitationButton(context).apply {
+                        setIsVideoCall(false)
+                        resourceID = "zego_uikit_call"
+                        setInvitees(
+                            Collections.singletonList(
+                                ZegoUIKitUser(
+                                    item.customer.id.toString(),
+                                    item.customer.fullname.toString(),
                                 ),
-                            )
-                        }
-                    },
-                )
-            }
+                            ),
+                        )
+                    }
+                },
+            )
         }
 
         LazyColumn(
@@ -268,7 +267,7 @@ fun OrderDetailScreen(
                             modifier = Modifier.padding(3.dp),
                         )
                         Text(
-                            text = "Đơn giá ${it.item?.price.formatToPrice()}",
+                            text = "Đơn giá: ${it.item?.price.formatToPrice()}",
                             modifier = Modifier.padding(3.dp),
                         )
 
@@ -293,5 +292,13 @@ fun OrderDetailScreen(
                 Text(text = if (type == 0) "Nhận đơn" else "Hoàn thành đơn hàng")
             }
         }
+    }
+}
+
+@Composable
+fun DetailClientText(title: String, content: String) {
+    Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+        Text(text = title, modifier = Modifier.fillMaxWidth(0.35f), fontSize = 18.sp)
+        Text(text = content, fontSize = 18.sp)
     }
 }
