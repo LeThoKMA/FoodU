@@ -14,7 +14,9 @@ import com.example.footu.model.Item
 import com.example.footu.model.ItemStatistic
 import com.example.footu.model.LoginRequest
 import com.example.footu.model.OrderItem
+import com.example.footu.model.OrderShipModel
 import com.example.footu.model.PromotionUser
+import com.example.footu.model.RegisterFirebaseModel
 import com.example.footu.model.User
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -24,10 +26,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
-    @GET("entries")
-    suspend fun test(): String
-
-    @POST("login")
+    @POST("auth/login")
     suspend fun login(@Body user: LoginRequest): BaseResponse<LoginResponse>
 
     @GET("home/all")
@@ -63,7 +62,10 @@ interface ApiService {
     @GET("promotion")
     suspend fun getPromotions(): BaseResponse<List<PromotionUser>>
 
-    @POST("payment")
+    @POST("pending-prepaid")
+    suspend fun doOrderPending(@Body request: UserOrderRequest): BaseResponse<OrderShipModel>
+
+    @POST("bill/prepaid")
     suspend fun doPayment(@Body request: UserOrderRequest): BaseResponseNoBody
 
     @GET("logout")
@@ -74,4 +76,22 @@ interface ApiService {
 
     @POST("register")
     suspend fun register(@Body request: RegisterRequest): BaseResponse<LoginResponse>
+
+    @GET("pending-prepaid/all")
+    suspend fun getOrderShipList(): BaseResponse<List<OrderShipModel>>
+
+    @PUT("pending-prepaid/receive/{id}")
+    suspend fun acceptOrder(@Path("id") id: Int): BaseResponseNoBody
+
+    @PUT("pending-prepaid/complete/{id}")
+    suspend fun doneOrder(@Path("id") id: Int): BaseResponseNoBody
+
+    @GET("pending-prepaid/received")
+    suspend fun getOrdersPicked(): BaseResponse<List<OrderShipModel>>
+
+    @POST("device")
+    suspend fun registerFirebase(@Body request: RegisterFirebaseModel): BaseResponseNoBody
+
+    @POST("pending-prepaid/payment/{id}")
+    suspend fun doPaymentForOrderShip(@Path("id") id: Int): BaseResponseNoBody
 }

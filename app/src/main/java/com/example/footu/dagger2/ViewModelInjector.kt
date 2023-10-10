@@ -2,7 +2,7 @@
 //import com.example.footu.dagger2.ViewModelScope
 //import com.example.footu.dagger2.ApplicationComponent
 //import com.example.footu.dagger2.NetworkModule
-//import com.example.footu.ui.Order.OrderViewModel
+//import com.example.footu.ui.Order.OrderSViewModel
 //import com.example.footu.ui.account.AccountViewModel
 //import com.example.footu.ui.login.LoginViewModel
 //import com.example.footu.ui.orderlist.OrderListViewModel
@@ -16,7 +16,7 @@
 //@ViewModelScope
 //interface ViewModelInjector {
 //    fun inject(viewModel: LoginViewModel)
-//    fun inject(viewModel: OrderViewModel)
+//    fun inject(viewModel: OrderSViewModel)
 //    fun inject(viewModel: PayConfirmViewModel)
 //    fun inject(viewModel: OrderListViewModel)
 //    fun inject(viewModel: AccountViewModel)

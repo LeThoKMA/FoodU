@@ -2,7 +2,13 @@ package com.example.footu.ui.pay
 
 import android.content.Intent
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.Window
+import android.view.WindowManager
+import android.widget.LinearLayout
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.footu.R
@@ -11,6 +17,8 @@ import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivityPayConfirmBinding
 import com.example.footu.model.DetailItemChoose
 import com.example.footu.model.PromotionUser
+import com.example.footu.ui.shipper.AddressCallBack
+import com.example.footu.ui.shipper.AddressDialog
 import com.example.footu.utils.ITEMS_PICKED
 import com.example.footu.utils.formatToPrice
 import com.example.footu.utils.toast
@@ -33,10 +41,13 @@ class ConfirmActivity :
     private val fee = "0"
     var environment = 0 // developer default
 
+    var type = -1
+
     private val merchantName = "CGV Cinemas"
     private val merchantCode = "CGV19072017"
     private val merchantNameLabel = "Nhà cung cấp"
     private val description = "Thanh toán đồ uống"
+    lateinit var dialogForShip: AlertDialog
 
     override fun getContentLayout(): Int {
         return R.layout.activity_pay_confirm
@@ -47,6 +58,7 @@ class ConfirmActivity :
             .setEnvironment(AppMoMoLib.ENVIRONMENT.DEVELOPMENT); // AppMoMoLib.ENVIRONMENT.PRODUCTION
         setColorForStatusBar(R.color.colorPrimary)
         setLightIconStatusBar(true)
+        dialogForShip = setupProgressDialog()
 
         items = intent.getParcelableArrayListExtra(ITEMS_PICKED)!!
         val price = intent.getIntExtra("price", 0)
@@ -87,20 +99,30 @@ class ConfirmActivity :
 
     override fun initListener() {
         binding.tvCreate.setOnClickListener {
-//            val priceDiscount =
-//                (billResponse.promotion.div(100f)).times(billResponse.totalPrice!!).toInt()
-//            viewModel.confirmBill(
-//                billResponse.id ?: 0,
-//                OrderStatus.PAID.value,
-//                billResponse.totalPrice!!.minus(priceDiscount),
-//            )
+            type = 0
             requestPayment()
         }
-        binding.imvBack.setOnClickListener { finish() }
+        binding.imvBack.setOnClickListener {
+            finish()
+        }
+        binding.tvShip.setOnClickListener {
+            type = 1
+            val dialog = AddressDialog(object : AddressCallBack {
+                override fun accept(address: String) {
+                    viewModel.listenResponseByShipper(
+                        items,
+                        promotionsPicked,
+                        priceAfterDiscount,
+                        address
+                    ) { requestPayment() }
+                }
+            })
+            dialog.show(supportFragmentManager, "address_dialog")
+        }
     }
 
     override fun initViewModel(): BaseViewModel {
-        return  viewModel
+        return viewModel
     }
 
     override fun observerData() {
@@ -111,6 +133,13 @@ class ConfirmActivity :
         viewModel.promotions.observe(this) {
             promotions.addAll(it.toMutableList())
             promotionAdapter.notifyDataSetChanged()
+        }
+        viewModel.isShowDialog.observe(this) {
+            if (it) {
+                dialogForShip.show()
+            } else {
+                dialogForShip.dismiss()
+            }
         }
     }
 
@@ -161,8 +190,8 @@ class ConfirmActivity :
                 Log.e(">>>>>>>>>>", data.getIntExtra("status", -1).toString())
                 if (data.getIntExtra("status", -1) === 0) {
                     // TOKEN IS AVAILABLE
-                    viewModel.confirmBill(items, promotionsPicked, priceAfterDiscount)
-                   // this.toast("message: " + "Get token " + data.getStringExtra("message"))
+                    viewModel.confirmBill(items, promotionsPicked, priceAfterDiscount, type)
+                    // this.toast("message: " + "Get token " + data.getStringExtra("message"))
                     val token = data.getStringExtra("data") // Token response
                     val phoneNumber = data.getStringExtra("phonenumber")
 
@@ -194,5 +223,27 @@ class ConfirmActivity :
         } else {
             // this.toast("message: " + this.getString(R.string.not_receive_info_err))
         }
+    }
+
+    private fun setupProgressDialog(): AlertDialog {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this, R.style.CustomDialog)
+        builder.setCancelable(false)
+
+        val myLayout = LayoutInflater.from(this)
+        val dialogView: View =
+            myLayout.inflate(R.layout.fragment_progress_dialog_waiting_shipper, null)
+
+        builder.setView(dialogView)
+
+        val dialog: AlertDialog = builder.create()
+        val window: Window? = dialog.window
+        if (window != null) {
+            val layoutParams = WindowManager.LayoutParams()
+            layoutParams.copyFrom(dialog.window?.attributes)
+            layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT
+            layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
+            dialog.window?.attributes = layoutParams
+        }
+        return dialog
     }
 }

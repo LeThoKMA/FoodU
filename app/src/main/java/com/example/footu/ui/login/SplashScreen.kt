@@ -2,6 +2,7 @@ package com.example.footu.ui.login
 
 import android.content.Intent
 import androidx.activity.viewModels
+import com.example.footu.MainActivity
 import com.example.footu.MyPreference
 import com.example.footu.R
 import com.example.footu.base.BaseActivity
@@ -17,8 +18,12 @@ class SplashScreen : BaseActivity<ActivitySplashScreenBinding>() {
 
     override fun observerData() {
         viewModel.doLogin.observe(this) {
-            if (it) {
+            if (it == 0) {
                 startActivity(Intent(this, HomeActivity::class.java))
+                finishAffinity()
+            }
+            if (it == 2) {
+                startActivity(Intent(this, MainActivity::class.java))
                 finishAffinity()
             }
         }
@@ -29,7 +34,7 @@ class SplashScreen : BaseActivity<ActivitySplashScreenBinding>() {
     }
 
     override fun initView() {
-        val preference = MyPreference().getInstance(this)
+        val preference = MyPreference.getInstance(this)
         if (preference?.getUser() == User()) {
             startActivity(Intent(this, SignInActivity::class.java))
             finishAffinity()
@@ -45,6 +50,6 @@ class SplashScreen : BaseActivity<ActivitySplashScreenBinding>() {
     }
 
     override fun initViewModel(): BaseViewModel {
-      return  viewModel
+        return viewModel
     }
 }

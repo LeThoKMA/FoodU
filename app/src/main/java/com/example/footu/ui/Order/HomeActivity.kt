@@ -22,7 +22,7 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class HomeActivity() :
+class HomeActivity :
     BaseActivity<HomeFragmentBinding>(), OrderInterface {
 
     private val viewModel: OrderViewModel by viewModels()
@@ -44,7 +44,7 @@ class HomeActivity() :
     override fun initListener() {
         binding.tvCreate.setOnClickListener {
             if (viewModel.price.value == 0) {
-                toast("Hãy chọn sản phẩm")
+                binding.root.context.toast("Hãy chọn sản phẩm")
                 return@setOnClickListener
             }
             val intent = Intent(binding.root.context, ConfirmActivity::class.java)
@@ -115,5 +115,10 @@ class HomeActivity() :
                 startActivity(intent)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        oderAdapter.resetData()
     }
 }

@@ -1,14 +1,19 @@
 package com.example.footu.base
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.os.SystemClock
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
@@ -20,14 +25,13 @@ import com.example.footu.utils.ANDROID
 import com.example.footu.utils.STATUS_BAR_HEIGHT
 import com.google.android.material.snackbar.Snackbar
 
-abstract class BaseFragment<BINDING : ViewDataBinding, VM : BaseViewModel> :
+abstract class BaseFragment<BINDING : ViewDataBinding> :
     Fragment() {
-
-    lateinit var viewModel: VM
 
     lateinit var binding: BINDING
     var loadingDialog: AlertDialog? = null
     private var mLastClickTime: Long = 0
+    var snackBar: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,12 +66,12 @@ abstract class BaseFragment<BINDING : ViewDataBinding, VM : BaseViewModel> :
         initView()
         initListener()
         observerLiveData()
-        observerDefaultLiveData()
+        observerDefaultLiveData(initViewModel())
     }
 
     abstract fun getContentLayout(): Int
 
-    abstract fun initViewModel()
+    abstract fun initViewModel(): BaseViewModel
 
     abstract fun initView()
 
@@ -75,7 +79,7 @@ abstract class BaseFragment<BINDING : ViewDataBinding, VM : BaseViewModel> :
 
     abstract fun observerLiveData()
 
-    private fun observerDefaultLiveData() {
+    private fun observerDefaultLiveData(viewModel: BaseViewModel) {
         viewModel.apply {
             activity?.let {
                 isLoading.observe(viewLifecycleOwner) {
@@ -98,7 +102,39 @@ abstract class BaseFragment<BINDING : ViewDataBinding, VM : BaseViewModel> :
                     showError(it.toString())
                 }
             }
+
+            isShowSnackbar.observe(viewLifecycleOwner) {
+                if (it) {
+                    showSnackBar(viewModel.contentSnackbar)
+                } else {
+                    snackBar?.dismiss()
+                }
+            }
         }
+    }
+
+    @SuppressLint("ResourceAsColor")
+    fun showSnackBar(content: String) {
+        snackBar =
+            Snackbar.make(
+                binding.root,
+                content,
+                Snackbar.LENGTH_INDEFINITE,
+            )
+        val snackbarText =
+            snackBar!!.view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+
+        val textSizeInSp = 16f // Kích thước chữ mong muốn (theo sp)
+
+        val layoutParams = snackBar!!.view.layoutParams as FrameLayout.LayoutParams
+        layoutParams.gravity = Gravity.CENTER_HORIZONTAL
+        layoutParams.topMargin = 75
+        layoutParams.leftMargin = 16
+        layoutParams.rightMargin = 16
+        snackBar!!.view.layoutParams = layoutParams
+        snackBar!!.view.setBackgroundColor(R.color.white)
+        snackbarText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSizeInSp)
+        snackBar!!.show()
     }
 
     private fun showError(errorMessage: String) {

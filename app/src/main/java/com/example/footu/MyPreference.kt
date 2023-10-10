@@ -6,25 +6,12 @@ import android.preference.PreferenceManager
 import com.example.footu.model.User
 
 class MyPreference {
-    private var accountUtil: MyPreference? = null
-    private var pref: SharedPreferences? = null
-    private var editor: SharedPreferences.Editor? = null
-
-    fun getInstance(context: Context): MyPreference? {
-        if (accountUtil == null) accountUtil = MyPreference()
-        if (pref == null) {
-            pref = PreferenceManager.getDefaultSharedPreferences(context)
-            accountUtil?.pref = pref
-        }
-        return accountUtil
-    }
-
     fun saveUser(user: User, password: String) {
         editor = pref?.edit()
         editor?.putString("id", user.id.toString())
         editor?.putString("username", user.username)
         editor?.putString("passwd", password)
-        editor?.putBoolean("admin", user.role ?: false)
+        editor?.putInt("admin", user.role ?: 0)
         editor?.putString("fullname", user.fullname)
         editor?.apply()
     }
@@ -39,7 +26,7 @@ class MyPreference {
             user = User(
                 id = pref?.getString("id", "")?.toInt(),
                 username = pref?.getString("username", ""),
-                role = pref?.getBoolean("admin", false),
+                role = pref?.getInt("admin", 0),
                 fullname = pref?.getString("fullname", ""),
             )
         }
@@ -54,5 +41,18 @@ class MyPreference {
         editor?.remove("passwd")
         editor?.remove("admin")
         editor?.apply()
+    }
+
+    companion object {
+        private var accountUtil: MyPreference? = null
+        private var pref: SharedPreferences? = null
+        private var editor: SharedPreferences.Editor? = null
+        fun getInstance(context: Context): MyPreference? {
+            if (accountUtil == null) accountUtil = MyPreference()
+            if (pref == null) {
+                pref = PreferenceManager.getDefaultSharedPreferences(context)
+            }
+            return accountUtil
+        }
     }
 }

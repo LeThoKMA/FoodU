@@ -9,4 +9,5 @@ data class UserOrderRequest(
     var promotionList: Int? = null,
     @SerializedName("totalPrice")
     var totalPrice: Int = 0,
+    var address: String? = "",
 )

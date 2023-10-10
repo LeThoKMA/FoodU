@@ -4,7 +4,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import com.example.footu.MyPreference
 import com.example.footu.R
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
@@ -44,7 +43,6 @@ class AccountActivity : BaseActivity<ActivityManageBinding>() {
     }
 
     override fun initView() {
-        val user = MyPreference().getInstance(binding.root.context)?.getUser()
     }
 
     override fun initListener() {

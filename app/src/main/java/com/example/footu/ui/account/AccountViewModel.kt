@@ -10,7 +10,6 @@ import com.example.footu.hilt.Repository
 import com.example.footu.network.ApiService
 import com.example.footu.utils.toast
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -24,7 +23,7 @@ class AccountViewModel @Inject constructor(
     var apiService: ApiService,
     @ApplicationContext
     var context: Context,
-    val repository: Repository
+    val repository: Repository,
 ) : BaseViewModel() {
     val logout = MutableLiveData<Boolean>()
     val message = MutableLiveData<String>()
@@ -34,7 +33,7 @@ class AccountViewModel @Inject constructor(
             flow { emit(apiService.logout()) }
                 .catch { handleApiError(it) }
                 .collect {
-                    MyPreference().getInstance(context)?.logout()
+                    MyPreference.getInstance(context)?.logout()
                     logout.postValue(true)
                 }
         }

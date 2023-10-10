@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "402288208030",
+    "project_id": "food-user-ea69d",
+    "storage_bucket": "food-user-ea69d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:402288208030:android:9c29cbe02a3fb957ccf38f",
+        "android_client_info": {
+          "package_name": "com.example.footu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfmum6pAWfifLrmhVE3u_erVRegBvSgsQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

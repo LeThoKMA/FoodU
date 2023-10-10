@@ -1,7 +1,11 @@
 package com.example.footu.utils
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.os.Build
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -48,4 +52,20 @@ fun Number?.formatToPrice(
 
 fun Double.decimalFormat(): String {
     return NumberFormat.getNumberInstance(Locale.US).format(this)
+}
+
+@SuppressLint("WrongConstant")
+fun Context.createNotificationChanel() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val name = "food_app"
+        val descriptionText = "hello world"
+        val importance = NotificationManager.IMPORTANCE_MAX
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
+        }
+        // Register the channel with the system
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
 }

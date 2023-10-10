@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.footu.R
-import dagger.hilt.android.lifecycle.HiltViewModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -20,6 +19,8 @@ abstract class BaseViewModel : ViewModel() {
     var isLoading: MutableLiveData<Boolean> = MutableLiveData()
     val errorMessage: MutableLiveData<Int?> = MutableLiveData()
     val responseMessage: MutableLiveData<String?> = MutableLiveData()
+    var isShowSnackbar: MutableLiveData<Boolean> = MutableLiveData()
+    var contentSnackbar: String = ""
 
     protected fun onRetrievePostListStart() {
         isLoading.postValue(true)
@@ -48,10 +49,12 @@ abstract class BaseViewModel : ViewModel() {
                     e.printStackTrace()
                     responseMessage.postValue(error.message)
                 }
+
                 HttpsURLConnection.HTTP_UNAUTHORIZED -> errorMessage.postValue(R.string.str_authe)
                 HttpsURLConnection.HTTP_FORBIDDEN, HttpsURLConnection.HTTP_INTERNAL_ERROR, HttpsURLConnection.HTTP_NOT_FOUND -> responseMessage.postValue(
                     error.message,
                 )
+
                 else -> responseMessage.postValue(error.message)
             }
         } else if (error is SocketTimeoutException) {
@@ -66,6 +69,17 @@ abstract class BaseViewModel : ViewModel() {
                 errorMessage.postValue(R.string.text_all_has_error_please_try)
             }
         }
+    }
+
+    fun onShowSnackbar(content: String) {
+        if (isShowSnackbar.value != true) {
+            contentSnackbar = content
+            isShowSnackbar.postValue(true)
+        }
+    }
+
+    fun onHideSnackbar() {
+        isShowSnackbar.postValue(false)
     }
 
     fun toMultipartBody(name: String, file: File): MultipartBody.Part {

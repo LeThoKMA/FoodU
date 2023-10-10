@@ -43,7 +43,7 @@ class OrderViewModel @Inject constructor(
     }
 
     fun addItemToBill(item: DetailItemChoose) {
-        if (!item.flag!!) {
+        if (item.flag == null || !item.flag!!) {
             val itemRemove = DetailItemChoose(item.id, item.name, 0, 0, 0, null, false)
             mapDetailItemChoose.put(itemRemove.id ?: 0, itemRemove)
         } else {

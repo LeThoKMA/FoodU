@@ -19,5 +19,6 @@ const val STATISTIC_FRAGMENT = "STATISTIC_FRAGMENT"
 const val ANDROID = "android"
 const val DIMEN = "dimen"
 const val STATUS_BAR_HEIGHT = "status_bar_height"
+const val CHANNEL_ID = "CHANNEL_ID"
 
 

@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class OrderItem(
     @SerializedName("id")
-    var id: Int? = 0,
+    var id: Int = 0,
     @SerializedName("status")
     var status: Int? = 0,
     @SerializedName("time")
