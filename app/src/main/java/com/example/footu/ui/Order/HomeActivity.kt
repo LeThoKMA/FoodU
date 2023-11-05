@@ -120,5 +120,7 @@ class HomeActivity :
     override fun onResume() {
         super.onResume()
         oderAdapter.resetData()
+        listItemChoose.clear()
+        binding.tvPrice.text = ""
     }
 }

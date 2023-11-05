@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide
 import com.example.footu.R
 import com.example.footu.databinding.ItemChooseBinding
 import com.example.footu.model.DetailItemChoose
+import com.example.footu.utils.formatToPrice
 
 class ItemConfirmAdapter(val list: MutableList<DetailItemChoose>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -38,8 +39,8 @@ class ItemConfirmAdapter(val list: MutableList<DetailItemChoose>) :
                     .load(item.imgUrl?.get(0)).into(binding.ivProduct)
             }
             binding.tvNameProduct.text = item?.name
-            binding.amount.text = item?.totalPrice.toString()
-            binding.tvPrice.text = item?.price.toString()
+            binding.amount.text = item?.totalPrice.formatToPrice()
+            binding.tvPrice.text = item?.price.formatToPrice()
             binding.edtNumber.text = "x" + item?.count.toString()
             binding.ivUp.visibility = View.GONE
             binding.ivDown.visibility = View.GONE

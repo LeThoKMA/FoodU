@@ -1,6 +1,7 @@
 package com.example.footu.ui.Order
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -60,6 +61,7 @@ class OderAdapter(var list: ArrayList<Item?>, val callback: OrderInterface) :
             }
             binding.tvNameProduct.text = item?.name
             binding.amount.text = item?.amount.toString()
+            binding.amount.visibility = View.INVISIBLE
             binding.tvPrice.text = item?.price.formatToPrice()
 
             if (listCount.containsKey(position)) {
