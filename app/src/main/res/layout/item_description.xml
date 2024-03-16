@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginTop="8dp"
+        app:cardCornerRadius="6dp"
+        app:cardElevation="1dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:padding="8dp">
+
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/img"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                app:riv_corner_radius="6dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@id/img"
+                app:layout_constraintStart_toStartOf="@id/img"
+                app:layout_constraintTop_toBottomOf="@id/img"
+                tools:text="Cà phê" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:paddingHorizontal="4dp"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="@id/img"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_name"
+                android:text="Bạc xỉu là một trong những thức uống độc đáo nhất sinh ra ở Sài Gòn, là sản phẩm pha trộn của ba nền văn hóa Hoa-Việt-Pháp. Trong thời kỳ Pháp thuộc ở Việt Nam 1858-1954, cộng đồng người Hoa ở Sài Gòn có lẽ đi sớm hơn người Việt trong kinh doanh hàng quán, trong đó có cà phê. Vào thời gian đầu, cà phê đen cùng với cà phê sữa vẫn rất khó uống đối với phụ nữ và trẻ con vì họ không quen vị đắng của cà phê, nhưng mùi và vị của cà phê rất cuốn hút. Sau này công thức pha cà phê sữa ở Sài Gòn được người Hoa biến đổi theo cách giảm tỷ lệ cà phê, tăng sữa trong ly thức uống để những người khó uống cà phê nhất vẫn thấy thích thú." />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</layout>

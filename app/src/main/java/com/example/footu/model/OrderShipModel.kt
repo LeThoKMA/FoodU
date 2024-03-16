@@ -6,9 +6,13 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class OrderShipModel(
     val billItemList: List<BillItem>,
-    val customer: User,
+    val customer: User?,
+    val shipper: User?,
     val id: Int,
     val time: String,
     val totalPrice: Int,
-    val address: String
+    val address: String,
+    val lat: Double?,
+    val longitude: Double?,
+    val ipPrepaid: Int?
 ) : Parcelable

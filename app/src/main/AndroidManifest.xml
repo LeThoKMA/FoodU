@@ -4,8 +4,14 @@
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false" />
-
+        android:required="false" /> <!-- Always include this permission -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Include only if your app benefits from precise location access. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--
+ Required only when requesting background location access on
+      Android 10 (API level 29) and higher.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -14,9 +20,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-
-    <!-- Permissions required by the App -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" /> <!-- Permissions required by the App -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -26,7 +30,7 @@
 
     <application
         android:name=".dagger2.App"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/beverage_drink_svgrepo_com"
@@ -36,21 +40,25 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
-            android:name=".ui.call.CallActivity"
-            android:exported="false" />
+            android:name=".ui.map.TrackingLocationActivity"
+            android:exported="false">
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/map_api_key" />
 
         <activity
             android:name=".MainActivityForUser"
             android:exported="false" />
         <activity
-            android:name=".ui.shipper.OrderListScreen"
+            android:name=".ui.shipper.home.OrderListScreen"
             android:exported="false"
             android:label="@string/title_activity_order_list_screen" />
         <activity
             android:name=".ui.shipper.OrderDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat" />
-
         <activity
             android:name=".ui.map.MapsActivity"
             android:exported="true"
@@ -91,19 +99,11 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".ui.Order.HomeActivity"
-            android:exported="false">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
+            android:name=".ui.Order.OrderActivity"
+            android:exported="false" />
         <activity
-            android:name=".ui.account.AccountActivity"
-            android:exported="false">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
+            android:name=".ui.map.RouterActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.account.ChangePassActivity"
             android:exported="false">
@@ -137,12 +137,9 @@
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
-        </activity>
-
-<!--        <service-->
-<!--            android:name=".SocketService"-->
-<!--            android:stopWithTask="false" />-->
-
+        </activity> <!-- <service -->
+        <!-- android:name=".SocketService" -->
+        <!-- android:stopWithTask="false" /> -->
         <service
             android:name=".MyFirebaseService"
             android:exported="true">

@@ -1,6 +1,6 @@
-package com.example.footu.ui.shipper
+package com.example.footu.ui.shipper.home
 
-import android.app.Activity.RESULT_OK
+import android.app.Activity
 import android.content.Intent
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
@@ -41,6 +41,9 @@ import com.example.footu.base.BaseFragment
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivityShipBinding
 import com.example.footu.model.OrderShipModel
+import com.example.footu.ui.shipper.OnClickDetailCallBack
+import com.example.footu.ui.shipper.OrderDetailActivity
+import com.example.footu.ui.shipper.OrdersAdapter
 import com.example.footu.utils.formatToPrice
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -50,18 +53,10 @@ class OrderListScreen : BaseFragment<ActivityShipBinding>() {
 
     private var launcher: ActivityResultLauncher<Intent>? = null
 
-    private val viewModel: OrderSViewModel by viewModels()
+    private val viewModel: OrderShipViewModel by viewModels()
     lateinit var adapter: OrdersAdapter
     var itemDelete: OrderShipModel? = null
-    private val newAdapter = NewOrdersAdapter(object : NewOnClickDetailCallBack {
-        override fun onClickDetail(item: OrderShipModel) {
-            itemDelete = item
-            val intent = Intent(binding.root.context, OrderDetailActivity::class.java)
-            intent.putExtra("item", item)
-            intent.putExtra("type", 0)
-            launcher?.launch(intent)
-        }
-    })
+    private lateinit var newAdapter: NewOrdersAdapter
 
     override fun observerLiveData() {
         viewModel.viewModelScope.launch {
@@ -83,13 +78,22 @@ class OrderListScreen : BaseFragment<ActivityShipBinding>() {
     }
 
     override fun initView() {
-        binding.rvOrders.layoutManager = LinearLayoutManager(binding.root.context)
         launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
+            if (it.resultCode == Activity.RESULT_OK) {
                 itemDelete?.let { it1 -> viewModel.onDeleteItem(it1) }
                 itemDelete = null
             }
         }
+        newAdapter = NewOrdersAdapter(object : NewOnClickDetailCallBack {
+            override fun onClickDetail(item: OrderShipModel) {
+                itemDelete = item
+                val intent = Intent(requireContext(), OrderDetailActivity::class.java)
+                intent.putExtra("item", item)
+                intent.putExtra("type", 0)
+                launcher?.launch(intent)
+            }
+        })
+        binding.rvOrders.layoutManager = LinearLayoutManager(binding.root.context)
         adapter = OrdersAdapter(
             viewModel.state.value.orderList,
             binding.root.context,
@@ -120,7 +124,7 @@ class OrderListScreen : BaseFragment<ActivityShipBinding>() {
 
     @Composable
     fun OrderMainView(
-        viewModel: OrderSViewModel = hiltViewModel(),
+        viewModel: OrderShipViewModel = hiltViewModel(),
         paddingValues: PaddingValues,
     ) {
         val uiState = viewModel.state.collectAsState()
@@ -178,11 +182,11 @@ class OrderListScreen : BaseFragment<ActivityShipBinding>() {
                         )
                         Column {
                             Text(
-                                text = item.customer.fullname ?: "",
+                                text = item.customer?.fullname ?: "",
                                 modifier = Modifier.padding(3.dp),
                             )
                             Text(
-                                text = item.customer.phone ?: "",
+                                text = item.customer?.phone ?: "",
                                 modifier = Modifier.padding(3.dp),
                             )
                             Text(

@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,9 +18,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,9 +30,12 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -53,6 +59,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.example.footu.model.OrderShipModel
+import com.example.footu.ui.map.RouterActivity
+import com.example.footu.ui.shipper.ui.theme.Ivory
 import com.example.footu.ui.shipper.ui.theme.Primary
 import com.example.footu.utils.formatToPrice
 import com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton
@@ -73,6 +81,8 @@ class OrderDetailActivity : ComponentActivity() {
         } else {
             intent.getParcelableExtra("item")
         }
+        orderDetail?.let { viewModel.setOrderDetail(it) }
+
         val type = intent.getIntExtra("type", -1)
         setContent {
             LocalContext.provides(this)
@@ -123,7 +133,7 @@ fun OrderDetailScreen(
     onAccepted: () -> Unit,
     type: Int,
 ) {
-    val phoneNumber = item.customer.phone
+    val phoneNumber = item.customer?.phone
     val annotatedString = buildAnnotatedString {
         append(phoneNumber)
         addStyle(
@@ -156,7 +166,7 @@ fun OrderDetailScreen(
 
     val onAccept = remember {
         {
-            viewModel.acceptOrder(item.id)
+            viewModel.acceptOrder(item)
         }
     }
 
@@ -166,12 +176,13 @@ fun OrderDetailScreen(
         }
     }
     val billItems = item.billItemList
+
     Column(
         modifier = Modifier
             .padding(paddingValues)
             .fillMaxSize(),
     ) {
-        DetailClientText(title = "Người đặt:", content = item.customer.fullname ?: "")
+        DetailClientText(title = "Người đặt:", content = item.customer?.fullname ?: "")
 
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -202,7 +213,11 @@ fun OrderDetailScreen(
 
         DetailClientText(title = "Thời gian:", content = item.time)
 
-        DetailClientText(title = "Địa chỉ:", content = item.address)
+        DetailLocationText(title = "Địa chỉ:", content = item.address) {
+            val intent = Intent(context, RouterActivity::class.java)
+            intent.putExtra("item", item)
+            context.startActivity(intent)
+        }
 
         Row(modifier = Modifier.align(End)) {
             AndroidView(
@@ -215,8 +230,8 @@ fun OrderDetailScreen(
                         setInvitees(
                             Collections.singletonList(
                                 ZegoUIKitUser(
-                                    item.customer.id.toString(),
-                                    item.customer.fullname.toString(),
+                                    item.customer?.id.toString(),
+                                    item.customer?.fullname.toString(),
                                 ),
                             ),
                         )
@@ -234,8 +249,8 @@ fun OrderDetailScreen(
                         setInvitees(
                             Collections.singletonList(
                                 ZegoUIKitUser(
-                                    item.customer.id.toString(),
-                                    item.customer.fullname.toString(),
+                                    item.customer?.id.toString(),
+                                    item.customer?.fullname.toString(),
                                 ),
                             ),
                         )
@@ -246,37 +261,56 @@ fun OrderDetailScreen(
 
         LazyColumn(
             modifier = Modifier
+                .padding(top = 8.dp)
                 .fillMaxWidth()
-                .fillMaxHeight(0.8f),
+                .weight(0.6f),
         ) {
             items(billItems, key = { it.item?.id!! }) {
-                Row(modifier = Modifier.padding(bottom = 16.dp)) {
-                    AsyncImage(
-                        model = it.item?.imgUrl?.get(0),
-                        contentDescription = it.item?.id.toString(),
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .fillMaxHeight()
-                            .width(100.dp)
-                            .align(CenterVertically),
-                    )
-
-                    Column(verticalArrangement = Arrangement.SpaceBetween) {
-                        Text(
-                            text = it.item?.name ?: "",
-                            modifier = Modifier.padding(3.dp),
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Ivory, // Card background color
+                        contentColor = Color.Black, // Card content color,e.g.text
+                    ),
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
+                        .fillMaxWidth(),
+                ) {
+//
+                    Row(modifier = Modifier.padding(8.dp)) {
+                        AsyncImage(
+                            model = it.item?.imgUrl?.get(0),
+                            contentDescription = it.item?.id.toString(),
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .height(80.dp)
+                                .width(80.dp)
+                                .clip(shape = RoundedCornerShape(16.dp))
+                                .align(CenterVertically),
                         )
-                        Text(
-                            text = "Đơn giá: ${it.item?.price.formatToPrice()}",
-                            modifier = Modifier.padding(3.dp),
-                        )
 
-                        Text(text = "Số lượng: ${it.quantity}", modifier = Modifier.padding(3.dp))
+                        Column(
+                            verticalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.align(CenterVertically),
+                        ) {
+                            Text(
+                                text = it.item?.name ?: "",
+                                modifier = Modifier.padding(3.dp),
+                                fontSize = 16.sp,
+                            )
+                            Text(
+                                text = "Đơn giá: ${it.item?.price.formatToPrice()}",
+                                modifier = Modifier.padding(3.dp),
+                                fontSize = 16.sp,
 
-                        Text(
-                            text = "Giá: ${it.price.formatToPrice()}",
-                            modifier = Modifier.padding(3.dp),
-                        )
+                            )
+
+                            Text(
+                                text = "Số lượng: ${it.quantity}",
+                                modifier = Modifier.padding(3.dp),
+                                fontSize = 16.sp,
+
+                            )
+                        }
                     }
                 }
             }
@@ -284,7 +318,7 @@ fun OrderDetailScreen(
         Spacer(modifier = Modifier.fillMaxHeight(0.2f))
         Row(
             horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
         ) {
             Button(
                 onClick = { if (type == 0) onAccept() else onDone() },
@@ -300,5 +334,25 @@ fun DetailClientText(title: String, content: String) {
     Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
         Text(text = title, modifier = Modifier.fillMaxWidth(0.35f), fontSize = 18.sp)
         Text(text = content, fontSize = 18.sp)
+    }
+}
+
+@Composable
+fun DetailLocationText(title: String, content: String, onClick: () -> Unit) {
+    Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+        Text(text = title, modifier = Modifier.fillMaxWidth(0.35f), fontSize = 18.sp)
+        Column {
+            Text(
+                text = content,
+                fontSize = 18.sp,
+            )
+            Text(
+                modifier = Modifier.clickable { onClick() },
+                text = "Xem tuyến đường giao hàng",
+                fontSize = 18.sp,
+                fontStyle = FontStyle.Italic,
+                color = Color.Red,
+            )
+        }
     }
 }

@@ -44,8 +44,8 @@ class OrdersAdapter(
                 Glide.with(binding.root.context)
                     .load(it[0]).into(binding.imgItem)
             }
-            binding.tvName.text = item.customer.fullname
-            binding.tvPhone.text = item.customer.phone
+            binding.tvName.text = item.customer?.fullname
+            //binding.tvPhone.text = item.customer?.phone
             binding.tvPrice.text = item.totalPrice.formatToPrice()
             binding.root.setOnClickListener {
                 callBack.onClickDetail(item)

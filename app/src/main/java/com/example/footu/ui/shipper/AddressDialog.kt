@@ -1,11 +1,11 @@
 package com.example.footu.ui.shipper
 
+import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import com.example.footu.R
 import com.example.footu.base.BaseDialog
 import com.example.footu.databinding.AddressDialogBinding
-import com.example.footu.utils.toast
 
 class AddressDialog(val callback: AddressCallBack) : BaseDialog<AddressDialogBinding>() {
     override fun getLayoutResource(): Int {
@@ -16,20 +16,20 @@ class AddressDialog(val callback: AddressCallBack) : BaseDialog<AddressDialogBin
     }
 
     override fun setUp(view: View?) {
-        binding.tvAcp.setOnClickListener {
-            if (binding.edtFilter.text.isBlank()) {
-                binding.root.context.toast("Vui lòng nhập địa chỉ giao hàng")
-            } else {
-                callback.accept(binding.edtFilter.text.toString())
-                dismiss()
-            }
+        binding.imgDelivery.setOnClickListener {
+            callback.delivery(1)
         }
-        binding.tvCancel.setOnClickListener {
-            dismiss()
-        }
+        binding.imgStore.setOnClickListener { callback.onStore(0) }
+    }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.window?.attributes?.windowAnimations = R.style.DialogAnimation
+        return dialog
     }
 }
 
 interface AddressCallBack {
-    fun accept(address: String)
+    fun delivery(type: Int)
+    fun onStore(type: Int)
 }

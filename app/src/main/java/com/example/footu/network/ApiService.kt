@@ -9,6 +9,7 @@ import com.example.footu.Response.BaseResponse
 import com.example.footu.Response.BaseResponseNoBody
 import com.example.footu.Response.BillDetailResponse
 import com.example.footu.Response.BillResponse
+import com.example.footu.Response.CategoryResponse
 import com.example.footu.Response.LoginResponse
 import com.example.footu.model.Item
 import com.example.footu.model.ItemStatistic
@@ -94,4 +95,13 @@ interface ApiService {
 
     @POST("pending-prepaid/payment/{id}")
     suspend fun doPaymentForOrderShip(@Path("id") id: Int): BaseResponseNoBody
+
+    @GET("category")
+    suspend fun getCategory(): BaseResponse<List<CategoryResponse>>
+
+    @GET("home/{id}")
+    suspend fun getProductByType(@Path("id") id: Int): BaseResponse<List<Item>>
+
+    @GET("pending-prepaid/customer/{id}")
+    suspend fun getOrdersDetail(@Path("id")id: Int): BaseResponse<List<OrderShipModel>>
 }

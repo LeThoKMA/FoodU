@@ -20,5 +20,10 @@ const val ANDROID = "android"
 const val DIMEN = "dimen"
 const val STATUS_BAR_HEIGHT = "status_bar_height"
 const val CHANNEL_ID = "CHANNEL_ID"
+const val PERMISSIONS_REQUEST_CODE = 111
+const val SHIPPER_ID = "SHIPPER_ID"
+const val LOCATION_PERMISSION_REQUEST_CODE = 999
+const val ORDER_TYPE = "ORDER_TYPE"
+const val ORDER_TYPE_DIALOG = "ORDER_TYPE_DIALOG"
 
 

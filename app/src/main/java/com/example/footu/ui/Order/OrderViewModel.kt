@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.footu.Request.ItemBillRequest
 import com.example.footu.Response.BillResponse
+import com.example.footu.Response.CategoryResponse
 import com.example.footu.base.BaseViewModel
 import com.example.footu.model.DetailItemChoose
 import com.example.footu.model.Item
@@ -29,6 +30,9 @@ class OrderViewModel @Inject constructor(
 
     private val _confirm = MutableLiveData<BillResponse?>()
     val confirm: LiveData<BillResponse?> = _confirm
+
+    private val _category = MutableLiveData<List<CategoryResponse>?>()
+    val category: MutableLiveData<List<CategoryResponse>?> = _category
 
     val message = MutableLiveData<String>()
 
@@ -55,7 +59,6 @@ class OrderViewModel @Inject constructor(
         }
         this.totalPrice = total
         _price.postValue(total)
-        // callback.price(total)
     }
 
     fun payConfirm(list: List<DetailItemChoose>) {
@@ -80,16 +83,26 @@ class OrderViewModel @Inject constructor(
         }
     }
 
-    fun fetchItems() {
+    private fun fetchItems() {
         viewModelScope.launch {
             flow {
-                emit(apiService.getItems())
+                emit(
+                    apiService.getCategory(),
+                )
             }.onStart { onRetrievePostListStart() }
                 .onCompletion { onRetrievePostListFinish() }
                 .collect {
-                    if (it.data != null) {
-                        dataItems.postValue(it.data as ArrayList<Item>?)
-                    }
+                }
+        }
+    }
+
+    fun getProductByType(id: Int) {
+        viewModelScope.launch {
+            flow { emit(apiService.getProductByType(id)) }
+                .onStart { onRetrievePostListStart() }
+                .onCompletion { onRetrievePostListFinish() }
+                .collect {
+                    dataItems.postValue(it.data as ArrayList<Item>?)
                 }
         }
     }

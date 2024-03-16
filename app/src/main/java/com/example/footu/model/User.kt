@@ -9,7 +9,7 @@ data class User(
     @SerializedName("fullname")
     var fullname: String? = "",
     @SerializedName("id")
-    var id: Int? = 0,
+    var id: Int = 0,
     @SerializedName("role")
     var role: Int? = 0,
     @SerializedName("username")

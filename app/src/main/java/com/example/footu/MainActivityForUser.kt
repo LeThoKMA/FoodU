@@ -1,27 +1,33 @@
 package com.example.footu
 
-import android.content.pm.PackageManager
+import android.Manifest
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.core.content.ContextCompat
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivityMainBinding
-import com.example.footu.ui.Order.HomeActivity
+import com.example.footu.ui.account.AccountFragment
+import com.example.footu.ui.detail.OrderDetailFragment
+import com.example.footu.ui.home.HomeFragment
 import com.example.footu.utils.hideSoftKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
 
-    private val viewModel: MainViewModel by viewModels()
-
-    lateinit var currentFragment: Fragment
-    private lateinit var targetFragment: Fragment
+    private val viewModel: MainUserViewModel by viewModels()
 
     val homeFragment by lazy {
-        HomeActivity()
+        HomeFragment()
     }
+    val ordersDetailFragment by lazy { OrderDetailFragment() }
+
+    val accountFragment by lazy { AccountFragment() }
 //
 //    val orderListShipper by lazy {
 //        initializeFragment(
@@ -36,7 +42,9 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
 
     fun setupPager() {
         pagerAdapter = FragmentNavigator(this.supportFragmentManager, lifecycle)
-        //pagerAdapter.addFragment(homeFragment)
+        pagerAdapter.addFragment(homeFragment)
+        pagerAdapter.addFragment(ordersDetailFragment)
+        pagerAdapter.addFragment(accountFragment)
         binding.pagger2.offscreenPageLimit = pagerAdapter.itemCount
         binding.pagger2.adapter = pagerAdapter
         binding.pagger2.isUserInputEnabled = false // disable swiping
@@ -46,24 +54,51 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
         return R.layout.activity_main
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun initView() {
         setColorForStatusBar(R.color.colorPrimary)
         setLightIconStatusBar(true)
-        val permissionNeeded = arrayOf(
-            "android.permission.CAMERA",
-            "android.permission.RECORD_AUDIO",
+        val locationPermissionRequest = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions(),
+        ) { permissions ->
+            when {
+                permissions.getOrDefault(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    false,
+                ) -> {
+                    // Precise location access granted.
+                }
+
+                permissions.getOrDefault(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    false,
+                ) -> {
+                    // Only approximate location access granted.
+                }
+
+                else -> {
+                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    startActivity(intent)
+                }
+            }
+        }
+
+// ...
+
+// Before you perform the actual permission request, check whether your app
+// already has the permissions, and whether your app needs to show a permission
+// rationale dialog. For more details, see Request permissions.
+        locationPermissionRequest.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.CAMERA,
+                Manifest.permission.RECORD_AUDIO,
+            ),
         )
 
-        if (ContextCompat.checkSelfPermission(
-                this,
-                "android.permission.CAMERA",
-            ) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(
-                this,
-                "android.permission.RECORD_AUDIO",
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(permissionNeeded, 101)
+        if (!isLocationEnabled()) {
+            requestLocationEnable(this)
         }
         setupPager()
     }
@@ -76,10 +111,15 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
                     true
                 }
 
-//                R.id.navigation_profile -> {
-//                    binding.pagger2.currentItem = 1
-//                    true
-//                }
+                R.id.navigation_order_detail -> {
+                    binding.pagger2.currentItem = 1
+                    true
+                }
+
+                R.id.navigation_profile -> {
+                    binding.pagger2.currentItem = 2
+                    true
+                }
 
                 else -> {
                     false
@@ -92,7 +132,7 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
         return viewModel
     }
 
-//    private fun initializeFragment(tag: String, createFragment: () -> Fragment): Fragment {
+    //    private fun initializeFragment(tag: String, createFragment: () -> Fragment): Fragment {
 //        return supportFragmentManager.findFragmentByTag(tag) ?: createFragment().also { fragment ->
 //            supportFragmentManager
 //                .beginTransaction()
@@ -101,7 +141,6 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
 //                .commit()
 //        }
 //    }
-
     private fun showFragment(currentFragment: Fragment, targetFragment: Fragment) {
         supportFragmentManager
             .beginTransaction()

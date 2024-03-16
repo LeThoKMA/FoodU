@@ -1,4 +1,4 @@
-package com.example.footu.ui.shipper
+package com.example.footu.ui.shipper.picked
 
 import androidx.lifecycle.viewModelScope
 import com.example.footu.base.BaseViewModel

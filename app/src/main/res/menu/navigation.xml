@@ -8,6 +8,11 @@
         android:title="Trang chủ" />
 
     <item
+        android:id="@+id/navigation_order_detail"
+        android:icon="@drawable/orders_icon"
+        android:title="Orders" />
+
+    <item
         android:id="@+id/navigation_profile"
         android:icon="@drawable/ic_profile"
         android:title="Tài khoản" />

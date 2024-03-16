@@ -1,4 +1,4 @@
-package com.example.footu.ui.shipper
+package com.example.footu.ui.shipper.home
 
 import androidx.lifecycle.viewModelScope
 import com.example.footu.base.BaseViewModel
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class OrderSViewModel @Inject constructor(
+class OrderShipViewModel @Inject constructor(
     private val api: ApiService,
 ) : BaseViewModel() {
     private val _state: MutableStateFlow<State> = MutableStateFlow(State())

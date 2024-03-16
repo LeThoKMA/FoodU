@@ -1,16 +1,20 @@
 package com.example.footu.model
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Item(
     @SerializedName("id")
-    var id: Int = 0,
+    val id: Int = 0,
     @SerializedName("name")
-    var name: String? = "",
+    val name: String? = "",
     @SerializedName("unitPrice")
-    var price: Int? = 0,
+    val price: Int? = 0,
     @SerializedName("quantity")
-    var amount: Int? = 0,
+    val amount: Int? = 0,
     @SerializedName("imageLinks")
-    var imgUrl: List<String>? = listOf(),
-) : java.io.Serializable
+    val imgUrl: List<String>? = listOf(),
+    val description: String? = "",
+) : java.io.Serializable, Parcelable

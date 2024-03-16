@@ -5,3 +5,9 @@ enum class OrderStatus(val value: Int) {
     PAID(2),
     CANCELLED(3),
 }
+
+enum class ItemSize {
+    S,
+    M,
+    L,
+}

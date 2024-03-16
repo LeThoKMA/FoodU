@@ -24,7 +24,7 @@ class MyPreference {
         var user = User()
         if (pref?.getString("id", "")?.isNotBlank() == true) {
             user = User(
-                id = pref?.getString("id", "")?.toInt(),
+                id = pref?.getString("id", "")!!.toInt(),
                 username = pref?.getString("username", ""),
                 role = pref?.getInt("admin", 0),
                 fullname = pref?.getString("fullname", ""),
@@ -47,6 +47,8 @@ class MyPreference {
         private var accountUtil: MyPreference? = null
         private var pref: SharedPreferences? = null
         private var editor: SharedPreferences.Editor? = null
+
+        @JvmStatic
         fun getInstance(context: Context): MyPreference? {
             if (accountUtil == null) accountUtil = MyPreference()
             if (pref == null) {

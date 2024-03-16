@@ -7,7 +7,7 @@ import com.example.footu.R
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivityAddUserBinding
-import com.example.footu.ui.Order.HomeActivity
+import com.example.footu.ui.home.HomeFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -37,7 +37,7 @@ class RegisterActivity :
     override fun observerData() {
         viewModel.doLogin.observe(this) {
             if (it == 0) {
-                startActivity(Intent(this, HomeActivity::class.java))
+                startActivity(Intent(this, HomeFragment::class.java))
                 finishAffinity()
             }
             if (it == 2) {

@@ -15,8 +15,8 @@ import com.example.footu.utils.formatToPrice
 
 class OderAdapter(var list: ArrayList<Item?>, val callback: OrderInterface) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var listState: HashMap<String, Boolean> = hashMapOf()
-    var listCount: HashMap<Int, Int> = hashMapOf()
+    private var listState: HashMap<String, Boolean> = hashMapOf()
+    private var listCount: HashMap<Int, Int> = hashMapOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -50,33 +50,34 @@ class OderAdapter(var list: ArrayList<Item?>, val callback: OrderInterface) :
         fun bind(
             position: Int,
             callback: OrderInterface,
-            item: Item?,
+            item: Item,
             listState: HashMap<String, Boolean>,
             listCount: HashMap<Int, Int>,
 
         ) {
-            if (item?.imgUrl?.isNotEmpty() == true) {
+            if (item.imgUrl?.isNotEmpty() == true) {
                 Glide.with(binding.root.context)
-                    .load(item.imgUrl?.get(0)).into(binding.ivProduct)
+                    .load(item.imgUrl.get(0)).into(binding.ivProduct)
             }
-            binding.tvNameProduct.text = item?.name
-            binding.amount.text = item?.amount.toString()
+            binding.tvNameProduct.text = item.name
+            binding.amount.text = item.amount.toString()
             binding.amount.visibility = View.INVISIBLE
-            binding.tvPrice.text = item?.price.formatToPrice()
+            binding.tvPrice.text = item.price.formatToPrice()
+            binding.root.rootView.setOnClickListener { callback.detailItem(item) }
 
             if (listCount.containsKey(position)) {
                 binding.edtNumber.text = listCount[position].toString()
             } else {
                 binding.edtNumber.text = "1"
             }
-            if (listState.containsKey(item?.id.toString())) {
-                binding.ivCheck.isChecked = listState[item?.id.toString()] == true
+            if (listState.containsKey(item.id.toString())) {
+                binding.ivCheck.isChecked = listState[item.id.toString()] == true
             } else {
                 binding.ivCheck.isChecked = false
             }
             binding.ivCheck.setOnClickListener {
                 if (binding.ivCheck.isChecked) {
-                    listState.set(item?.id.toString(), true)
+                    listState.set(item.id.toString(), true)
                 } else {
                     listState.set(item?.id.toString(), false)
                 }

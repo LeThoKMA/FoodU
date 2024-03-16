@@ -2,21 +2,21 @@ package com.example.footu.ui.account
 
 import android.content.DialogInterface
 import android.content.Intent
-import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.viewModels
 import com.example.footu.R
-import com.example.footu.base.BaseActivity
+import com.example.footu.base.BaseFragment
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivityManageBinding
 import com.example.footu.ui.login.SignInActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class AccountActivity : BaseActivity<ActivityManageBinding>() {
+class AccountFragment : BaseFragment<ActivityManageBinding>() {
     private val viewModel: AccountViewModel by viewModels()
     fun showDialog() {
         val alertDialog: AlertDialog = this.let {
-            val builder = AlertDialog.Builder(it)
+            val builder = AlertDialog.Builder(requireContext())
             builder.apply {
                 setMessage("Bạn có muốn đăng xuất")
                 setPositiveButton(
@@ -63,10 +63,10 @@ class AccountActivity : BaseActivity<ActivityManageBinding>() {
         return viewModel
     }
 
-    override fun observerData() {
-        viewModel.logout.observe(this) {
+    override fun observerLiveData() {
+        viewModel.logout.observe(viewLifecycleOwner) {
             if (it) {
-                val intent = Intent(this, SignInActivity::class.java)
+                val intent = Intent(requireContext(), SignInActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
             }

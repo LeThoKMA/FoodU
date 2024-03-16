@@ -3,11 +3,11 @@ package com.example.footu.ui.login
 import android.content.Intent
 import androidx.activity.viewModels
 import com.example.footu.MainActivity
+import com.example.footu.MainActivityForUser
 import com.example.footu.R
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivitySignInBinding
-import com.example.footu.ui.Order.HomeActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -45,7 +45,7 @@ class SignInActivity : BaseActivity<ActivitySignInBinding>() {
     override fun observerData() {
         viewModel.doLogin.observe(this) {
             if (it == 0) {
-                startActivity(Intent(this, HomeActivity::class.java))
+                startActivity(Intent(this, MainActivityForUser::class.java))
                 finishAffinity()
             }
             if (it == 2) {

@@ -1,6 +1,9 @@
 package com.example.footu.ui.pay
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -9,20 +12,29 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.footu.R
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivityPayConfirmBinding
 import com.example.footu.model.DetailItemChoose
 import com.example.footu.model.PromotionUser
-import com.example.footu.ui.shipper.AddressCallBack
-import com.example.footu.ui.shipper.AddressDialog
 import com.example.footu.utils.ITEMS_PICKED
-import com.example.footu.utils.formatToPrice
+import com.example.footu.utils.ORDER_TYPE
 import com.example.footu.utils.toast
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.mapbox.geojson.Point
+import com.mapbox.maps.dsl.cameraOptions
+import com.mapbox.maps.plugin.gestures.addOnFlingListener
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import org.json.JSONException
 import org.json.JSONObject
 import vn.momo.momo_partner.AppMoMoLib
@@ -30,9 +42,13 @@ import vn.momo.momo_partner.AppMoMoLib
 @AndroidEntryPoint
 class ConfirmActivity :
     BaseActivity<ActivityPayConfirmBinding>() {
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var latLong: Pair<Double, Double> = Pair(0.0, 0.0)
+
     private val viewModel: PayConfirmViewModel by viewModels()
     lateinit var adapter: ItemConfirmAdapter
-    lateinit var promotionAdapter: ItemPromotionAdapter
+
+    // lateinit var promotionAdapter: ItemPromotionAdapter
     var promotions: MutableList<PromotionUser> = mutableListOf()
     var promotionsPicked: PromotionUser? = null
     var items: MutableList<DetailItemChoose> = mutableListOf()
@@ -41,13 +57,13 @@ class ConfirmActivity :
     private val fee = "0"
     var environment = 0 // developer default
 
-    var type = -1
+    private var type = -1
 
-    private val merchantName = "CGV Cinemas"
-    private val merchantCode = "CGV19072017"
+    private val merchantName = "The Coffe House"
+    private val merchantCode = "123456"
     private val merchantNameLabel = "Nhà cung cấp"
     private val description = "Thanh toán đồ uống"
-    lateinit var dialogForShip: AlertDialog
+    var dialogForShip: AlertDialog? = null
 
     override fun getContentLayout(): Int {
         return R.layout.activity_pay_confirm
@@ -56,68 +72,96 @@ class ConfirmActivity :
     override fun initView() {
         AppMoMoLib.getInstance()
             .setEnvironment(AppMoMoLib.ENVIRONMENT.DEVELOPMENT); // AppMoMoLib.ENVIRONMENT.PRODUCTION
+        dialogForShip = setupProgressDialog()
         setColorForStatusBar(R.color.colorPrimary)
         setLightIconStatusBar(true)
-        dialogForShip = setupProgressDialog()
+        type = intent.getIntExtra(ORDER_TYPE, -1)
+        if (type == 1) {
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            lifecycleScope.launch(Dispatchers.Main) {
+                val location = startLocationUpdates()
+                location?.let {
+                    latLong = Pair(it.latitude, it.longitude)
+                    binding.mapView.getMapboxMap().setCamera(
+                        cameraOptions {
+                            center(
+                                Point.fromLngLat(
+                                    location.longitude,
+                                    location.latitude,
+                                ),
+                            )
+                            zoom(14.0)
+                        },
+                    )
+                    viewModel.getAddress(location.latitude, location.longitude)
+                }
+            }
+        } else {
+            binding.mapView.visibility = View.GONE
+            binding.mapPoint.visibility = View.GONE
+            binding.tvAddress.visibility = View.GONE
+        }
 
         items = intent.getParcelableArrayListExtra(ITEMS_PICKED)!!
         val price = intent.getIntExtra("price", 0)
-        binding.tvPrice.text = price.formatToPrice()
+        // binding.tvPrice.text = price.formatToPrice()
         priceAfterDiscount = price
 
         var priceDiscount = 0
         adapter = ItemConfirmAdapter(items)
         binding.rcItem.layoutManager = LinearLayoutManager(binding.root.context)
         binding.rcItem.adapter = adapter
-        binding.rcPromotion.layoutManager =
-            LinearLayoutManager(binding.root.context, RecyclerView.HORIZONTAL, false)
-        promotionAdapter = ItemPromotionAdapter(
-            promotions,
-            object : PromotionCallBack {
-                override fun pick(index: Int) {
-                    val promotion = promotions[index]
-                    if (promotion.isPicked) {
-                        promotionsPicked = promotion
-                        promotions.forEach { if (it != promotion) it.isPicked = false }
-                        promotionAdapter.notifyDataSetChanged()
-                    } else {
-                        promotionsPicked = null
-                    }
-
-                    priceDiscount =
-                        promotionsPicked?.percentage?.div(100f)?.times(price)?.toInt() ?: 0
-
-                    binding.tvPromotionDiscount.text = priceDiscount.formatToPrice()
-                    priceAfterDiscount = price.minus(priceDiscount)
-                    binding.tvPrice.text = price.minus(priceDiscount).formatToPrice()
-                    priceDiscount = 0
-                }
-            },
-        )
-        binding.rcPromotion.adapter = promotionAdapter
+//        binding.rcPromotion.layoutManager =
+//            LinearLayoutManager(binding.root.context, RecyclerView.HORIZONTAL, false)
+//        promotionAdapter = ItemPromotionAdapter(
+//            promotions,
+//            object : PromotionCallBack {
+//                override fun pick(index: Int) {
+//                    val promotion = promotions[index]
+//                    if (promotion.isPicked) {
+//                        promotionsPicked = promotion
+//                        promotions.forEach { if (it != promotion) it.isPicked = false }
+//                        promotionAdapter.notifyDataSetChanged()
+//                    } else {
+//                        promotionsPicked = null
+//                    }
+//
+//                    priceDiscount =
+//                        promotionsPicked?.percentage?.div(100f)?.times(price)?.toInt() ?: 0
+//
+//                    binding.tvPromotionDiscount.text = priceDiscount.formatToPrice()
+//                    priceAfterDiscount = price.minus(priceDiscount)
+//                    binding.tvPrice.text = price.minus(priceDiscount).formatToPrice()
+//                    priceDiscount = 0
+//                }
+//            },
+//        )
+//        binding.rcPromotion.adapter = promotionAdapter
     }
 
     override fun initListener() {
         binding.tvCreate.setOnClickListener {
-            type = 0
-            requestPayment()
+            if (type == 1) {
+                viewModel.listenResponseByShipper(
+                    items,
+                    promotionsPicked,
+                    priceAfterDiscount,
+                    binding.tvAddress.text.toString(),
+                    latLong = latLong,
+                ) { requestPayment() }
+            } else {
+                requestPayment()
+            }
         }
         binding.imvBack.setOnClickListener {
             finish()
         }
-        binding.tvShip.setOnClickListener {
-            type = 1
-            val dialog = AddressDialog(object : AddressCallBack {
-                override fun accept(address: String) {
-                    viewModel.listenResponseByShipper(
-                        items,
-                        promotionsPicked,
-                        priceAfterDiscount,
-                        address
-                    ) { requestPayment() }
-                }
-            })
-            dialog.show(supportFragmentManager, "address_dialog")
+
+        binding.mapView.getMapboxMap().addOnFlingListener {
+            latLong = binding.mapView.getMapboxMap().cameraState.center.let {
+                Pair(it.latitude(), it.longitude())
+            }
+            viewModel.getAddress(latLong.first, latLong.second)
         }
     }
 
@@ -132,13 +176,18 @@ class ConfirmActivity :
         }
         viewModel.promotions.observe(this) {
             promotions.addAll(it.toMutableList())
-            promotionAdapter.notifyDataSetChanged()
+            //    promotionAdapter.notifyDataSetChanged()
         }
         viewModel.isShowDialog.observe(this) {
             if (it) {
-                dialogForShip.show()
+                dialogForShip?.show()
             } else {
-                dialogForShip.dismiss()
+                dialogForShip?.dismiss()
+            }
+        }
+        lifecycleScope.launch {
+            viewModel.address.collect {
+                binding.tvAddress.text = it
             }
         }
     }
@@ -190,7 +239,13 @@ class ConfirmActivity :
                 Log.e(">>>>>>>>>>", data.getIntExtra("status", -1).toString())
                 if (data.getIntExtra("status", -1) === 0) {
                     // TOKEN IS AVAILABLE
-                    viewModel.confirmBill(items, promotionsPicked, priceAfterDiscount, type)
+                    viewModel.confirmBill(
+                        items,
+                        promotionsPicked,
+                        priceAfterDiscount,
+                        type,
+                        latLong,
+                    )
                     // this.toast("message: " + "Get token " + data.getStringExtra("message"))
                     val token = data.getStringExtra("data") // Token response
                     val phoneNumber = data.getStringExtra("phonenumber")
@@ -245,5 +300,32 @@ class ConfirmActivity :
             dialog.window?.attributes = layoutParams
         }
         return dialog
+    }
+
+    private suspend fun startLocationUpdates(): Location? {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return null
+        }
+        val task = fusedLocationClient.getCurrentLocation(
+            Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+            CancellationTokenSource().token,
+        ).addOnSuccessListener { location ->
+        }.await()
+
+        return task
     }
 }

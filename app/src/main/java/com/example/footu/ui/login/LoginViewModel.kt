@@ -1,5 +1,6 @@
 package com.example.footu.ui.login
 
+//import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallConfigProvider
 import android.content.Context
 import android.widget.Toast
 import androidx.lifecycle.LiveData
@@ -13,12 +14,7 @@ import com.example.footu.hilt.NetworkModule
 import com.example.footu.model.LoginRequest
 import com.example.footu.network.ApiService
 import com.example.footu.utils.toast
-import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType
-import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallConfig
-import com.zegocloud.uikit.prebuilt.call.config.ZegoNotificationConfig
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallConfigProvider
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig
-import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -34,8 +30,7 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     val apiService: ApiService,
     val appInstance: App,
-    @ApplicationContext
-    private val context: Context,
+    @ApplicationContext context: Context,
 ) : BaseViewModel() {
 
     private val _doLogin = MutableLiveData<Int?>()
@@ -47,7 +42,7 @@ class LoginViewModel @Inject constructor(
             flow { emit(apiService.login(LoginRequest(email, password))) }.flowOn(Dispatchers.IO)
                 .onStart { onRetrievePostListStart() }
                 .onCompletion { onRetrievePostListFinish() }
-                .catch { Toast.makeText(appInstance, it.message, Toast.LENGTH_LONG).show() }
+                .catch { Toast.makeText(appInstance, "Error", Toast.LENGTH_LONG).show() }
                 .collect {
                     if (it.data?.token?.isNotBlank() == true) {
                         NetworkModule.mToken = it.data.token
@@ -78,35 +73,35 @@ class LoginViewModel @Inject constructor(
         val appSign = "c5663e686bbe551ff22eedafeb47c6b9f842f1636b1373bf2fe1494931e9f38a"
 
         val callInvitationConfig = ZegoUIKitPrebuiltCallInvitationConfig()
-        callInvitationConfig.notifyWhenAppRunningInBackgroundOrQuit = true
-        callInvitationConfig.provider =
-            ZegoUIKitPrebuiltCallConfigProvider { invitationData ->
-                var config: ZegoUIKitPrebuiltCallConfig? = null
-                val isVideoCall = invitationData.type == ZegoInvitationType.VIDEO_CALL.value
-                val isGroupCall = invitationData.invitees.size > 1
-                config = if (isVideoCall && isGroupCall) {
-                    ZegoUIKitPrebuiltCallConfig.groupVideoCall()
-                } else if (!isVideoCall && isGroupCall) {
-                    ZegoUIKitPrebuiltCallConfig.groupVoiceCall()
-                } else if (!isVideoCall) {
-                    ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall()
-                } else {
-                    ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()
-                }
-                config
-            }
-        val notificationConfig = ZegoNotificationConfig()
-        notificationConfig.sound = "zego_uikit_sound_call"
-        notificationConfig.channelID = "CallInvitation"
-        notificationConfig.channelName = "CallInvitation"
-        ZegoUIKitPrebuiltCallInvitationService.init(
-            App.getInstance(),
-            appID,
-            appSign,
-            userID,
-            userName,
-            callInvitationConfig,
-        )
+       // callInvitationConfig.notifyWhenAppRunningInBackgroundOrQuit = true
+//        callInvitationConfig.provider =
+//            ZegoUIKitPrebuiltCallConfigProvider { invitationData ->
+//                var config: ZegoUIKitPrebuiltCallConfig? = null
+//                val isVideoCall = invitationData.type == ZegoInvitationType.VIDEO_CALL.value
+//                val isGroupCall = invitationData.invitees.size > 1
+//                config = if (isVideoCall && isGroupCall) {
+//                    ZegoUIKitPrebuiltCallConfig.groupVideoCall()
+//                } else if (!isVideoCall && isGroupCall) {
+//                    ZegoUIKitPrebuiltCallConfig.groupVoiceCall()
+//                } else if (!isVideoCall) {
+//                    ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall()
+//                } else {
+//                    ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()
+//                }
+//                config
+//            }
+//        val notificationConfig = ZegoNotificationConfig()
+//        notificationConfig.sound = "zego_uikit_sound_call"
+//        notificationConfig.channelID = "CallInvitation"
+//        notificationConfig.channelName = "CallInvitation"
+//        ZegoUIKitPrebuiltCallInvitationService.init(
+//            App.app,
+//            appID,
+//            appSign,
+//            userID,
+//            userName,
+//            callInvitationConfig,
+//        )
     }
 
     fun register(phone: String, name: String, pass: String, passRepeat: String) {

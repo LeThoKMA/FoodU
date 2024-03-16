@@ -10,4 +10,6 @@ data class UserOrderRequest(
     @SerializedName("totalPrice")
     var totalPrice: Int = 0,
     var address: String? = "",
+    val lat: Double? = 0.0,
+    val longitude: Double? = 0.0,
 )

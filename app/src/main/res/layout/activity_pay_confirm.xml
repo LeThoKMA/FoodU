@@ -45,143 +45,144 @@
             android:id="@+id/rc_item"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginBottom="250dp"
             android:padding="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/mapView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/constraintLayout5" />
 
-        <TextView
-            android:id="@+id/tv_promotion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Khuyến mãi"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.052"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rc_item" />
+        <!--        <TextView-->
+        <!--            android:id="@+id/tv_promotion"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginTop="16dp"-->
+        <!--            android:text="Khuyến mãi"-->
+        <!--            android:textSize="20sp"-->
+        <!--            android:textStyle="bold"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintHorizontal_bias="0.052"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@+id/rc_item" />-->
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rc_promotion"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal"
-            android:padding="8dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_promotion" />
+        <!--        <androidx.recyclerview.widget.RecyclerView-->
+        <!--            android:id="@+id/rc_promotion"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginTop="8dp"-->
+        <!--            android:orientation="horizontal"-->
+        <!--            android:padding="8dp"-->
+        <!--            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintHorizontal_bias="0.0"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/tv_promotion" />-->
 
-        <TextView
-            android:id="@+id/tv_promotion_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Giảm"
-            android:textColor="@color/black"
-            android:textSize="14sp"
+        <!--        <TextView-->
+        <!--            android:id="@+id/tv_promotion_title"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginTop="16dp"-->
+        <!--            android:text="Giảm"-->
+        <!--            android:textColor="@color/black"-->
+        <!--            android:textSize="14sp"-->
 
-            app:layout_constraintStart_toStartOf="@+id/textView6"
-            app:layout_constraintTop_toBottomOf="@+id/rc_promotion" />
+        <!--            app:layout_constraintStart_toStartOf="@+id/textView6"-->
+        <!--            app:layout_constraintTop_toBottomOf="@+id/rc_promotion" />-->
 
-        <TextView
-            android:id="@+id/tv_promotion_discount"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:paddingEnd="8dp"
-            android:text="0 đ"
-            android:textAlignment="textEnd"
-            android:textColor="@color/blue_bold"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="@id/tv_promotion_title"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/tv_price"
-            app:layout_constraintTop_toTopOf="@id/tv_promotion_title" />
-
-
-        <TextView
-            android:id="@+id/textView6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="48dp"
-            android:text="Tổng cộng"
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rc_promotion" />
+        <!--        <TextView-->
+        <!--            android:id="@+id/tv_promotion_discount"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:paddingEnd="8dp"-->
+        <!--            android:text="0 đ"-->
+        <!--            android:textAlignment="textEnd"-->
+        <!--            android:textColor="@color/blue_bold"-->
+        <!--            android:textSize="14sp"-->
+        <!--            app:layout_constraintBottom_toBottomOf="@id/tv_promotion_title"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toStartOf="@+id/tv_price"-->
+        <!--            app:layout_constraintTop_toTopOf="@id/tv_promotion_title" />-->
 
 
-        <TextView
-            android:id="@+id/tv_price"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:paddingEnd="8dp"
-            android:text="0 đ"
-            android:textAlignment="textEnd"
-            android:textColor="@color/colorPrimary"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="@id/textView6"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/textView6"
-            app:layout_constraintTop_toTopOf="@id/textView6" />
+        <!--        <TextView-->
+        <!--            android:id="@+id/textView6"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginTop="48dp"-->
+        <!--            android:text="Tổng cộng"-->
+        <!--            android:textColor="@color/black"-->
+        <!--            android:textSize="14sp"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@+id/rc_promotion" />-->
 
-
-        <LinearLayout
-            android:id="@+id/constraintLayout2"
+        <com.mapbox.maps.MapView
+            android:id="@+id/mapView"
             android:layout_width="match_parent"
-            android:orientation="horizontal"
+            android:layout_height="300dp"
+            android:layout_marginBottom="8dp"
+            android:padding="8dp"
+            app:layout_constraintBottom_toTopOf="@id/tv_create"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvAddress"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toBottomOf="parent">
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@id/mapView"
+            app:layout_constraintTop_toTopOf="@id/mapView"
+            tools:text="That khe, trang dinh, lang son" />
 
-            <TextView
-                android:id="@+id/tv_ship"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/bg_button_cancel"
-                android:paddingHorizontal="16dp"
-                android:gravity="center"
-                android:paddingVertical="16dp"
-                android:layout_marginStart="16dp"
-                android:text="Đặt ship"
-                android:layout_weight="1"
-                android:textColor="@color/white"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/tv_create"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="1.0" />
+        <ImageView
+            android:id="@+id/mapPoint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_point_in_map"
+            app:layout_constraintBottom_toBottomOf="@id/mapView"
+            app:layout_constraintEnd_toEndOf="@id/mapView"
+            app:layout_constraintStart_toStartOf="@id/mapView"
+            app:layout_constraintTop_toTopOf="@id/mapView" />
 
-            <TextView
-                android:id="@+id/tv_create"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="32dp"
-                android:background="@drawable/bg_button_confirm"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="16dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Nhận trực tiếp"
-                android:textColor="@color/white"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
+        <!--        <TextView-->
+        <!--            android:id="@+id/tv_price"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginStart="16dp"-->
+        <!--            android:paddingEnd="8dp"-->
+        <!--            android:text="0 đ"-->
+        <!--            android:textAlignment="textEnd"-->
+        <!--            android:textColor="@color/colorPrimary"-->
+        <!--            android:textSize="14sp"-->
+        <!--            app:layout_constraintBottom_toBottomOf="@id/textView6"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toEndOf="@id/textView6"-->
+        <!--            app:layout_constraintTop_toTopOf="@id/textView6" />-->
 
 
-        </LinearLayout>
+        <TextView
+            android:id="@+id/tv_create"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_button_confirm"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="16dp"
+            android:text="Xác nhận thanh toán"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

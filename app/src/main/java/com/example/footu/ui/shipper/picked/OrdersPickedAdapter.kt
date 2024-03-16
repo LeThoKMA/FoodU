@@ -1,4 +1,4 @@
-package com.example.footu.ui.shipper
+package com.example.footu.ui.shipper.picked
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -7,14 +7,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.bumptech.glide.Glide
 import com.example.footu.R
-import com.example.footu.databinding.ItemOrderShipBinding
+import com.example.footu.databinding.ItemOrdersPickedBinding
 import com.example.footu.model.OrderShipModel
 import com.example.footu.utils.formatToPrice
 
-class NewOrdersAdapter(
-    private val callBack: NewOnClickDetailCallBack,
+class OrdersPickedAdapter(
+    private val callBack: OrderPickedCallback,
 ) : ListAdapter<OrderShipModel, ViewHolder>(object : DiffUtil.ItemCallback<OrderShipModel>() {
     override fun areItemsTheSame(oldItem: OrderShipModel, newItem: OrderShipModel): Boolean {
         return oldItem.id == newItem.id
@@ -29,10 +28,10 @@ class NewOrdersAdapter(
         val layoutInflater = LayoutInflater.from(parent.context)
         val binding = DataBindingUtil.inflate(
             layoutInflater,
-            R.layout.item_order_ship,
+            R.layout.item_orders_picked,
             parent,
             false,
-        ) as ItemOrderShipBinding
+        ) as ItemOrdersPickedBinding
         return ViewHolder(binding)
     }
 
@@ -40,14 +39,14 @@ class NewOrdersAdapter(
         (holder as ViewHolder).bindView(getItem(position), callBack)
     }
 
-    class ViewHolder(val binding: ItemOrderShipBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bindView(item: OrderShipModel, callBack: NewOnClickDetailCallBack) {
-            item.billItemList[0].item?.imgUrl?.let {
-                Glide.with(binding.root.context)
-                    .load(it[0]).into(binding.imgItem)
-            }
-            binding.tvName.text = item.customer.fullname
-            binding.tvPhone.text = item.customer.phone
+    class ViewHolder(val binding: ItemOrdersPickedBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bindView(item: OrderShipModel, callBack: OrderPickedCallback) {
+            val adapter = ChildPickedAdapter()
+            binding.rcOrder.adapter = adapter
+            adapter.submitList(item.billItemList)
+            binding.tvOrderId.text = "Mã đơn: ${item.id}"
+            binding.tvName.text = item.customer?.fullname
+            binding.tvAddress.text = item.address
             binding.tvPrice.text = item.totalPrice.formatToPrice()
             binding.root.setOnClickListener {
                 callBack.onClickDetail(item)
@@ -56,6 +55,6 @@ class NewOrdersAdapter(
     }
 }
 
-interface NewOnClickDetailCallBack {
+interface OrderPickedCallback {
     fun onClickDetail(item: OrderShipModel)
 }

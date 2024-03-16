@@ -7,6 +7,7 @@
     <string name="text_all_has_error_network">Lỗi kết nối mạng</string>
     <string name="text_all_has_error_please_try">Có lỗi xảy ra, vui lòng thử lại</string>
     <string name="str_authe">Sai tên tài khoản hoặc mật khẩu</string>
+    <string name="map_api_key">AIzaSyBUFMNCV35H3RsZaQdHxH_DBrTg9L_RR0A</string>
     <string-array name="type">
         <item>Coffee</item>
         <item>Tea</item>
@@ -20,4 +21,5 @@
     <string name="title_activity_maps">MapsActivity</string>
     <string name="title_activity_order_list_screen">OrderListScreen</string>
     <string name="title_activity_order_detail">OrderDetailActivity</string>
+    <string name="mapbox_access_token">pk.eyJ1IjoibGVkdWN0aG8xODEyIiwiYSI6ImNsczBqdDJqdzAxbnYyaW1vMHIzNzdiaGUifQ.4BbO8pfoz_ip7kBUCPbgkg</string>
 </resources>

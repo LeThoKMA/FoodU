@@ -1,8 +1,7 @@
-package com.example.footu.ui.shipper
+package com.example.footu.ui.shipper.picked
 
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
@@ -15,17 +14,18 @@ import com.example.footu.base.BaseFragment
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.OrderShipPickedFragmentBinding
 import com.example.footu.model.OrderShipModel
-import com.example.footu.ui.account.AccountActivity
+import com.example.footu.ui.account.AccountFragment
+import com.example.footu.ui.shipper.OrderDetailActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class OrderShipPickedFragment :
     BaseFragment<OrderShipPickedFragmentBinding>(),
-    OnClickDetailCallBack {
+    OrderPickedCallback {
     val viewModel: OrderShipPickedViewModel by viewModels()
 
-    lateinit var adapter: OrdersAdapter
+    lateinit var adapter: OrdersPickedAdapter
 
     var launcher: ActivityResultLauncher<Intent>? = null
     var itemDelete: OrderShipModel? = null
@@ -46,13 +46,13 @@ class OrderShipPickedFragment :
             }
         }
         binding.rvOrders.layoutManager = LinearLayoutManager(binding.root.context)
-        adapter = OrdersAdapter(viewModel.uiState.value.orders, binding.root.context, this)
+        adapter = OrdersPickedAdapter(this)
         binding.rvOrders.adapter = adapter
     }
 
     override fun initListener() {
         binding.ivAccount.setOnClickListener {
-            startActivity(Intent(binding.root.context, AccountActivity::class.java))
+            startActivity(Intent(binding.root.context, AccountFragment::class.java))
         }
         binding.refreshLayout.setOnRefreshListener {
             viewModel.hideSnackbar()
@@ -65,18 +65,16 @@ class OrderShipPickedFragment :
         viewModel.viewModelScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect {
-                    adapter.setData(it.orders)
-                    Log.e(">>>>>>>>>", it.orders.toString())
+                    adapter.submitList(it.orders)
                 }
             }
         }
     }
 
     override fun onClickDetail(item: OrderShipModel) {
-        itemDelete = item
-        val intent = Intent(binding.root.context, OrderDetailActivity::class.java)
+        val intent = Intent(requireContext(), OrderDetailActivity::class.java)
         intent.putExtra("item", item)
-        intent.putExtra("type", 1)
+        intent.putExtra("type", 0)
         launcher?.launch(intent)
     }
 }
