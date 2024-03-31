@@ -1,0 +1,16 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Bóng đổ -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#44000000" /> <!-- Màu bóng đổ -->
+            <size android:width="80dp" android:height="80dp" /> <!-- Kích thước bóng đổ -->
+        </shape>
+    </item>
+    <!-- FAB -->
+    <item android:top="10dp" android:right="10dp" android:left="10dp" android:bottom="10dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/colorPrimary" /> <!-- Màu của FAB -->
+            <size android:width="60dp" android:height="60dp" /> <!-- Kích thước của FAB -->
+        </shape>
+    </item>
+</layer-list>

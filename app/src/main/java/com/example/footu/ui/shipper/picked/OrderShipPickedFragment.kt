@@ -23,12 +23,12 @@ import kotlinx.coroutines.launch
 class OrderShipPickedFragment :
     BaseFragment<OrderShipPickedFragmentBinding>(),
     OrderPickedCallback {
-    val viewModel: OrderShipPickedViewModel by viewModels()
+    private val viewModel: OrderShipPickedViewModel by viewModels()
 
     lateinit var adapter: OrdersPickedAdapter
 
-    var launcher: ActivityResultLauncher<Intent>? = null
-    var itemDelete: OrderShipModel? = null
+    private var launcher: ActivityResultLauncher<Intent>? = null
+    private var itemDelete: OrderShipModel? = null
 
     override fun getContentLayout(): Int {
         return R.layout.order_ship_picked_fragment

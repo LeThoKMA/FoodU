@@ -18,6 +18,7 @@ import com.example.footu.databinding.HomeFragmentBinding
 import com.example.footu.ui.Order.CategoryAdapter
 import com.example.footu.ui.Order.DescriptionProductAdapter
 import com.example.footu.ui.Order.OrderActivity
+import com.example.footu.utils.ITEM_TYPE
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -47,7 +48,7 @@ class HomeFragment :
 
         categoryAdapter = CategoryAdapter(listCategory, onClickItem = {
             val intent = Intent(requireContext(), OrderActivity::class.java)
-            intent.putExtra("TYPE", it)
+            intent.putExtra(ITEM_TYPE, it)
             startActivity(intent)
         })
         binding.rvType.layoutManager =

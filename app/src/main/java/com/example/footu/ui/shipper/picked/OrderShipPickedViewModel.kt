@@ -2,7 +2,6 @@ package com.example.footu.ui.shipper.picked
 
 import androidx.lifecycle.viewModelScope
 import com.example.footu.base.BaseViewModel
-import com.example.footu.dagger2.App
 import com.example.footu.model.OrderShipModel
 import com.example.footu.network.ApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +18,6 @@ import javax.inject.Inject
 @HiltViewModel
 class OrderShipPickedViewModel @Inject constructor(
     private val apiService: ApiService,
-    private val appInstance: App,
 ) :
     BaseViewModel() {
 

@@ -1,46 +1,103 @@
 package com.example.footu
 
 import android.Manifest
+import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.provider.Settings
+import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.animation.LinearInterpolator
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivityMainBinding
+import com.example.footu.model.DetailItemChoose
 import com.example.footu.ui.account.AccountFragment
+import com.example.footu.ui.cart.CartFragment
 import com.example.footu.ui.detail.OrderDetailFragment
 import com.example.footu.ui.home.HomeFragment
+import com.example.footu.utils.ITEMS_CHOOSE
+import com.example.footu.utils.ITEMS_CHOOSE_ACTION
 import com.example.footu.utils.hideSoftKeyboard
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
 
     private val viewModel: MainUserViewModel by viewModels()
 
-    val homeFragment by lazy {
+    private val homeFragment by lazy {
         HomeFragment()
     }
-    val ordersDetailFragment by lazy { OrderDetailFragment() }
+    private val ordersDetailFragment by lazy { OrderDetailFragment() }
 
-    val accountFragment by lazy { AccountFragment() }
-//
-//    val orderListShipper by lazy {
-//        initializeFragment(
-//            "orders_shipper",
-//        ) { OrderListScreen() }
-//    }
+    private val accountFragment by lazy { AccountFragment() }
 
-    lateinit var pagerAdapter: FragmentNavigator
+    private lateinit var pagerAdapter: FragmentNavigator
 
-    override fun observerData() {
+    private val scaleUp: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.scale_up) }
+    private val scaleDown: Animation by lazy {
+        AnimationUtils.loadAnimation(
+            this,
+            R.anim.scale_down,
+        )
+    }
+    private var job: Job? = null
+
+    private val broadcastItems = object : BroadcastReceiver() {
+        override fun onReceive(p0: Context?, p1: Intent?) {
+            if (p1?.hasExtra(ITEMS_CHOOSE) == true) {
+                val receivedList: ArrayList<DetailItemChoose> =
+                    p1.getParcelableArrayListExtra(ITEMS_CHOOSE)!!
+                viewModel.handleItemsCart(receivedList)
+            }
+        }
     }
 
-    fun setupPager() {
+    override fun observerData() {
+        viewModel.totalPrice.observe(this) {
+            if (it > 0) {
+                binding.fab.alpha = 0f
+                binding.fab.visibility = View.VISIBLE
+                binding.fab.animate()
+                    .alpha(1f).duration = 1000
+
+                val animation =
+                    ObjectAnimator.ofFloat(binding.fab, "translationZ", 0f, 100f, 0f)
+                animation.duration = 2000 // Độ trễ mỗi chu kỳ
+                animation.repeatCount = ObjectAnimator.INFINITE // Lặp vô hạn
+                animation.interpolator = LinearInterpolator()
+                animation.start()
+
+                job = lifecycleScope.launch {
+                    while (this.isActive) {
+                        binding.fab.startAnimation(scaleUp)
+                        delay(2500L)
+                        binding.fab.startAnimation(scaleDown)
+                    }
+                }
+            } else {
+                job?.cancel()
+                binding.fab.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun setupPager() {
         pagerAdapter = FragmentNavigator(this.supportFragmentManager, lifecycle)
         pagerAdapter.addFragment(homeFragment)
         pagerAdapter.addFragment(ordersDetailFragment)
@@ -54,6 +111,7 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
         return R.layout.activity_main
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     @RequiresApi(Build.VERSION_CODES.N)
     override fun initView() {
         setColorForStatusBar(R.color.colorPrimary)
@@ -66,14 +124,18 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     false,
                 ) -> {
-                    // Precise location access granted.
+                    if (!isLocationEnabled()) {
+                        requestLocationEnable(this)
+                    }
                 }
 
                 permissions.getOrDefault(
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     false,
                 ) -> {
-                    // Only approximate location access granted.
+                    if (!isLocationEnabled()) {
+                        requestLocationEnable(this)
+                    }
                 }
 
                 else -> {
@@ -96,10 +158,8 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
                 Manifest.permission.RECORD_AUDIO,
             ),
         )
-
-        if (!isLocationEnabled()) {
-            requestLocationEnable(this)
-        }
+        val intentFilter = IntentFilter(ITEMS_CHOOSE_ACTION)
+        registerReceiver(broadcastItems, intentFilter)
         setupPager()
     }
 
@@ -126,21 +186,21 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
                 }
             }
         }
+        binding.fab.setOnClickListener {
+            val dialog =
+                CartFragment.newInstance(
+                    viewModel.itemsChoose.values.toMutableList(),
+                    viewModel.totalPrice.value ?: 0,
+                    onChangeItem = { viewModel.onChangeItem(it) },
+                )
+            dialog.show(supportFragmentManager, CartFragment.TAG)
+        }
     }
 
     override fun initViewModel(): BaseViewModel {
         return viewModel
     }
 
-    //    private fun initializeFragment(tag: String, createFragment: () -> Fragment): Fragment {
-//        return supportFragmentManager.findFragmentByTag(tag) ?: createFragment().also { fragment ->
-//            supportFragmentManager
-//                .beginTransaction()
-//                .add(R.id.fragmentContainer, fragment, tag)
-//                .hide(fragment)
-//                .commit()
-//        }
-//    }
     private fun showFragment(currentFragment: Fragment, targetFragment: Fragment) {
         supportFragmentManager
             .beginTransaction()
@@ -149,5 +209,10 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
             .commit()
         hideSoftKeyboard()
         loadingDialog?.hide()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(broadcastItems)
     }
 }

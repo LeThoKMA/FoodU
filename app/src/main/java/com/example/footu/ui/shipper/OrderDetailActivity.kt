@@ -301,7 +301,6 @@ fun OrderDetailScreen(
                                 text = "Đơn giá: ${it.item?.price.formatToPrice()}",
                                 modifier = Modifier.padding(3.dp),
                                 fontSize = 16.sp,
-
                             )
 
                             Text(

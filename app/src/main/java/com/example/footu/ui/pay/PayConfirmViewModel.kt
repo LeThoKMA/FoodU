@@ -71,7 +71,7 @@ class PayConfirmViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val billItems = mutableListOf<ItemBillRequest>()
-            itemList.forEach { billItems.add(ItemBillRequest(it.id, it.count, it.totalPrice)) }
+            itemList.forEach { billItems.add(ItemBillRequest(it.id, it.count, it.totalPrice, it.size?.ordinal, it.textDescription)) }
             val request = UserOrderRequest(billItems, promotionUser?.id, price)
             val userLocationModel =
                 UserLocationModel(user!!.id, user.fullname, latLong.first, latLong.second)

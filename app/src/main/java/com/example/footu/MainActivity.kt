@@ -28,14 +28,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     private val viewModel: MainViewModel by viewModels()
 
-    val orderShipPickedFragment by lazy { OrderShipPickedFragment() }
+    private val orderShipPickedFragment by lazy { OrderShipPickedFragment() }
 
-    val orderListShipper by lazy {
+    private val orderListShipper by lazy {
         OrderListScreen()
     }
-    val accountFragment by lazy { AccountFragment() }
+    private val accountFragment by lazy { AccountFragment() }
 
-    lateinit var pagerAdapter: FragmentNavigator
+    private lateinit var pagerAdapter: FragmentNavigator
 
     // Declare the launcher at the top of your Activity/Fragment:
     private val requestPermissionLauncher = registerForActivityResult(
@@ -174,7 +174,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         )
     }
 
-    fun setupPager() {
+    private fun setupPager() {
         pagerAdapter = FragmentNavigator(this.supportFragmentManager, lifecycle)
         pagerAdapter.addFragment(orderListShipper)
         pagerAdapter.addFragment(orderShipPickedFragment)

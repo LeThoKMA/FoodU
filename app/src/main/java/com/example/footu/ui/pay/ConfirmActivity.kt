@@ -23,6 +23,7 @@ import com.example.footu.model.DetailItemChoose
 import com.example.footu.model.PromotionUser
 import com.example.footu.utils.ITEMS_PICKED
 import com.example.footu.utils.ORDER_TYPE
+import com.example.footu.utils.formatToPrice
 import com.example.footu.utils.toast
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -104,7 +105,7 @@ class ConfirmActivity :
 
         items = intent.getParcelableArrayListExtra(ITEMS_PICKED)!!
         val price = intent.getIntExtra("price", 0)
-        // binding.tvPrice.text = price.formatToPrice()
+        binding.tvTotal.text = "Tổng cộng: ${price.formatToPrice()}"
         priceAfterDiscount = price
 
         var priceDiscount = 0

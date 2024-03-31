@@ -6,8 +6,15 @@ enum class OrderStatus(val value: Int) {
     CANCELLED(3),
 }
 
-enum class ItemSize {
-    S,
-    M,
-    L,
+enum class ItemSize(val value: Double) {
+    S(0.75),
+    M(1.0),
+    L(1.5),
+}
+
+enum class TypeItem {
+    COFFEE,
+    CAKE,
+    FREEZE,
+    TEA,
 }

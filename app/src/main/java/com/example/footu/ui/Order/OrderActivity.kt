@@ -1,28 +1,28 @@
 package com.example.footu.ui.Order
 
 import android.content.Intent
-import android.os.Bundle
 import android.os.Parcelable
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.footu.R
+import com.example.footu.TypeItem
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivityOrderBinding
 import com.example.footu.model.DetailItemChoose
-import com.example.footu.model.Item
-import com.example.footu.ui.account.AccountFragment
 import com.example.footu.ui.pay.ConfirmActivity
 import com.example.footu.ui.shipper.AddressCallBack
 import com.example.footu.ui.shipper.AddressDialog
-import com.example.footu.utils.BILL_RESPONSE
+import com.example.footu.utils.ITEMS_CHOOSE
+import com.example.footu.utils.ITEMS_CHOOSE_ACTION
 import com.example.footu.utils.ITEMS_PICKED
+import com.example.footu.utils.ITEM_TYPE
 import com.example.footu.utils.ORDER_TYPE
 import com.example.footu.utils.ORDER_TYPE_DIALOG
 import com.example.footu.utils.formatToPrice
 import com.example.footu.utils.toast
-import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -31,8 +31,7 @@ class OrderActivity :
 
     private val viewModel: OrderViewModel by viewModels()
 
-    var listItem: ArrayList<Item?> = arrayListOf()
-    var listItemChoose: MutableList<DetailItemChoose> = mutableListOf()
+    var listItem: MutableList<DetailItemChoose> = mutableListOf()
     lateinit var oderAdapter: OderAdapter
 
     override fun getContentLayout(): Int {
@@ -40,17 +39,30 @@ class OrderActivity :
     }
 
     override fun initView() {
-        val type = intent.getIntExtra("TYPE", 0)
+        val type = intent.getIntExtra(ITEM_TYPE, 0)
         viewModel.getProductByType(type)
         oderAdapter = OderAdapter(listItem, this)
+        binding.tvTitle.text = when (type) {
+            TypeItem.COFFEE.ordinal.plus(1) -> "Cà phê"
+            TypeItem.CAKE.ordinal.plus(1) -> "Bánh ngọt"
+            TypeItem.FREEZE.ordinal.plus(1) -> "Freeze"
+            TypeItem.TEA.ordinal.plus(1) -> "Trà"
+            else -> ""
+        }
         binding.rvCategory.layoutManager = LinearLayoutManager(binding.root.context)
         binding.rvCategory.adapter = oderAdapter
     }
 
     override fun initListener() {
-        binding.tvCreate.setOnClickListener {
+        binding.tvAdd.setOnClickListener {
+            val intent = Intent(ITEMS_CHOOSE_ACTION)
+            intent.putParcelableArrayListExtra(ITEMS_CHOOSE, viewModel.getListItemChoose())
+            sendBroadcast(intent)
+            finish()
+        }
+        binding.tvCreateOrder.setOnClickListener {
             if (viewModel.price.value == 0) {
-                binding.root.context.toast("Hãy chọn sản phẩm")
+                toast("Hãy chọn sản phẩm")
                 return@setOnClickListener
             }
             val dialog = AddressDialog(object : AddressCallBack {
@@ -58,7 +70,7 @@ class OrderActivity :
                     val intent = Intent(binding.root.context, ConfirmActivity::class.java)
                     intent.putParcelableArrayListExtra(
                         ITEMS_PICKED,
-                        listItemChoose as java.util.ArrayList<out Parcelable>,
+                        viewModel.getListItemChoose() as ArrayList<out Parcelable>,
                     )
                     intent.putExtra(ORDER_TYPE, type)
                     intent.putExtra("price", viewModel.price.value)
@@ -70,7 +82,7 @@ class OrderActivity :
                     val intent = Intent(binding.root.context, ConfirmActivity::class.java)
                     intent.putParcelableArrayListExtra(
                         ITEMS_PICKED,
-                        listItemChoose as java.util.ArrayList<out Parcelable>,
+                        viewModel.getListItemChoose() as ArrayList<out Parcelable>,
                     )
                     intent.putExtra(ORDER_TYPE, type)
                     intent.putExtra("price", viewModel.price.value)
@@ -80,34 +92,45 @@ class OrderActivity :
             })
             dialog.show(supportFragmentManager, ORDER_TYPE_DIALOG)
         }
-        binding.ivAccount.setOnClickListener {
-            startActivity(Intent(binding.root.context, AccountFragment::class.java))
-        }
     }
 
-    override fun addItemToBill(item: DetailItemChoose) {
-        viewModel.addItemToBill(item)
-        if (item.flag == true) {
-            if (listItemChoose.find { it.id == item.id } == null) {
-                listItemChoose.add(item)
-            } else {
-                for (i in 0 until listItemChoose.size) {
-                    if (listItemChoose[i].id == item.id) {
-                        listItemChoose[i] = item
-                        break
-                    }
-                }
+    override fun detailItem(position: Int) {
+        val dialog = DetailItemFragment.newInstance(listItem[position], onSelect = {
+            listItem[position] = it
+            oderAdapter.notifyItemChanged(position)
+            viewModel.addItemToBill(it)
+        })
+        dialog.show(supportFragmentManager, DetailItemFragment.TAG)
+    }
+
+    override fun plusItem(position: Int) {
+        listItem[position].count++
+        oderAdapter.notifyItemChanged(position)
+        viewModel.addItemToBill(listItem[position])
+    }
+
+    override fun subtractItem(position: Int) {
+        if (listItem[position].count > 1) listItem[position].count--
+        oderAdapter.notifyItemChanged(position)
+        viewModel.addItemToBill(listItem[position])
+    }
+
+    override fun editCount(position: Int) {
+        val dialog = ConfirmDialog(object : ConfirmDialog.CallBack {
+            override fun accept(count: String) {
+                val itemCount = count.toInt()
+                listItem[position].count = itemCount
+                oderAdapter.notifyItemChanged(position)
+                viewModel.addItemToBill(listItem[position])
             }
-        } else {
-            if (listItemChoose.find { it.id == item.id } == null) return
-            val index = listItemChoose.indexOf(listItemChoose.find { it.id == item.id })
-            listItemChoose.removeAt(index)
-        }
+        })
+        dialog.show((binding.root.context as AppCompatActivity).supportFragmentManager, "")
     }
 
-    override fun detailItem(item: Item) {
-//        val dialog = DetailItemFragment.newInstance(item)
-//        dialog.show(supportFragmentManager, DetailItemFragment.TAG)
+    override fun selectItem(flag: Boolean, position: Int) {
+        listItem[position].flag = flag
+        oderAdapter.notifyItemChanged(position)
+        viewModel.addItemToBill(listItem[position])
     }
 
     override fun onDestroy() {
@@ -132,25 +155,11 @@ class OrderActivity :
         viewModel.message.observe(this) {
             Toast.makeText(binding.root.context, it, Toast.LENGTH_LONG).show()
         }
-        viewModel.confirm.observe(this) {
-            if (it != null) {
-                val bundle = Bundle()
-                bundle.putString(BILL_RESPONSE, Gson().toJson(it))
-                bundle.putParcelableArrayList(
-                    ITEMS_PICKED,
-                    listItemChoose as java.util.ArrayList<out Parcelable>,
-                )
-                val intent = Intent(binding.root.context, ConfirmActivity::class.java)
-                intent.putExtra("data", bundle)
-                startActivity(intent)
-            }
-        }
     }
 
     override fun onResume() {
         super.onResume()
         oderAdapter.resetData()
-        listItemChoose.clear()
         binding.tvPrice.text = ""
     }
 }

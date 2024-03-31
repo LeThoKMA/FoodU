@@ -34,17 +34,17 @@ class ItemConfirmAdapter(val list: MutableList<DetailItemChoose>) :
 
     class ViewHolder(var binding: ItemChooseBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(position: Int, item: DetailItemChoose?) {
-            if (item?.imgUrl?.isNotEmpty() == true) {
-                Glide.with(binding.root.context)
-                    .load(item.imgUrl?.get(0)).into(binding.ivProduct)
-            }
-            binding.tvNameProduct.text = item?.name
-            binding.amount.text = item?.totalPrice.formatToPrice()
-            binding.tvPrice.text = item?.price.formatToPrice()
-            binding.edtNumber.text = "x" + item?.count.toString()
             binding.ivUp.visibility = View.GONE
             binding.ivDown.visibility = View.GONE
             binding.ivCheck.visibility = View.GONE
+            if (item?.imgUrl?.isNotEmpty() == true) {
+                Glide.with(binding.root.context)
+                    .load(item.imgUrl[0]).into(binding.ivProduct)
+            }
+            binding.tvNameProduct.text = item?.name
+          //  binding.amount.text = item?.totalPrice.formatToPrice()
+            binding.tvPrice.text = item?.price.formatToPrice()
+            binding.edtNumber.text = "x" + item?.count.toString()
         }
     }
 }

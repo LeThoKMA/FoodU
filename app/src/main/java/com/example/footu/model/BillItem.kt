@@ -12,4 +12,6 @@ data class BillItem(
     val quantity: Int? = 0,
     @SerializedName("price")
     val price: Int? = 0,
+    val size: Int? = 0,
+    val description: String? = "",
 ) : Parcelable

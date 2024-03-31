@@ -88,6 +88,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-nearby:19.0.0'
     implementation 'com.google.firebase:firebase-messaging-ktx:23.2.1'
     implementation 'com.google.android.gms:play-services-location:21.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout-compose-android:1.1.0-alpha13'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
 

@@ -15,6 +15,6 @@ data class Item(
     @SerializedName("quantity")
     val amount: Int? = 0,
     @SerializedName("imageLinks")
-    val imgUrl: List<String>? = listOf(),
+    val imgUrl: List<String> = listOf(),
     val description: String? = "",
 ) : java.io.Serializable, Parcelable
