@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
+import com.example.footu.ItemSize
 import com.example.footu.model.OrderShipModel
 import com.example.footu.ui.map.RouterActivity
 import com.example.footu.ui.shipper.ui.theme.Ivory
@@ -81,7 +82,6 @@ class OrderDetailActivity : ComponentActivity() {
         } else {
             intent.getParcelableExtra("item")
         }
-        orderDetail?.let { viewModel.setOrderDetail(it) }
 
         val type = intent.getIntExtra("type", -1)
         setContent {
@@ -107,7 +107,7 @@ class OrderDetailActivity : ComponentActivity() {
                     )
                 },
 
-            ) { paddingValues ->
+                ) { paddingValues ->
                 orderDetail?.let {
                     OrderDetailScreen(
                         it,
@@ -198,15 +198,15 @@ fun OrderDetailScreen(
                         end = offset,
                     )
                         .firstOrNull()?.let { annotation ->
-                        val phoneNumberr = annotation.item
-                        val intent = Intent(Intent.ACTION_DIAL)
-                        intent.data = Uri.parse("tel:$phoneNumberr")
-                        context.startActivity(intent)
-                    }
+                            val phoneNumberr = annotation.item
+                            val intent = Intent(Intent.ACTION_DIAL)
+                            intent.data = Uri.parse("tel:$phoneNumberr")
+                            context.startActivity(intent)
+                        }
                 },
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
 
-            )
+                )
         }
 
         DetailClientText(title = "Giá:", content = item.totalPrice.formatToPrice())
@@ -221,8 +221,11 @@ fun OrderDetailScreen(
 
         Row(modifier = Modifier.align(End)) {
             AndroidView(
-                modifier = Modifier.size(40.dp).clip(RoundedCornerShape(16.dp))
-                    .background(Color.Gray).padding(8.dp),
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.Gray)
+                    .padding(8.dp),
                 factory = { context ->
                     ZegoSendCallInvitationButton(context).apply {
                         setIsVideoCall(true)
@@ -240,8 +243,12 @@ fun OrderDetailScreen(
             )
 
             AndroidView(
-                modifier = Modifier.padding(start = 16.dp, end = 8.dp).size(40.dp)
-                    .clip(RoundedCornerShape(16.dp)).background(Color.Gray).padding(8.dp),
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 8.dp)
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.Gray)
+                    .padding(8.dp),
                 factory = { context ->
                     ZegoSendCallInvitationButton(context).apply {
                         setIsVideoCall(false)
@@ -272,7 +279,8 @@ fun OrderDetailScreen(
                         contentColor = Color.Black, // Card content color,e.g.text
                     ),
                     shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier.padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
+                    modifier = Modifier
+                        .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
                         .fillMaxWidth(),
                 ) {
 //
@@ -302,12 +310,24 @@ fun OrderDetailScreen(
                                 modifier = Modifier.padding(3.dp),
                                 fontSize = 16.sp,
                             )
+                            Text(text = it.description ?: "", maxLines = 3, fontSize = 16.sp)
 
+                        }
+                        Row {
                             Text(
                                 text = "Số lượng: ${it.quantity}",
                                 modifier = Modifier.padding(3.dp),
                                 fontSize = 16.sp,
+                            )
 
+                            Text(
+                                text = when (it.size) {
+                                    ItemSize.S.ordinal -> ItemSize.S.name
+                                    ItemSize.M.ordinal -> ItemSize.M.name
+                                    ItemSize.L.ordinal -> ItemSize.L.name
+                                    else -> ""
+                                },
+                                fontSize = 16.sp
                             )
                         }
                     }
@@ -317,7 +337,9 @@ fun OrderDetailScreen(
         Spacer(modifier = Modifier.fillMaxHeight(0.2f))
         Row(
             horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
         ) {
             Button(
                 onClick = { if (type == 0) onAccept() else onDone() },
@@ -331,24 +353,24 @@ fun OrderDetailScreen(
 @Composable
 fun DetailClientText(title: String, content: String) {
     Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-        Text(text = title, modifier = Modifier.fillMaxWidth(0.35f), fontSize = 18.sp)
-        Text(text = content, fontSize = 18.sp)
+        Text(text = title, modifier = Modifier.fillMaxWidth(0.35f), fontSize = 16.sp)
+        Text(text = content, fontSize = 16.sp)
     }
 }
 
 @Composable
 fun DetailLocationText(title: String, content: String, onClick: () -> Unit) {
     Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-        Text(text = title, modifier = Modifier.fillMaxWidth(0.35f), fontSize = 18.sp)
+        Text(text = title, modifier = Modifier.fillMaxWidth(0.35f), fontSize = 16.sp)
         Column {
             Text(
                 text = content,
-                fontSize = 18.sp,
+                fontSize = 16.sp,
             )
             Text(
                 modifier = Modifier.clickable { onClick() },
                 text = "Xem tuyến đường giao hàng",
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontStyle = FontStyle.Italic,
                 color = Color.Red,
             )

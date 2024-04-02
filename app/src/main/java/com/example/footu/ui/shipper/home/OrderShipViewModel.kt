@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
@@ -40,6 +41,7 @@ class OrderShipViewModel @Inject constructor(
             flow { emit(api.getOrderShipList()) }
                 .onStart { onRetrievePostListStart() }
                 .onCompletion { onRetrievePostListFinish() }
+                .catch { handleApiError(it) }
                 .collect { data ->
                     _state.update { it.copy(orderList = data.data ?: emptyList()) }
                 }

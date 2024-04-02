@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,35 +38,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     private lateinit var pagerAdapter: FragmentNavigator
 
-    // Declare the launcher at the top of your Activity/Fragment:
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            // FCM SDK (and your app) can post notifications.
-        } else {
-            // TODO: Inform user that that your app will not show notifications.
-        }
-    }
-
-    private fun askNotificationPermission() {
-        // This is only necessary for API level >= 33 (TIRAMISU)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, "android.permission.POST_NOTIFICATIONS") ==
-                PackageManager.PERMISSION_GRANTED
-            ) {
-                // FCM SDK (and your app) can post notifications.
-            } else if (shouldShowRequestPermissionRationale("android.permission.POST_NOTIFICATIONS")) {
-                // TODO: display an educational UI explaining to the user the features that will be enabled
-                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
-                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
-                //       If the user selects "No thanks," allow the user to continue without notifications.
-            } else {
-                // Directly ask for the permission
-                requestPermissionLauncher.launch("android.permission.POST_NOTIFICATIONS")
-            }
-        }
-    }
 
     override fun observerData() {
     }
@@ -79,29 +51,31 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         setColorForStatusBar(R.color.colorPrimary)
         setLightIconStatusBar(true)
 
-        val locationPermissionRequest = registerForActivityResult(
+        val requestPermission = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions(),
         ) { permissions ->
-            when {
-                permissions.getOrDefault(
+            if (permissions.getOrDefault(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     false,
-                ) -> {
-                    // Precise location access granted.
-                }
-
-                permissions.getOrDefault(
+                ) || permissions.getOrDefault(
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     false,
-                ) -> {
-                    // Only approximate location access granted.
+                )
+            ) {
+                if (!isLocationEnabled()) {
+                    requestLocationEnable(this)
                 }
-
-                else -> {
-                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                    startActivity(intent)
-                }
+            } else {
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(intent)
             }
+
+            if (!permissions.getOrDefault(Manifest.permission.POST_NOTIFICATIONS, false)) {
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                startActivity(intent)
+            }
+
         }
 
 // ...
@@ -109,45 +83,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 // Before you perform the actual permission request, check whether your app
 // already has the permissions, and whether your app needs to show a permission
 // rationale dialog. For more details, see Request permissions.
-        locationPermissionRequest.launch(
-            arrayOf(
+
+        requestPermission.launch(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) arrayOf(
+                Manifest.permission.POST_NOTIFICATIONS,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.CAMERA,
                 Manifest.permission.RECORD_AUDIO,
-            ),
+            ) else arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.CAMERA,
+                Manifest.permission.RECORD_AUDIO,
+            )
         )
 
-        askNotificationPermission()
-
-        if (!isLocationEnabled()) {
-            requestLocationEnable(this)
-        }
-
         initFirebase()
-
-        FirebaseMessaging.getInstance().subscribeToTopic("shipperTopic")
-            .addOnCompleteListener { task ->
-                var msg = "Subscribed"
-                if (!task.isSuccessful) {
-                    msg = "Subscribe failed"
-                }
-                Log.e(">>>>>>>>>>>>>>>", msg)
-            }
-
-//        val workManager = WorkManager.getInstance(applicationContext)
-//        workManager.getWorkInfosForUniqueWorkLiveData(MyLocationWorker.workName)
-//            .observe(this) {
-//                println(it.first().state)
-//            }
-//        workManager.enqueueUniquePeriodicWork(
-//            MyLocationWorker.workName,
-//            ExistingPeriodicWorkPolicy.KEEP,
-//            PeriodicWorkRequestBuilder<MyLocationWorker>(
-//                30,
-//                TimeUnit.SECONDS,
-//            ).build(),
-//        )
         LocationEmitter.emitLocation()
         setupPager()
     }
@@ -172,6 +124,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 }
             },
         )
+        FirebaseMessaging.getInstance().subscribeToTopic("shipperTopic")
+            .addOnCompleteListener { task ->
+                var msg = "Subscribed"
+                if (!task.isSuccessful) {
+                    msg = "Subscribe failed"
+                }
+                Log.e(">>>>>>>>>>>>>>>", msg)
+            }
     }
 
     private fun setupPager() {
