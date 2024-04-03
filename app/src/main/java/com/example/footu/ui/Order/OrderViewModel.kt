@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.footu.ItemSize
 import com.example.footu.Request.ItemBillRequest
 import com.example.footu.Response.BillResponse
 import com.example.footu.Response.CategoryResponse
@@ -24,8 +25,8 @@ import javax.inject.Inject
 class OrderViewModel @Inject constructor(
     val apiService: ApiService,
 ) : BaseViewModel() {
-    private val _dataItems = MutableLiveData<List<DetailItemChoose>>()
-    val dataItems: LiveData<List<DetailItemChoose>> = _dataItems
+    private val _dataItems = MutableLiveData<MutableList<DetailItemChoose>>()
+    val dataItems: LiveData<MutableList<DetailItemChoose>> = _dataItems
 
     private val _price = MutableLiveData<Int>(0)
     val price: LiveData<Int> = _price
@@ -38,7 +39,7 @@ class OrderViewModel @Inject constructor(
 
     val message = MutableLiveData<String>()
 
-    var mapDetailItemChoose: HashMap<Int, DetailItemChoose> = hashMapOf()
+    private var mapDetailItemChoose: HashMap<Int, DetailItemChoose> = hashMapOf()
     var list: ArrayList<Item?> = arrayListOf()
 
     var size = 0
@@ -119,13 +120,19 @@ class OrderViewModel @Inject constructor(
                             id = it.id,
                             price = it.price ?: 0,
                             imgUrl = it.imgUrl,
-                            name = it.name?:"",
+                            name = it.name ?: "",
                         )
                     }
                 }
                 .collect {
-                    _dataItems.postValue(it)
+                    _dataItems.postValue(it?.toMutableList())
                 }
         }
+    }
+
+    fun resetData() {
+        val updatedList = _dataItems.value?.map { it.copy(flag = false, size = ItemSize.M, textDescription = "") }
+        _dataItems.value = updatedList?.toMutableList()
+        _price.value = 0
     }
 }

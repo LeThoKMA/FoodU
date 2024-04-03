@@ -3,6 +3,8 @@ package com.example.footu.ui.Order
 import android.content.Intent
 import android.os.Parcelable
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,6 +33,8 @@ class OrderActivity :
 
     private val viewModel: OrderViewModel by viewModels()
 
+    private var resultLauncher: ActivityResultLauncher<Intent>? = null
+
     var listItem: MutableList<DetailItemChoose> = mutableListOf()
     lateinit var oderAdapter: OderAdapter
 
@@ -51,6 +55,13 @@ class OrderActivity :
         }
         binding.rvCategory.layoutManager = LinearLayoutManager(binding.root.context)
         binding.rvCategory.adapter = oderAdapter
+
+        resultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                if (it.resultCode == RESULT_OK) {
+                    viewModel.resetData()
+                }
+            }
     }
 
     override fun initListener() {
@@ -74,7 +85,7 @@ class OrderActivity :
                     )
                     intent.putExtra(ORDER_TYPE, type)
                     intent.putExtra("price", viewModel.price.value)
-                    startActivity(intent)
+                    resultLauncher?.launch(intent)
                     (supportFragmentManager.findFragmentByTag(ORDER_TYPE_DIALOG) as? AddressDialog)?.dismiss()
                 }
 
@@ -86,7 +97,7 @@ class OrderActivity :
                     )
                     intent.putExtra(ORDER_TYPE, type)
                     intent.putExtra("price", viewModel.price.value)
-                    startActivity(intent)
+                    resultLauncher?.launch(intent)
                     (supportFragmentManager.findFragmentByTag(ORDER_TYPE_DIALOG) as? AddressDialog)?.dismiss()
                 }
             })
@@ -146,7 +157,7 @@ class OrderActivity :
             if (it != null) {
                 listItem.clear()
                 listItem.addAll(it)
-                oderAdapter.resetData()
+                oderAdapter.notifyDataSetChanged()
             }
         }
         viewModel.price.observe(this) {
@@ -159,7 +170,9 @@ class OrderActivity :
 
     override fun onResume() {
         super.onResume()
-        oderAdapter.resetData()
-        binding.tvPrice.text = ""
+    }
+
+    override fun onStop() {
+        super.onStop()
     }
 }

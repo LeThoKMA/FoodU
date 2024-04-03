@@ -91,8 +91,8 @@ class DetailItemFragment(private val onSelect: (DetailItemChoose) -> Unit) : Dia
     override fun onStart() {
         val dialog: Dialog? = dialog
         val width =
-            (resources.displayMetrics.widthPixels * 0.8).toInt() // 80% chiều rộng của màn hình
-        val height = (resources.displayMetrics.heightPixels * 0.6).toInt()
+            (resources.displayMetrics.widthPixels * 0.9).toInt() // 80% chiều rộng của màn hình
+        val height = (resources.displayMetrics.heightPixels * 0.7).toInt()
         dialog?.window?.setLayout(width, height)
         super.onStart()
     }
@@ -121,7 +121,7 @@ fun DetailItemView(item: DetailItemChoose, onSelect: (DetailItemChoose) -> Unit)
     }
     var selectedSize by remember {
         mutableStateOf(
-            ItemSize.M,
+           item.size,
         )
     }
     val onCounter = remember<(Boolean) -> Unit> {
@@ -136,19 +136,19 @@ fun DetailItemView(item: DetailItemChoose, onSelect: (DetailItemChoose) -> Unit)
         }
     }
     var textDescription by remember {
-        mutableStateOf("")
+        mutableStateOf(item.textDescription)
     }
 
     val brush = remember {
         Brush.linearGradient(
             colors = listOf(
-                Color.Red,
-                Color(0xFFFF7F00), // Orange
-                Color.Yellow,
-                Color.Green,
-                Color(0xFF00FFFF), // Cyan
-                Color.Blue,
-                Color(0xFF8B00FF), // Purple
+                Color(0xFF660000), // Red - đậm và tối hơn
+                Color(0xFF993300), // Orange - đậm và tối hơn
+                Color(0xFF666600), // Yellow - tối hơn
+                Color(0xFF003300), // Green - đậm và tối hơn
+                Color(0xFF003333), // Cyan - đậm và tối hơn
+                Color(0xFF000066), // Blue - đậm và tối hơn
+                Color(0xFF330066), // Purple - đậm và tối hơn
             ),
         )
     }
@@ -265,6 +265,7 @@ fun DetailItemView(item: DetailItemChoose, onSelect: (DetailItemChoose) -> Unit)
                 price = item.price,
                 size = selectedSize,
                 flag = true,
+                textDescription = textDescription
             )
             onSelect(detailItemChoose)
         }, modifier = Modifier.align(CenterHorizontally)) {

@@ -70,8 +70,4 @@ class OderAdapter(var list: MutableList<DetailItemChoose>, val callback: OrderIn
             }
         }
     }
-
-    fun resetData() {
-        notifyDataSetChanged()
-    }
 }

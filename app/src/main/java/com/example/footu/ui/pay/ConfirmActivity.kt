@@ -173,6 +173,7 @@ class ConfirmActivity :
     override fun observerData() {
         viewModel.message.observe(this) {
             this.toast(it)
+            setResult(RESULT_OK)
             finish()
         }
         viewModel.promotions.observe(this) {
