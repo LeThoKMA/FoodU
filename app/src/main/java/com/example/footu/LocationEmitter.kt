@@ -26,7 +26,7 @@ object LocationEmitter {
     fun emitLocation() {
         CoroutineScope(IO).launch {
             while (true) {
-                delay(20000L)
+                delay(10000L)
                 if (ActivityCompat.checkSelfPermission(
                         context,
                         Manifest.permission.ACCESS_FINE_LOCATION,

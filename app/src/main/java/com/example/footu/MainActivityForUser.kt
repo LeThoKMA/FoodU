@@ -116,32 +116,23 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
     override fun initView() {
         setColorForStatusBar(R.color.colorPrimary)
         setLightIconStatusBar(true)
-        val locationPermissionRequest = registerForActivityResult(
+        val requestPermission = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions(),
         ) { permissions ->
-            when {
-                permissions.getOrDefault(
+            if (permissions.getOrDefault(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     false,
-                ) -> {
-                    if (!isLocationEnabled()) {
-                        requestLocationEnable(this)
-                    }
-                }
-
-                permissions.getOrDefault(
+                ) || permissions.getOrDefault(
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     false,
-                ) -> {
-                    if (!isLocationEnabled()) {
-                        requestLocationEnable(this)
-                    }
+                )
+            ) {
+                if (!isLocationEnabled()) {
+                    requestLocationEnable(this)
                 }
-
-                else -> {
-                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                    startActivity(intent)
-                }
+            } else {
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(intent)
             }
         }
 
@@ -150,14 +141,27 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
 // Before you perform the actual permission request, check whether your app
 // already has the permissions, and whether your app needs to show a permission
 // rationale dialog. For more details, see Request permissions.
-        locationPermissionRequest.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.CAMERA,
-                Manifest.permission.RECORD_AUDIO,
-            ),
-        )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            requestPermission.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                ),
+            )
+        } else {
+            requestPermission.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                ),
+            )
+        }
         val intentFilter = IntentFilter(ITEMS_CHOOSE_ACTION)
         registerReceiver(broadcastItems, intentFilter)
         setupPager()

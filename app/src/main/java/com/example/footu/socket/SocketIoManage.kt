@@ -10,7 +10,7 @@ object SocketIoManage {
     val defaultChannel = "land-channel-"
 
     init {
-        mSocket = IO.socket("https://28d8-183-91-2-166.ngrok-free.app")
+        mSocket = IO.socket("https://cd1f-183-91-2-166.ngrok-free.app")
 
         val onConnect: Emitter.Listener =
             Emitter.Listener { Log.d("SocketIoManage", "connected...") }

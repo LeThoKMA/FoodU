@@ -1,7 +1,6 @@
 package com.example.footu.ui.map
 
 import android.Manifest
-import android.animation.Animator
 import android.animation.TypeEvaluator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
@@ -14,7 +13,7 @@ import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Build
 import android.util.Log
-import android.view.animation.LinearInterpolator
+import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
@@ -41,13 +40,15 @@ import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.turf.TurfMeasurement
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class TrackingLocationActivity : BaseActivity<ActivityTrackingLocationBinding>() {
+class TrackingLocationActivity :
+    BaseActivity<ActivityTrackingLocationBinding>() {
     private val viewModel: TrackingLocationViewModel by viewModels()
+    private var animator: ValueAnimator? = null
+    private var animateDuration = 10000L
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var lastLocation: Location? = null
     private lateinit var point: Point
@@ -62,10 +63,9 @@ class TrackingLocationActivity : BaseActivity<ActivityTrackingLocationBinding>()
     }
     private var shipperLocationAnnotation: PointAnnotation? = null
     private val pointAnnotationManager by lazy {
-        val annotationApi = binding.mapView.annotations
-        annotationApi.createPointAnnotationManager(binding.mapView)
+        binding.mapView.annotations.createPointAnnotationManager()
     }
-    lateinit var pointAnnotationOptions: PointAnnotationOptions
+    private lateinit var pointAnnotationOptions: PointAnnotationOptions
 
     override fun observerData() {
         lifecycleScope.launch {
@@ -105,7 +105,7 @@ class TrackingLocationActivity : BaseActivity<ActivityTrackingLocationBinding>()
         if (shipperLocationAnnotation == null) {
             bitmapFromDrawableRes(
                 this,
-                R.drawable.shipper,
+                R.drawable.point,
             )?.let {
                 pointAnnotationOptions = PointAnnotationOptions()
                     .withPoint(Point.fromLngLat(longitude, latitude))
@@ -128,8 +128,7 @@ class TrackingLocationActivity : BaseActivity<ActivityTrackingLocationBinding>()
                 //    binding.mapView.getMapboxMap().setCamera()
             }
         } else {
-            shipperLocationAnnotation!!.point = Point.fromLngLat(longitude, latitude)
-            pointAnnotationManager.update(shipperLocationAnnotation!!)
+            animateCars(shipperLocationAnnotation!!.point, Point.fromLngLat(longitude, latitude))
         }
     }
 
@@ -183,7 +182,7 @@ class TrackingLocationActivity : BaseActivity<ActivityTrackingLocationBinding>()
                 point = Point.fromLngLat(location.longitude, location.latitude)
                 bitmapFromDrawableRes(
                     this@TrackingLocationActivity,
-                    R.drawable.ic_user_map,
+                    R.drawable.icon_map_small,
                 )?.let {
                     val pointAnnotation = PointAnnotationOptions().withPoint(
                         Point.fromLngLat(
@@ -216,38 +215,47 @@ class TrackingLocationActivity : BaseActivity<ActivityTrackingLocationBinding>()
         }
     }
 
-    private fun createPointAnimator(curretPosition: Point, targetPosition: Point): Animator {
-        val pointEvaluator = TypeEvaluator<Point> { fraction, startValue, endValue ->
-            Point.fromLngLat(
-                startValue.longitude() + ((endValue.longitude() - startValue.longitude() * fraction)),
-                startValue.latitude() + ((endValue.latitude() - startValue.latitude()) * fraction),
-            )
-        }
-        return ValueAnimator.ofObject(pointEvaluator, curretPosition, targetPosition).apply {
-            duration = TurfMeasurement.distance(curretPosition, targetPosition, "meters").toLong()
-            interpolator = LinearInterpolator()
+    override fun onStart() {
+        super.onStart()
+    }
 
-//            addListener(object : AnimatorListenerAdapter() {
-//                override fun onAnimationEnd(animation: Animator) {
-//                    super.onAnimationEnd(animation)
-//                    animate()
-//                }
-//            })
-//
-//            addUpdateListener { animation ->
-//                (animation.animatedValue as? Point)?.let {
-//                    markerLinePointList.add(it)
-//                    pointSource.geometry(it)
-//                    if (++count > 1) {
-//                        lineSource.geometry(LineString.fromLngLats(markerLinePointList))
-//                    }
-//                }
-//            }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        binding.mapView.onLowMemory()
+    }
+
+    private fun cleanAnimation() {
+        animator?.apply {
+            removeAllListeners()
+            cancel()
         }
     }
 
-    override fun onStart() {
-        super.onStart()
+    private fun animateCars(oldPoint: Point, nextPoint: Point) {
+        cleanAnimation()
+        animator =
+            ValueAnimator.ofObject(
+                TypeEvaluator<Point> { fraction, startValue, endValue ->
+                    Point.fromLngLat(
+                        startValue.longitude() + (endValue.longitude() - startValue.longitude()) * fraction,
+                        startValue.latitude() + (endValue.latitude() - startValue.latitude()) * fraction,
+                    )
+                },
+                oldPoint,
+                nextPoint,
+            ).apply {
+                duration = animateDuration
+                interpolator = AccelerateDecelerateInterpolator()
+                addUpdateListener { valueAnimator ->
+                    (valueAnimator.animatedValue as Point).let {
+                        shipperLocationAnnotation?.point = it
+                    }
+                }
+                start()
+                addUpdateListener {
+                    pointAnnotationManager.update(shipperLocationAnnotation!!)
+                }
+            }
     }
 
     @SuppressLint("MissingPermission")
@@ -308,10 +316,5 @@ class TrackingLocationActivity : BaseActivity<ActivityTrackingLocationBinding>()
                 // Xử lý tương ứng, ví dụ: hiển thị thông báo rằng quyền không được cấp
             }
         }
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
     }
 }

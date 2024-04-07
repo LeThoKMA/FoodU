@@ -62,7 +62,7 @@ object NetworkModule {
         httpClient.addInterceptor(logging) // <-- this is the important line!
 
         return Retrofit.Builder()
-            .baseUrl("https://684c-183-91-2-166.ngrok-free.app/api/")
+            .baseUrl("https://d334-183-91-2-166.ngrok-free.app/api/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(httpClient.build())
             .build()

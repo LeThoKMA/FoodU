@@ -4,15 +4,12 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
-import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivityMainBinding
@@ -37,7 +34,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private val accountFragment by lazy { AccountFragment() }
 
     private lateinit var pagerAdapter: FragmentNavigator
-
 
     override fun observerData() {
     }
@@ -70,12 +66,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 startActivity(intent)
             }
 
-            if (!permissions.getOrDefault(Manifest.permission.POST_NOTIFICATIONS, false)) {
+            if (!permissions.getOrDefault(
+                    Manifest.permission.POST_NOTIFICATIONS,
+                    false,
+                ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+            ) {
                 val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
                 intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
                 startActivity(intent)
             }
-
         }
 
 // ...
@@ -85,18 +84,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 // rationale dialog. For more details, see Request permissions.
 
         requestPermission.launch(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) arrayOf(
-                Manifest.permission.POST_NOTIFICATIONS,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.CAMERA,
-                Manifest.permission.RECORD_AUDIO,
-            ) else arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.CAMERA,
-                Manifest.permission.RECORD_AUDIO,
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                arrayOf(
+                    Manifest.permission.POST_NOTIFICATIONS,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                )
+            } else {
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                )
+            },
         )
 
         initFirebase()

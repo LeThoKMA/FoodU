@@ -7,8 +7,6 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
@@ -216,20 +214,14 @@ abstract class BaseActivity<BINDING : ViewDataBinding> :
         }
     }
 
-    @SuppressLint("MissingPermission")
     protected fun requestLocationEnable(context: Context) {
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        locationManager.requestLocationUpdates(
-            LocationManager.GPS_PROVIDER,
-            0,
-            0f,
-            object : LocationListener {
-                override fun onLocationChanged(p0: Location) {
-                }
-            },
-        )
         val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-        context.startActivity(intent)
+        if (intent.resolveActivity(packageManager) != null) {
+            context.startActivity(intent)
+        } else {
+            Toast.makeText(context, "Không thể mở cài đặt vị trí", Toast.LENGTH_SHORT)
+                .show()
+        }
     }
 
     protected fun isLocationEnabled(): Boolean {

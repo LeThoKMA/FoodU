@@ -19,6 +19,9 @@ import javax.inject.Inject
 class TrackingLocationViewModel @Inject constructor(
     @ApplicationContext context: Context,
 ) : BaseViewModel() {
+//    private val _locationStateFlow: MutableStateFlow<LocationState?> = MutableStateFlow(null)
+//    val locationStateFlow: StateFlow<LocationState?> = _locationStateFlow
+
     private val _locationStateFlow: MutableStateFlow<ShipperLocation?> = MutableStateFlow(null)
     val locationStateFlow: StateFlow<ShipperLocation?> = _locationStateFlow
 
@@ -41,6 +44,9 @@ class TrackingLocationViewModel @Inject constructor(
             SocketIoManage.mSocket?.on("$id") { args ->
                 val receivedData = Gson().fromJson(args[0].toString(), ShipperLocation::class.java)
                 _locationStateFlow.value = receivedData
+//                _locationStateFlow.update {
+//                    it?.copy(oldLocation = it.newLocation, newLocation = receivedData)
+//                }
             }
         }
     }
@@ -48,4 +54,9 @@ class TrackingLocationViewModel @Inject constructor(
     sealed class Event {
         data class Position(val location: Location?) : Event()
     }
+
+    data class LocationState(
+        var newLocation: ShipperLocation? = null,
+        var oldLocation: ShipperLocation? = null,
+    )
 }

@@ -179,7 +179,7 @@ abstract class BaseFragment<BINDING : ViewDataBinding> :
         view.setPadding(0, getStatusBarHeight(binding.root.context), 0, 0)
     }
 
-    fun getStatusBarHeight(context: Context): Int {
+    private fun getStatusBarHeight(context: Context): Int {
         var result = 0
         val resourceId =
             context.resources.getIdentifier(STATUS_BAR_HEIGHT, "dp", ANDROID)
