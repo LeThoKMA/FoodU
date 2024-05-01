@@ -15,6 +15,7 @@ import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivityMainBinding
 import com.example.footu.model.RegisterFirebaseModel
 import com.example.footu.ui.account.AccountFragment
+import com.example.footu.ui.chat.ChatFragment
 import com.example.footu.ui.shipper.home.OrderListScreen
 import com.example.footu.ui.shipper.picked.OrderShipPickedFragment
 import com.google.android.gms.tasks.OnCompleteListener
@@ -32,6 +33,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         OrderListScreen()
     }
     private val accountFragment by lazy { AccountFragment() }
+
+    private val chatFragment by lazy { ChatFragment() }
 
     private lateinit var pagerAdapter: FragmentNavigator
 
@@ -143,6 +146,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         pagerAdapter = FragmentNavigator(this.supportFragmentManager, lifecycle)
         pagerAdapter.addFragment(orderListShipper)
         pagerAdapter.addFragment(orderShipPickedFragment)
+        pagerAdapter.addFragment(chatFragment)
         pagerAdapter.addFragment(accountFragment)
         binding.pagger2.offscreenPageLimit = pagerAdapter.itemCount
         binding.pagger2.adapter = pagerAdapter
@@ -166,8 +170,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     true
                 }
 
-                R.id.navigation_profile -> {
+                R.id.nav_chat -> {
                     binding.pagger2.currentItem = 2
+                    true
+                }
+
+                R.id.navigation_profile -> {
+                    binding.pagger2.currentItem = 3
                     true
                 }
 

@@ -27,9 +27,9 @@ import kotlinx.coroutines.launch
 class HomeFragment :
     BaseFragment<HomeFragmentBinding>() {
     private val viewModel: HomeViewModel by viewModels()
-    var categoryAdapter: CategoryAdapter? = null
-    lateinit var descriptionAdapter: DescriptionProductAdapter
-    var listCategory = mutableListOf<CategoryResponse>()
+    private var categoryAdapter: CategoryAdapter? = null
+    private lateinit var descriptionAdapter: DescriptionProductAdapter
+    private var listCategory = mutableListOf<CategoryResponse>()
 
     override fun getContentLayout(): Int {
         return R.layout.home_fragment
