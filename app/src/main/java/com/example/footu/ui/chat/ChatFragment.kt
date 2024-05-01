@@ -19,14 +19,11 @@ class ChatFragment : BaseFragment<ChatFragmentBinding>() {
     }
 
     override fun initView() {
-        TODO("Not yet implemented")
     }
 
     override fun initListener() {
-        TODO("Not yet implemented")
     }
 
     override fun observerLiveData() {
-        TODO("Not yet implemented")
     }
 }

@@ -13,6 +13,7 @@ import com.example.footu.dagger2.App
 import com.example.footu.hilt.NetworkModule
 import com.example.footu.model.LoginRequest
 import com.example.footu.network.ApiService
+import com.example.footu.utils.AppKey
 import com.example.footu.utils.toast
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,7 +40,17 @@ class LoginViewModel @Inject constructor(
 
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
-            flow { emit(apiService.login(LoginRequest(email, password))) }.flowOn(Dispatchers.IO)
+            flow {
+                emit(
+                    apiService.login(
+                        LoginRequest(
+                            email,
+                            password,
+                            AppKey.getPublicKey()
+                        )
+                    )
+                )
+            }.flowOn(Dispatchers.IO)
                 .onStart { onRetrievePostListStart() }
                 .onCompletion { onRetrievePostListFinish() }
                 .catch { Toast.makeText(appInstance, "Error", Toast.LENGTH_LONG).show() }
@@ -73,7 +84,7 @@ class LoginViewModel @Inject constructor(
         val appSign = "c5663e686bbe551ff22eedafeb47c6b9f842f1636b1373bf2fe1494931e9f38a"
 
         val callInvitationConfig = ZegoUIKitPrebuiltCallInvitationConfig()
-       // callInvitationConfig.notifyWhenAppRunningInBackgroundOrQuit = true
+        // callInvitationConfig.notifyWhenAppRunningInBackgroundOrQuit = true
 //        callInvitationConfig.provider =
 //            ZegoUIKitPrebuiltCallConfigProvider { invitationData ->
 //                var config: ZegoUIKitPrebuiltCallConfig? = null
