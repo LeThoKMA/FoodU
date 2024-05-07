@@ -1,4 +1,4 @@
-package com.example.footu.ui.chat
+package com.example.footu.ui.chat.adapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.footu.R
 import com.example.footu.Response.HintMessageResponse
 
@@ -36,7 +35,7 @@ class HintMessageAdapter() :
 
         fun bindView(hintMessageResponse: HintMessageResponse) {
             name.text = hintMessageResponse.messageResponse.fromUser.username
-            content.text  = hintMessageResponse.messageResponse.content
+            content.text = hintMessageResponse.messageResponse.content
         }
     }
 

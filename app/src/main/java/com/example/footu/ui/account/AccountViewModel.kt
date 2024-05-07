@@ -33,7 +33,7 @@ class AccountViewModel @Inject constructor(
             flow { emit(apiService.logout()) }
                 .catch { handleApiError(it) }
                 .collect {
-                    MyPreference.getInstance(context)?.logout()
+                    MyPreference.getInstance()?.logout()
                     logout.postValue(true)
                 }
         }

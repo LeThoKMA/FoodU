@@ -40,7 +40,7 @@ class SplashScreen : BaseActivity<ActivitySplashScreenBinding>() {
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun initView() {
-        val preference = MyPreference.getInstance(this)
+        val preference = MyPreference.getInstance()
         Log.e(">>>>>>", preference?.getUser().toString())
         if (preference?.getUser() == User()) {
             startActivity(Intent(this, SignInActivity::class.java))

@@ -7,6 +7,7 @@ import com.example.footu.MyPreference
 import com.example.footu.base.BaseViewModel
 import com.example.footu.dagger2.App
 import com.example.footu.model.OrderShipModel
+import com.example.footu.model.User
 import com.example.footu.network.ApiMapService
 import com.example.footu.network.ApiService
 import com.example.footu.utils.toast
@@ -39,10 +40,12 @@ class OrderDetailViewModel @Inject constructor(
     val onSuccess: StateFlow<Boolean> = _onSuccess.asStateFlow()
 
     private lateinit var orderDetail: OrderShipModel
+    private var user: User? = null
 
     init {
-        val userID = MyPreference.getInstance(context)?.getUser()?.id
-        val userName = MyPreference.getInstance(context)?.getUser()?.fullname
+        user =  MyPreference.getInstance()?.getUser()
+        val userID = user?.id
+        val userName = user?.fullname
         initCallService(userID.toString(), userName.toString())
     }
 

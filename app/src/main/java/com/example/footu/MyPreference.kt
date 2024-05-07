@@ -1,8 +1,8 @@
 package com.example.footu
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
+import com.example.footu.dagger2.App
 import com.example.footu.model.User
 
 class MyPreference {
@@ -49,10 +49,10 @@ class MyPreference {
         private var editor: SharedPreferences.Editor? = null
 
         @JvmStatic
-        fun getInstance(context: Context): MyPreference? {
+        fun getInstance(): MyPreference? {
             if (accountUtil == null) accountUtil = MyPreference()
             if (pref == null) {
-                pref = PreferenceManager.getDefaultSharedPreferences(context)
+                pref = PreferenceManager.getDefaultSharedPreferences(App.app)
             }
             return accountUtil
         }

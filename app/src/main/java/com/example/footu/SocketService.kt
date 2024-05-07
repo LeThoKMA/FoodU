@@ -20,7 +20,7 @@ class SocketService() : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        socketChannel = MyPreference.getInstance(this)?.getUser()?.id!!
+        socketChannel = MyPreference.getInstance()?.getUser()?.id!!
         SocketIoManage.subcribe()
         SocketIoManage.mSocket?.on("$socketChannel") { args ->
             showNotification("Hello world")

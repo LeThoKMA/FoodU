@@ -44,7 +44,7 @@ object LocationEmitter {
                     Log.e("MyLocationWorker", "get location: ")
 
                     location?.let {
-                        val id = MyPreference.getInstance(context)?.getUser()?.id!!
+                        val id = MyPreference.getInstance()?.getUser()?.id!!
                         val shipperLocation = ShipperLocation(id, it.latitude, it.longitude)
                         val obj = JSONObject(
                             GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create()

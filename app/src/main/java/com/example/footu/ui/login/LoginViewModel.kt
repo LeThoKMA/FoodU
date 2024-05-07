@@ -36,7 +36,7 @@ class LoginViewModel @Inject constructor(
 
     private val _doLogin = MutableLiveData<Int?>()
     val doLogin: LiveData<Int?> = _doLogin
-    private var myPreference: MyPreference = MyPreference.getInstance(context)!!
+    private var myPreference: MyPreference? = MyPreference.getInstance()
 
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
@@ -71,7 +71,7 @@ class LoginViewModel @Inject constructor(
                 .catch { Toast.makeText(appInstance, it.message, Toast.LENGTH_LONG).show() }
                 .collect {
                     it.data?.let { it1 ->
-                        myPreference.saveUser(it1, password)
+                        myPreference?.saveUser(it1, password)
                         initCallService(it1.id.toString(), it1.fullname.toString())
                     }
                     _doLogin.postValue(it.data?.role)

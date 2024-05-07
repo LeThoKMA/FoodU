@@ -1,4 +1,4 @@
-package com.example.footu.ui.chat
+package com.example.footu.ui.chat.activity
 
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
@@ -6,7 +6,7 @@ import com.example.footu.databinding.ActivityUserChatBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class UserChatActivity:BaseActivity<ActivityUserChatBinding>() {
+class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
     override fun observerData() {
         TODO("Not yet implemented")
     }

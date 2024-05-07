@@ -15,7 +15,7 @@ class MyWorkManager(val appContext: Context, workerParams: WorkerParameters) :
     androidx.work.Worker(appContext, workerParams) {
     var socketChannel: Int = -1
     override fun doWork(): Result {
-        socketChannel = MyPreference.getInstance(this.appContext)?.getUser()?.id!!
+        socketChannel = MyPreference.getInstance()?.getUser()?.id!!
         SocketIoManage.mSocket?.on("$socketChannel") { args ->
             showNotification("Hello world")
         }

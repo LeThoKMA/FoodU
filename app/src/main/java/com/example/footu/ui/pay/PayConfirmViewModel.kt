@@ -50,7 +50,7 @@ class PayConfirmViewModel @Inject constructor(
     private val _isShowDialog = MutableLiveData(false)
     val isShowDialog: LiveData<Boolean> = _isShowDialog
 
-    val user = MyPreference.getInstance(context)?.getUser()
+    val user = MyPreference.getInstance()?.getUser()
 
     private var idOrder = -1
     private val accessToken = context.getString(R.string.mapbox_access_token)
