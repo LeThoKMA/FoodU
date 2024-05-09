@@ -6,6 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import android.util.Base64
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -68,4 +69,8 @@ fun Context.createNotificationChanel() {
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
+}
+
+fun ByteArray.byteArrayToString(): String {
+    return Base64.encodeToString(this, Base64.DEFAULT)
 }

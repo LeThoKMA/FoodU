@@ -3,6 +3,7 @@ package com.example.footu.model
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
+import java.security.PublicKey
 
 @Parcelize
 data class User(
@@ -16,4 +17,5 @@ data class User(
     var username: String? = "",
     var email: String? = "",
     var phone: String? = "",
+    val publicKey: String? = ""
 ) : java.io.Serializable, Parcelable

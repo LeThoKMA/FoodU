@@ -24,6 +24,7 @@ import com.example.footu.databinding.ActivityMainBinding
 import com.example.footu.model.DetailItemChoose
 import com.example.footu.ui.account.AccountFragment
 import com.example.footu.ui.cart.CartFragment
+import com.example.footu.ui.chat.ChatFragment
 import com.example.footu.ui.detail.OrderDetailFragment
 import com.example.footu.ui.home.HomeFragment
 import com.example.footu.utils.ITEMS_CHOOSE
@@ -46,6 +47,8 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
     private val ordersDetailFragment by lazy { OrderDetailFragment() }
 
     private val accountFragment by lazy { AccountFragment() }
+
+    private val chatFragment by lazy { ChatFragment() }
 
     private lateinit var pagerAdapter: FragmentNavigator
 
@@ -101,6 +104,7 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
         pagerAdapter = FragmentNavigator(this.supportFragmentManager, lifecycle)
         pagerAdapter.addFragment(homeFragment)
         pagerAdapter.addFragment(ordersDetailFragment)
+        pagerAdapter.addFragment(chatFragment)
         pagerAdapter.addFragment(accountFragment)
         binding.pagger2.offscreenPageLimit = pagerAdapter.itemCount
         binding.pagger2.adapter = pagerAdapter
@@ -180,8 +184,13 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
                     true
                 }
 
-                R.id.navigation_profile -> {
+                R.id.nav_chat -> {
                     binding.pagger2.currentItem = 2
+                    true
+                }
+
+                R.id.navigation_profile -> {
+                    binding.pagger2.currentItem = 3
                     true
                 }
 

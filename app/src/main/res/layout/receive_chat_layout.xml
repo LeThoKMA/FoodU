@@ -14,7 +14,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="5dp"
-        android:background="@drawable/custom_receive_chat"
         android:paddingStart="3dp"
         android:paddingEnd="3dp"
         app:layout_constraintStart_toStartOf="parent"

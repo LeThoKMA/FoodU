@@ -122,7 +122,14 @@
         </activity>
         <activity
             android:name=".ui.login.SignInActivity"
-            android:exported="true">
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".ui.chat.activity.UserChatActivity"
+            android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />

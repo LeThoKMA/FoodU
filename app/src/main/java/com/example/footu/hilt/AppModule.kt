@@ -1,6 +1,8 @@
 package com.example.footu.hilt
 
 import android.content.Context
+import com.example.footu.MyPreference
+import com.example.footu.MyPreferencee
 import com.example.footu.dagger2.App
 import dagger.Module
 import dagger.Provides
@@ -27,5 +29,15 @@ object ModuleRepository {
     @Provides
     fun provideRepository(): Repository {
         return Repository()
+    }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object SharePrefModule {
+    @Singleton
+    @Provides
+    fun provideSharePref(): MyPreferencee {
+        return MyPreferencee()
     }
 }

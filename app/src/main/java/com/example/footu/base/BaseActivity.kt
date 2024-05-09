@@ -56,15 +56,16 @@ abstract class BaseActivity<BINDING : ViewDataBinding> :
         observerData()
     }
 
-    abstract fun observerData()
-
     abstract fun getContentLayout(): Int
+
+    abstract fun initViewModel(): BaseViewModel
 
     abstract fun initView()
 
     abstract fun initListener()
 
-    abstract fun initViewModel(): BaseViewModel
+    abstract fun observerData()
+
 
     open fun isDoubleClick(): Boolean {
         if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {

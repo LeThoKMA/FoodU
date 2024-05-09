@@ -11,8 +11,11 @@ import com.example.footu.Response.BaseResponseNoBody
 import com.example.footu.Response.BillDetailResponse
 import com.example.footu.Response.BillResponse
 import com.example.footu.Response.CategoryResponse
-import com.example.footu.Response.HintIdResponse
+import com.example.footu.Response.HintMessageResponse
+import com.example.footu.Response.HintResponse
 import com.example.footu.Response.LoginResponse
+import com.example.footu.Response.MessageResponse
+import com.example.footu.Response.TotalMessageResponse
 import com.example.footu.model.Item
 import com.example.footu.model.ItemStatistic
 import com.example.footu.model.LoginRequest
@@ -108,5 +111,14 @@ interface ApiService {
     suspend fun getOrdersDetail(@Path("id") id: Int): BaseResponse<List<OrderShipModel>>
 
     @POST("message/hint")
-    suspend fun checkHintId(@Body request: HintRequest): BaseResponse<HintIdResponse>
+    suspend fun checkHintId(@Body request: HintRequest): BaseResponse<HintResponse>
+
+    @GET("message/{id}")
+    suspend fun fetchMessage(
+        @Path("id") id: Int,
+        @Query("page") page: Int
+    ): BaseResponse<TotalMessageResponse>
+
+    @GET("message")
+    suspend fun getAllHintMessage(@Query("id") id: Int): BaseResponse<List<HintMessageResponse>>
 }
