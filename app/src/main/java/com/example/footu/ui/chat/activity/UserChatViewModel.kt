@@ -35,7 +35,6 @@ class UserChatViewModel @Inject constructor(
     private var hintResponse: HintResponse? = null
     val stateFlow: StateFlow<StateUi> = _stateFlow
 
-
     fun getHintIdAndMessageData(otherId: Int) {
         viewModelScope.launch {
             flow {
@@ -73,12 +72,11 @@ class UserChatViewModel @Inject constructor(
                             fromUser = message.fromUser,
                             toUser = message.toUser,
                             content = AppKey.decrypt(message.content, message.iv),
-                            time = message.time
+                            time = message.time,
                         )
                     }
                 }
                 it.data?.messageList
-
             }
             .collect {
                 _stateFlow.value = StateUi.TotalMessage(it)
@@ -92,8 +90,8 @@ class UserChatViewModel @Inject constructor(
                 val messageResponse = receivedData.copy(
                     content = AppKey.decrypt(
                         receivedData.content,
-                        receivedData.iv
-                    )
+                        receivedData.iv,
+                    ),
                 )
                 _stateFlow.value = StateUi.Message(messageResponse)
             }
@@ -111,7 +109,7 @@ class UserChatViewModel @Inject constructor(
                 user?.id ?: 0,
                 toUserId ?: 0,
                 encryptMessage,
-                iv.byteArrayToString()
+                iv.byteArrayToString(),
             )
             val obj = JSONObject(
                 GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create()
@@ -123,12 +121,16 @@ class UserChatViewModel @Inject constructor(
 
     sealed class StateUi {
         data class TotalMessage(
-            val messageList: List<MessageResponse>? = listOf()
+            val messageList: List<MessageResponse>? = listOf(),
         ) : StateUi()
 
         data class Message(
-            val messageResponse: MessageResponse? = null
+            val messageResponse: MessageResponse? = null,
         ) : StateUi()
     }
 
+    override fun onCleared() {
+        SocketIoManage.mSocket?.off("chat:${hintResponse?.id}")
+        super.onCleared()
+    }
 }
