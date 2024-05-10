@@ -50,6 +50,7 @@ class LoginViewModel @Inject constructor(
                         )
                     )
                 )
+                println(AppKey.getPublicKey())
             }.flowOn(Dispatchers.IO)
                 .onStart { onRetrievePostListStart() }
                 .onCompletion { onRetrievePostListFinish() }

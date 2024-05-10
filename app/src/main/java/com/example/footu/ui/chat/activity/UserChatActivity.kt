@@ -69,9 +69,9 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
 
     override fun initListener() {
         binding.imageBtnChat.setOnClickListener {
-            if (binding.edtChat.text.isNotEmpty()) {
+            if (binding.edtChat.text.trim().isNotEmpty()) {
                 Log.e(">>>>>>>", binding.edtChat.text.toString())
-                viewModel.sendMessage(binding.edtChat.text.toString())
+                viewModel.sendMessage(binding.edtChat.text.toString().trim())
             }
         }
     }

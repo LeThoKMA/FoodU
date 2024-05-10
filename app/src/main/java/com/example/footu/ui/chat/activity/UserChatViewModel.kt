@@ -15,6 +15,7 @@ import com.example.footu.utils.generateRandomIV
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -36,7 +37,7 @@ class UserChatViewModel @Inject constructor(
     val stateFlow: StateFlow<StateUi> = _stateFlow
 
     fun getHintIdAndMessageData(otherId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             flow {
                 user?.id?.let {
                     emit(apiService.checkHintId(HintRequest(userId1 = it, userId2 = otherId)))
@@ -45,10 +46,15 @@ class UserChatViewModel @Inject constructor(
                 hintResponse = it.data
                 it.data?.let { data ->
                     if (user?.id == data.user1.id) {
-                        data.user1.publicKey?.let { it1 -> AppKey.calculateKey(it1) }
+                        data.user1.publicKey?.let { it1 ->
+                            AppKey.calculateKey(
+                                it1
+                            )
+                        }
                     } else {
                         data.user2.publicKey?.let { it1 -> AppKey.calculateKey(it1) }
                     }
+                    println(">>>>>>>>>>>" + hintResponse)
                     fetchDataMessage(data.id)
                 }
             }
@@ -87,11 +93,12 @@ class UserChatViewModel @Inject constructor(
         viewModelScope.launch {
             SocketIoManage.mSocket?.on("chat:${hintResponse?.id}") { args ->
                 val receivedData = Gson().fromJson(args[0].toString(), MessageResponse::class.java)
+                val contentDecrypt = AppKey.decrypt(
+                    receivedData.content,
+                    receivedData.iv,
+                )
                 val messageResponse = receivedData.copy(
-                    content = AppKey.decrypt(
-                        receivedData.content,
-                        receivedData.iv,
-                    ),
+                    content = contentDecrypt,
                 )
                 _stateFlow.value = StateUi.Message(messageResponse)
             }

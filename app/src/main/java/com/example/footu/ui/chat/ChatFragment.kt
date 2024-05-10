@@ -33,7 +33,7 @@ class ChatFragment : BaseFragment<ChatFragmentBinding>() {
     override fun initListener() {
         binding.tvEmpty.setOnClickListener {
             val intent = Intent(requireContext(), UserChatActivity::class.java)
-            intent.putExtra(OTHER_USER_ID, 1)
+            intent.putExtra(OTHER_USER_ID, 2)
             startActivity(intent)
         }
     }

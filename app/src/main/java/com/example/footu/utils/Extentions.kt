@@ -72,5 +72,5 @@ fun Context.createNotificationChanel() {
 }
 
 fun ByteArray.byteArrayToString(): String {
-    return Base64.encodeToString(this, Base64.DEFAULT)
+    return Base64.encodeToString(this, Base64.NO_WRAP)
 }

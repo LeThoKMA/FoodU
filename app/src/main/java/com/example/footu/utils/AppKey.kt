@@ -8,6 +8,8 @@ import android.security.keystore.KeyProperties
 import android.util.Base64
 import androidx.annotation.RequiresApi
 import com.example.footu.dagger2.App
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.nio.charset.StandardCharsets
 import java.security.KeyFactory
 import java.security.KeyPairGenerator
@@ -75,7 +77,7 @@ object AppKey {
                 val privateKey = keyStore.getEntry(KEY_ALIAS, null) as PrivateKeyEntry
                 return Base64.encodeToString(
                     privateKey.certificate.publicKey.encoded,
-                    Base64.DEFAULT
+                    Base64.NO_WRAP
                 )
             }
         } catch (e: Exception) {
@@ -85,7 +87,7 @@ object AppKey {
     }
 
     fun calculateKey(publicKey: String) {
-        val publicKeySpec = X509EncodedKeySpec(Base64.decode(publicKey, Base64.DEFAULT))
+        val publicKeySpec = X509EncodedKeySpec(Base64.decode(publicKey, Base64.NO_WRAP))
         val keyFactory = KeyFactory.getInstance(KF_ALG)
         val publicKey1 = keyFactory.generatePublic(publicKeySpec)
 
@@ -103,20 +105,20 @@ object AppKey {
     fun encrypt(plainText: String, iv: ByteArray): String {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
         val encryptedBytes = cipher.doFinal(plainText.toByteArray())
-        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
+        return Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
     }
 
     fun encrypt(byteArray: ByteArray, iv: ByteArray): String {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
         val encryptedBytes = cipher.doFinal(byteArray)
-        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
+        return Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
     }
 
     fun decrypt(data: String?, iv: String): String? {
         try {
-            val ivByteArray = Base64.decode(iv, Base64.DEFAULT)
+            val ivByteArray = Base64.decode(iv, Base64.NO_WRAP)
             cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, ivByteArray))
-            val encryptedBytes: ByteArray = Base64.decode(data, Base64.DEFAULT)
+            val encryptedBytes: ByteArray = Base64.decode(data, Base64.NO_WRAP)
             val decryptedBytes = cipher.doFinal(encryptedBytes)
             return String(decryptedBytes, StandardCharsets.UTF_8)
         } catch (e: Exception) {
@@ -127,9 +129,9 @@ object AppKey {
 
     fun decryptByteArray(data: String, iv: String): ByteArray {
         try {
-            val ivByteArray = Base64.decode(iv, Base64.DEFAULT)
+            val ivByteArray = Base64.decode(iv, Base64.NO_WRAP)
             cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, ivByteArray))
-            val encryptedBytes: ByteArray = Base64.decode(data, Base64.DEFAULT)
+            val encryptedBytes: ByteArray = Base64.decode(data, Base64.NO_WRAP)
             return cipher.doFinal(encryptedBytes)
         } catch (e: Exception) {
             e.printStackTrace()
