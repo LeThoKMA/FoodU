@@ -60,9 +60,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.example.footu.ItemSize
 import com.example.footu.model.OrderShipModel
+import com.example.footu.ui.chat.activity.UserChatActivity
 import com.example.footu.ui.map.RouterActivity
 import com.example.footu.ui.shipper.ui.theme.Ivory
 import com.example.footu.ui.shipper.ui.theme.Primary
+import com.example.footu.utils.OTHER_USER_ID
 import com.example.footu.utils.formatToPrice
 import com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser
@@ -107,7 +109,7 @@ class OrderDetailActivity : ComponentActivity() {
                     )
                 },
 
-                ) { paddingValues ->
+            ) { paddingValues ->
                 orderDetail?.let {
                     OrderDetailScreen(
                         it,
@@ -198,15 +200,15 @@ fun OrderDetailScreen(
                         end = offset,
                     )
                         .firstOrNull()?.let { annotation ->
-                            val phoneNumberr = annotation.item
-                            val intent = Intent(Intent.ACTION_DIAL)
-                            intent.data = Uri.parse("tel:$phoneNumberr")
-                            context.startActivity(intent)
-                        }
+                        val phoneNumberr = annotation.item
+                        val intent = Intent(Intent.ACTION_DIAL)
+                        intent.data = Uri.parse("tel:$phoneNumberr")
+                        context.startActivity(intent)
+                    }
                 },
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
 
-                )
+            )
         }
 
         DetailClientText(title = "Giá:", content = item.totalPrice.formatToPrice())
@@ -220,6 +222,14 @@ fun OrderDetailScreen(
         }
 
         Row(modifier = Modifier.align(End)) {
+            Text(
+                text = "Nhắn tin",
+                modifier = Modifier.padding(8.dp).clickable {
+                    val intent = Intent(context, UserChatActivity::class.java)
+                    intent.putExtra(OTHER_USER_ID, item.customer?.id)
+                    context.startActivity(intent)
+                },
+            )
             AndroidView(
                 modifier = Modifier
                     .size(40.dp)
@@ -311,7 +321,6 @@ fun OrderDetailScreen(
                                 fontSize = 16.sp,
                             )
                             Text(text = it.description ?: "", maxLines = 3, fontSize = 16.sp)
-
                         }
                         Row {
                             Text(
@@ -327,7 +336,7 @@ fun OrderDetailScreen(
                                     ItemSize.L.ordinal -> ItemSize.L.name
                                     else -> ""
                                 },
-                                fontSize = 16.sp
+                                fontSize = 16.sp,
                             )
                         }
                     }

@@ -44,34 +44,33 @@ class UserChatViewModel @Inject constructor(
                 }
             }.collect {
                 hintResponse = it.data
-                it.data?.let { data ->
-                    if (user?.id == data.user1.id) {
-                        data.user1.publicKey?.let { it1 ->
-                            AppKey.calculateKey(
-                                it1
-                            )
-                        }
-                    } else {
-                        data.user2.publicKey?.let { it1 -> AppKey.calculateKey(it1) }
+                if (user?.id == hintResponse?.user1?.id) {
+                    hintResponse?.user2?.publicKey?.let { it1 ->
+                        AppKey.calculateKey(
+                            it1,
+                        )
                     }
-                    println(">>>>>>>>>>>" + hintResponse)
-                    fetchDataMessage(data.id)
+                } else {
+                    hintResponse?.user1?.publicKey?.let { it1 -> AppKey.calculateKey(it1) }
+                }
+                hintResponse?.id?.let { data ->
+                    fetchDataMessage(data)
                 }
             }
         }
     }
 
-    private suspend fun fetchDataMessage(id: Int) {
-        flow { emit(apiService.fetchMessage(id, 0)) }.onStart {
-            onRetrievePostListStart()
-        }.catch {
-            handleApiError(it)
-        }.onCompletion {
-            onRetrievePostListFinish()
-        }
-            .map {
-                if (it.data?.messageList?.isNotEmpty() == true) {
-                    it.data.messageList.map { message ->
+    private fun fetchDataMessage(id: Int) {
+        viewModelScope.launch {
+            flow { emit(apiService.fetchMessage(id, 0)) }.onStart {
+                onRetrievePostListStart()
+            }.catch {
+                handleApiError(it)
+            }.onCompletion {
+                onRetrievePostListFinish()
+            }
+                .map {
+                    it.data?.messageList?.map { message ->
                         message.copy(
                             messageId = message.messageId,
                             hintId = message.hintId,
@@ -82,17 +81,19 @@ class UserChatViewModel @Inject constructor(
                         )
                     }
                 }
-                it.data?.messageList
-            }
-            .collect {
-                _stateFlow.value = StateUi.TotalMessage(it)
-            }
+                .collect {
+                    _stateFlow.value = StateUi.TotalMessage(it)
+                }
+        }
     }
 
     fun setupSocket() {
         viewModelScope.launch {
             SocketIoManage.mSocket?.on("chat:${hintResponse?.id}") { args ->
-                val receivedData = Gson().fromJson(args[0].toString(), MessageResponse::class.java)
+                val receivedData =
+                    Gson().fromJson(args[0].toString(), MessageResponse::class.java)
+                println(receivedData.content + "Content encrypt")
+                println(receivedData.iv + "iv encrypt")
                 val contentDecrypt = AppKey.decrypt(
                     receivedData.content,
                     receivedData.iv,
