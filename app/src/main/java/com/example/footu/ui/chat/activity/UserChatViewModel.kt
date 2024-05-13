@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
@@ -92,8 +93,6 @@ class UserChatViewModel @Inject constructor(
             SocketIoManage.mSocket?.on("chat:${hintResponse?.id}") { args ->
                 val receivedData =
                     Gson().fromJson(args[0].toString(), MessageResponse::class.java)
-                println(receivedData.content + "Content encrypt")
-                println(receivedData.iv + "iv encrypt")
                 val contentDecrypt = AppKey.decrypt(
                     receivedData.content,
                     receivedData.iv,

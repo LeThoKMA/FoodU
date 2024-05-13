@@ -3,6 +3,7 @@ package com.example.footu.ui.chat
 import android.content.Intent
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -11,6 +12,7 @@ import com.example.footu.base.BaseFragment
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ChatFragmentBinding
 import com.example.footu.ui.chat.activity.UserChatActivity
+import com.example.footu.ui.chat.adapter.HintMessageAdapter
 import com.example.footu.utils.OTHER_USER_ID
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -18,6 +20,12 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class ChatFragment : BaseFragment<ChatFragmentBinding>() {
     private val viewModel: HintChatViewModel by viewModels()
+    private val hintMessageAdapter = HintMessageAdapter(onClickDetail = {
+        val intent = Intent(requireContext(), UserChatActivity::class.java)
+        intent.putExtra(OTHER_USER_ID, it)
+        startActivity(intent)
+    })
+
     override fun getContentLayout(): Int {
         return R.layout.chat_fragment
     }
@@ -28,14 +36,10 @@ class ChatFragment : BaseFragment<ChatFragmentBinding>() {
 
     override fun initView() {
         paddingStatusBar(binding.root)
+        binding.rcChat.adapter = hintMessageAdapter
     }
 
     override fun initListener() {
-        binding.tvEmpty.setOnClickListener {
-            val intent = Intent(requireContext(), UserChatActivity::class.java)
-            intent.putExtra(OTHER_USER_ID, 2)
-            startActivity(intent)
-        }
     }
 
     override fun observerLiveData() {
@@ -45,7 +49,7 @@ class ChatFragment : BaseFragment<ChatFragmentBinding>() {
                     if (it.isEmpty()) {
                         binding.tvEmpty.visibility = View.VISIBLE
                     } else {
-                        println(it)
+                        hintMessageAdapter.submitList(it)
                     }
                 }
             }
