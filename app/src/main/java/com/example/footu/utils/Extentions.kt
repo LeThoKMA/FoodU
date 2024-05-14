@@ -16,6 +16,10 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.drawToBitmap
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.makeramen.roundedimageview.RoundedImageView
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Currency
@@ -82,20 +86,9 @@ fun ByteArray.byteArrayToString(): String {
     return Base64.encodeToString(this, Base64.DEFAULT)
 }
 
-fun ImageView.nameToAvatar(name: String) {
-    val random = Random.Default
-    val r = random.nextInt(256)
-    val g = random.nextInt(256)
-    val b = random.nextInt(256)
-    val randomColor = Color.rgb(r, g, b)
-    val bitmap = Bitmap.createBitmap(80, 80, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(bitmap)
-    val paint = Paint().apply {
-        color = Color.WHITE
-        textAlign = Paint.Align.CENTER
-        textSize = 14f
-    }
-    canvas.drawText(name.first().toString(), bitmap.width / 2f, bitmap.height / 2f, paint)
-    setImageBitmap(bitmap)
-    setBackgroundColor(randomColor)
+fun ImageView.displayImage(bitmap: Bitmap) {
+    Glide.with(this.context).load(bitmap).transition(DrawableTransitionOptions.withCrossFade())
+        .into(this)
 }
+
+

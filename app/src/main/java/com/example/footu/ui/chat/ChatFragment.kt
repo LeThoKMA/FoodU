@@ -50,6 +50,7 @@ class ChatFragment : BaseFragment<ChatFragmentBinding>() {
                         binding.tvEmpty.visibility = View.VISIBLE
                     } else {
                         hintMessageAdapter.submitList(it)
+                        binding.tvEmpty.visibility = View.GONE
                     }
                 }
             }

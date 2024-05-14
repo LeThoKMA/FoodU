@@ -1,7 +1,6 @@
 package com.example.footu.ui.chat
 
 import androidx.lifecycle.viewModelScope
-import com.example.footu.MyPreference
 import com.example.footu.MyPreferencee
 import com.example.footu.Response.HintMessageResponse
 import com.example.footu.base.BaseViewModel
@@ -9,10 +8,8 @@ import com.example.footu.network.ApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,9 +31,9 @@ class HintChatViewModel @Inject constructor(
         viewModelScope.launch {
             flow { emit(apiService.getAllHintMessage(user.id)) }
                 .map {
-                    it.data?.filter { data -> data.messageResponse != null }?.map { data ->
+                    it.data?.map { data ->
                         val dmpUser =
-                            if (data.messageResponse?.fromUser?.id == user.id) data.messageResponse.toUser else data.messageResponse?.fromUser
+                            if (data.lastMessage?.fromUser?.id == user.id) data.lastMessage.toUser else data.lastMessage?.fromUser
                         data.copy(otherUser = dmpUser)
                     }
                 }

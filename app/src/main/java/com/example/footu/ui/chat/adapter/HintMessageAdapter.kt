@@ -11,7 +11,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.footu.R
 import com.example.footu.Response.HintMessageResponse
+import com.example.footu.utils.displayImage
 import com.example.footu.utils.nameToAvatar
+import com.example.footu.utils.randomColor
+import com.makeramen.roundedimageview.RoundedImageView
 
 class HintMessageAdapter(private val onClickDetail: (Int) -> Unit) :
     ListAdapter<HintMessageResponse, HintMessageAdapter.ViewHolder>(object :
@@ -37,13 +40,26 @@ class HintMessageAdapter(private val onClickDetail: (Int) -> Unit) :
         private val content: TextView = view.findViewById(R.id.tvContent)
 
         fun bindView(hintMessageResponse: HintMessageResponse, onClickDetail: (Int) -> Unit) {
-            avatar.nameToAvatar(hintMessageResponse.otherUser?.username.toString())
+            avatar.setBackgroundColor(randomColor())
+            avatar.displayImage(
+                nameToAvatar(
+                    hintMessageResponse.otherUser?.username.toString(),
+                    60,
+                    60
+                )
+            )
             name.text = hintMessageResponse.otherUser?.username
             val isYour =
-                hintMessageResponse.otherUser != hintMessageResponse.messageResponse?.fromUser
+                hintMessageResponse.otherUser != hintMessageResponse.lastMessage?.fromUser
             content.text =
-                if (isYour && hintMessageResponse.messageResponse != null) "Bạn đã gửi tin nhắn" else "${hintMessageResponse.otherUser?.fullname} đã gửi tin nhắn"
-            rootView.setOnClickListener { onClickDetail.invoke(hintMessageResponse.id.toInt()) }
+                if (isYour && hintMessageResponse.lastMessage != null) "Bạn đã gửi tin nhắn" else "${hintMessageResponse.otherUser?.fullname} đã gửi tin nhắn"
+            rootView.setOnClickListener {
+                hintMessageResponse.otherUser?.id?.let { it1 ->
+                    onClickDetail.invoke(
+                        it1
+                    )
+                }
+            }
         }
     }
 
