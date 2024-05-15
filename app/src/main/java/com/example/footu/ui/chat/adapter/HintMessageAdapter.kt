@@ -11,12 +11,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.footu.R
 import com.example.footu.Response.HintMessageResponse
+import com.example.footu.model.User
 import com.example.footu.utils.displayImage
 import com.example.footu.utils.nameToAvatar
 import com.example.footu.utils.randomColor
 import com.makeramen.roundedimageview.RoundedImageView
 
-class HintMessageAdapter(private val onClickDetail: (Int) -> Unit) :
+class HintMessageAdapter(private val onClickDetail: (User) -> Unit) :
     ListAdapter<HintMessageResponse, HintMessageAdapter.ViewHolder>(object :
         DiffUtil.ItemCallback<HintMessageResponse>() {
         override fun areItemsTheSame(
@@ -39,7 +40,7 @@ class HintMessageAdapter(private val onClickDetail: (Int) -> Unit) :
         private val name: TextView = view.findViewById(R.id.tvName)
         private val content: TextView = view.findViewById(R.id.tvContent)
 
-        fun bindView(hintMessageResponse: HintMessageResponse, onClickDetail: (Int) -> Unit) {
+        fun bindView(hintMessageResponse: HintMessageResponse, onClickDetail: (User) -> Unit) {
             avatar.setBackgroundColor(randomColor())
             avatar.displayImage(
                 nameToAvatar(
@@ -54,7 +55,7 @@ class HintMessageAdapter(private val onClickDetail: (Int) -> Unit) :
             content.text =
                 if (isYour && hintMessageResponse.lastMessage != null) "Bạn đã gửi tin nhắn" else "${hintMessageResponse.otherUser?.fullname} đã gửi tin nhắn"
             rootView.setOnClickListener {
-                hintMessageResponse.otherUser?.id?.let { it1 ->
+                hintMessageResponse.otherUser?.let { it1 ->
                     onClickDetail.invoke(
                         it1
                     )

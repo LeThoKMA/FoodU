@@ -18,4 +18,4 @@ data class User(
     var email: String? = "",
     var phone: String? = "",
     val publicKey: String? = ""
-) : java.io.Serializable, Parcelable
+) :  Parcelable

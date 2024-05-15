@@ -226,7 +226,7 @@ fun OrderDetailScreen(
                 text = "Nhắn tin",
                 modifier = Modifier.padding(8.dp).clickable {
                     val intent = Intent(context, UserChatActivity::class.java)
-                    intent.putExtra(OTHER_USER_ID, item.customer?.id)
+                    intent.putExtra(OTHER_USER_ID, item.customer)
                     context.startActivity(intent)
                 },
             )

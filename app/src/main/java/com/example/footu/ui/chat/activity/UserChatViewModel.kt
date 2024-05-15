@@ -61,9 +61,36 @@ class UserChatViewModel @Inject constructor(
         }
     }
 
-    private fun fetchDataMessage(id: Int) {
+    private fun fetchDataMessage(id: Int, page: Int = 0) {
         viewModelScope.launch {
-            flow { emit(apiService.fetchMessage(id, 0)) }.onStart {
+            flow { emit(apiService.fetchMessage(id, page)) }.onStart {
+                onRetrievePostListStart()
+            }.catch {
+                handleApiError(it)
+            }.onCompletion {
+                onRetrievePostListFinish()
+            }
+                .map {
+                    it.data?.messageList?.map { message ->
+                        message.copy(
+                            messageId = message.messageId,
+                            hintId = message.hintId,
+                            fromUser = message.fromUser,
+                            toUser = message.toUser,
+                            content = AppKey.decrypt(message.content, message.iv),
+                            time = message.time,
+                        )
+                    }
+                }
+                .collect {
+                    _stateFlow.value = StateUi.TotalMessage(it)
+                }
+        }
+    }
+
+    fun loadMoreDataMessage(page: Int = 0) {
+        viewModelScope.launch {
+            flow { emit(apiService.fetchMessage(hintResponse!!.id, page)) }.onStart {
                 onRetrievePostListStart()
             }.catch {
                 handleApiError(it)

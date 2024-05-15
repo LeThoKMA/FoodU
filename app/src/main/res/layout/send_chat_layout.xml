@@ -1,46 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_marginStart="20dp"
-    android:padding="2dp"
-    android:background="@color/black"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_gravity="end"
+    android:layout_marginEnd="16dp"
+    android:layout_marginVertical="4dp"
+    android:gravity="end">
 
-    <RelativeLayout
-        android:id="@+id/relative_parent"
-        android:paddingStart="3dp"
-        android:paddingEnd="3dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="5dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:background="@drawable/bg_blue_bold_16rd"
+        android:paddingHorizontal="16dp">
+
 
         <TextView
             android:id="@+id/send_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="7dp"
-            android:paddingStart="10dp"
-            android:paddingEnd="40dp"
-            tools:text="Send message"
+            android:paddingHorizontal="16dp"
             android:textColor="@color/white"
-            android:textSize="18sp" />
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Send message" />
 
         <TextView
             android:id="@+id/time_message_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/send_message"
-            android:layout_marginLeft="-40dp"
-            android:layout_toRightOf="@id/send_message"
-            android:padding="7dp"
-            tools:text="01:23"
+            android:layout_marginEnd="16dp"
             android:textColor="@color/white"
-            android:textSize="7sp" />
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="@+id/send_message"
+            app:layout_constraintTop_toBottomOf="@id/send_message"
+            tools:text="01:23" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </RelativeLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>
