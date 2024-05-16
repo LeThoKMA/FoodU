@@ -41,32 +41,21 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycle_chat"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginBottom="10dp"
-            android:padding="5dp"
+            android:clipToPadding="false"
+            android:padding="8dp"
+            android:elevation="4dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@id/message_constrain"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/layout_action_bar"
-            app:layout_constraintVertical_bias="1.0">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycle_chat"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:clipToPadding="false"
-                android:padding="8dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:reverseLayout="true"
-                app:stackFromEnd="true" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            app:reverseLayout="true"
+            app:stackFromEnd="true" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/message_constrain"

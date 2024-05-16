@@ -62,15 +62,19 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
         val newList = adapter.currentList.toMutableList()
         list?.let { newList.addAll(it) }
         adapter.submitList(newList)
+        if (mPage == 0) {
+            binding.recycleChat.scrollToPosition(0)
+        }
     }
 
     private fun onNewMessage(messageResponse: MessageResponse?) {
         messageResponse?.let {
             val newList = adapter.currentList.toMutableList()
             newList.add(0, messageResponse)
-            adapter.submitList(newList)
-            if (messageResponse.fromUser.id != otherUserId?.id) {
-                binding.recycleChat.scrollToPosition(0)
+            adapter.submitList(newList) {
+                if (messageResponse.fromUser.id != otherUserId?.id) {
+                    binding.recycleChat.scrollToPosition(0)
+                }
             }
         }
     }
@@ -101,9 +105,7 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (dy < 0) { // Chỉ kiểm tra khi cuộn lên
-                    val firstVisibleItemPosition =
-                        ((binding.recycleChat.layoutManager) as LinearLayoutManager).findFirstVisibleItemPosition()
-                    if (firstVisibleItemPosition == 0) {
+                    if (!recyclerView.canScrollVertically(-1)) {
                         // Gọi API để tải thêm dữ liệu khi cuộn lên đầu danh sách
                         mPage++
                         viewModel.loadMoreDataMessage(mPage)

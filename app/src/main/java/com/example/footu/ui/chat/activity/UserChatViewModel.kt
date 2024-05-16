@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
@@ -35,6 +36,7 @@ class UserChatViewModel @Inject constructor(
     private val user = MyPreference.getInstance()?.getUser()
     private val _stateFlow = MutableStateFlow<StateUi>(StateUi.TotalMessage())
     private var hintResponse: HintResponse? = null
+    private var totalPage = 0
     val stateFlow: StateFlow<StateUi> = _stateFlow
 
     fun getHintIdAndMessageData(otherId: Int) {
@@ -71,6 +73,7 @@ class UserChatViewModel @Inject constructor(
                 onRetrievePostListFinish()
             }
                 .map {
+                    totalPage = it.data?.totalPage ?: 0
                     it.data?.messageList?.map { message ->
                         message.copy(
                             messageId = message.messageId,
@@ -82,6 +85,7 @@ class UserChatViewModel @Inject constructor(
                         )
                     }
                 }
+                .flowOn(Dispatchers.IO)
                 .collect {
                     _stateFlow.value = StateUi.TotalMessage(it)
                 }
@@ -89,67 +93,75 @@ class UserChatViewModel @Inject constructor(
     }
 
     fun loadMoreDataMessage(page: Int = 0) {
-        viewModelScope.launch {
-            flow { emit(apiService.fetchMessage(hintResponse!!.id, page)) }.onStart {
-                onRetrievePostListStart()
-            }.catch {
-                handleApiError(it)
-            }.onCompletion {
-                onRetrievePostListFinish()
-            }
-                .map {
-                    it.data?.messageList?.map { message ->
-                        message.copy(
-                            messageId = message.messageId,
-                            hintId = message.hintId,
-                            fromUser = message.fromUser,
-                            toUser = message.toUser,
-                            content = AppKey.decrypt(message.content, message.iv),
-                            time = message.time,
-                        )
+        if (page <= totalPage) {
+
+            viewModelScope.launch {
+                flow { emit(apiService.fetchMessage(hintResponse!!.id, page)) }
+                    .catch {
+                        handleApiError(it)
                     }
-                }
-                .collect {
-                    _stateFlow.value = StateUi.TotalMessage(it)
-                }
+                    .map {
+                        it.data?.messageList?.map { message ->
+                            message.copy(
+                                messageId = message.messageId,
+                                hintId = message.hintId,
+                                fromUser = message.fromUser,
+                                toUser = message.toUser,
+                                content = AppKey.decrypt(message.content, message.iv),
+                                time = message.time,
+                            )
+                        }
+                    }
+                    .flowOn(Dispatchers.IO)
+                    .collect {
+                        _stateFlow.value = StateUi.TotalMessage(it)
+                    }
+            }
         }
+
     }
 
     fun setupSocket() {
-        viewModelScope.launch {
             SocketIoManage.mSocket?.on("chat:${hintResponse?.id}") { args ->
-                val receivedData =
-                    Gson().fromJson(args[0].toString(), MessageResponse::class.java)
-                val contentDecrypt = AppKey.decrypt(
-                    receivedData.content,
-                    receivedData.iv,
-                )
-                val messageResponse = receivedData.copy(
-                    content = contentDecrypt,
-                )
-                _stateFlow.value = StateUi.Message(messageResponse)
-            }
+                viewModelScope.launch {
+                    println(this.coroutineContext)
+                    val receivedData =
+                        Gson().fromJson(args[0].toString(), MessageResponse::class.java)
+                    AppKey.decryptFlow(
+                        receivedData.content,
+                        receivedData.iv,
+                    ).map {
+                        val messageResponse = receivedData.copy(
+                            content = it,
+                        )
+                        messageResponse
+                    }.collect {
+                        _stateFlow.value = StateUi.Message(it)
+                    }
+                }
         }
     }
 
     fun sendMessage(content: String) {
         viewModelScope.launch {
             val iv = generateRandomIV()
-            val encryptMessage = AppKey.encrypt(content, iv)
-            val toUserId =
-                if (user?.id != hintResponse?.user1?.id) hintResponse?.user1?.id else hintResponse?.user2?.id
-            val messageRequest = MessageRequest(
-                hintResponse?.id ?: 0,
-                user?.id ?: 0,
-                toUserId ?: 0,
-                encryptMessage,
-                iv.byteArrayToString(),
-            )
-            val obj = JSONObject(
-                GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create()
-                    .toJson(messageRequest),
-            )
-            SocketIoManage.mSocket?.emit("chat:${hintResponse?.id}", obj)
+            AppKey.encryptFlow(content, iv).map {
+                val toUserId =
+                    if (user?.id != hintResponse?.user1?.id) hintResponse?.user1?.id else hintResponse?.user2?.id
+                val messageRequest = MessageRequest(
+                    hintResponse?.id ?: 0,
+                    user?.id ?: 0,
+                    toUserId ?: 0,
+                    it,
+                    iv.byteArrayToString(),
+                )
+                return@map JSONObject(
+                    GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create()
+                        .toJson(messageRequest),
+                )
+            }.collect {
+                SocketIoManage.mSocket?.emit("chat:${hintResponse?.id}", it)
+            }
         }
     }
 
