@@ -5,5 +5,6 @@ data class MessageRequest(
     val fromUserId: Int,
     val toUserId: Int,
     val content: String,
-    val iv: String
+    val iv: String,
+    val type:Int = 0
 )

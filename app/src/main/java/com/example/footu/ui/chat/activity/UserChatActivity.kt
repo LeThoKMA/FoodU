@@ -5,6 +5,9 @@ import android.os.Build
 import android.util.Log
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -19,8 +22,15 @@ import com.example.footu.databinding.ActivityUserChatBinding
 import com.example.footu.model.User
 import com.example.footu.ui.chat.adapter.MessageAdapter
 import com.example.footu.utils.OTHER_USER_ID
+import com.example.footu.utils.convertUriToBitmap
+import com.example.footu.utils.getVideoFileSize
+import com.example.footu.utils.isVideoFile
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
@@ -36,6 +46,38 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
         }
     }
     private var mPage = 0
+
+    private val pickMedia =
+        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            // Callback is invoked after the user selects a media item or closes the
+            // photo picker.
+            if (uri?.let { isVideoFile(this, it) } == true) {
+                CoroutineScope(IO).launch {
+                    val size = getVideoFileSize(uri, this@UserChatActivity)?.div(1024 * 1024) ?: 0
+                    withContext(Main) {
+                        if (size <= 10L) {
+                            uri.let { viewModel.uploadVideo(it, senderRoom, receiverRoom) }
+                        } else {
+                            Toast.makeText(
+                                this@UserChatActivity,
+                                "Video có kích thước tối đa 10MB",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                        }
+                    }
+                }
+            } else {
+                val bitmap = convertUriToBitmap(this, uri)
+                bitmap?.let {
+                    viewModel.uploadImage(
+                        it, senderRoom = senderRoom,
+                        mReceiverUid = mReceiverUid,
+                        receiverRoom = receiverRoom
+                    )
+                }
+            }
+        }
 
     override fun observerData() {
         lifecycleScope.launch {
@@ -113,6 +155,9 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
                 }
             }
         })
+        binding.imgPick.setOnClickListener {
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
+        }
     }
 
     override fun initViewModel(): BaseViewModel {
