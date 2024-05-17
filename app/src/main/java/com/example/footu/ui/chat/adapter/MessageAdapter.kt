@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.example.footu.R
 import com.example.footu.Response.MessageResponse
@@ -104,41 +105,11 @@ class MessageAdapter :
             }
 
             is ImageSenderViewHolder -> {
-                val byteArray = Base64.decode(message.content, Base64.DEFAULT)
-                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-                Glide.with(holder.itemView.context)
-                    .load(bitmap)
-                    .into(object : CustomTarget<Drawable>() {
-                        override fun onResourceReady(
-                            resource: Drawable,
-                            transition: com.bumptech.glide.request.transition.Transition<in Drawable>?,
-                        ) {
-                            holder.img.setImageDrawable(resource)
-                        }
-
-                        override fun onLoadCleared(placeholder: Drawable?) {
-                            // Do nothing
-                        }
-                    })
+                holder.bindView(message)
             }
 
             is ImageReceiverViewHolder -> {
-                val byteArray = Base64.decode(message.content, Base64.DEFAULT)
-                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-                Glide.with(holder.itemView.context)
-                    .load(bitmap)
-                    .into(object : CustomTarget<Drawable>() {
-                        override fun onResourceReady(
-                            resource: Drawable,
-                            transition: com.bumptech.glide.request.transition.Transition<in Drawable>?,
-                        ) {
-                            holder.img.setImageDrawable(resource)
-                        }
-
-                        override fun onLoadCleared(placeholder: Drawable?) {
-                            // Do nothing
-                        }
-                    })
+                holder.bindView(message)
             }
 
             is VideoSenderViewHolder -> {
@@ -188,10 +159,48 @@ class MessageAdapter :
 
     inner class ImageSenderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val img: ImageView = itemView.findViewById(R.id.img_mess)
+        fun bindView(message: MessageResponse) {
+            val bitmap =
+                BitmapFactory.decodeByteArray(message.byteArray, 0, message.byteArray?.size ?: 0)
+            Glide.with(itemView.context)
+                .load(bitmap)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(object : CustomTarget<Drawable>() {
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        transition: com.bumptech.glide.request.transition.Transition<in Drawable>?,
+                    ) {
+                        img.setImageDrawable(resource)
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                        // Do nothing
+                    }
+                })
+        }
     }
 
     inner class ImageReceiverViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val img: ImageView = itemView.findViewById(R.id.img_mess_receive)
+        fun bindView(message: MessageResponse) {
+            val bitmap =
+                BitmapFactory.decodeByteArray(message.byteArray, 0, message.byteArray?.size ?: 0)
+            Glide.with(itemView.context)
+                .load(bitmap)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(object : CustomTarget<Drawable>() {
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        transition: com.bumptech.glide.request.transition.Transition<in Drawable>?,
+                    ) {
+                        img.setImageDrawable(resource)
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                        // Do nothing
+                    }
+                })
+        }
     }
 
     inner class VideoReceiverViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

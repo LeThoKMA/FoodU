@@ -131,13 +131,13 @@ object AppKey {
         }
     }
 
-    private suspend fun encrypt(byteArray: ByteArray, iv: ByteArray): String {
+     suspend fun encrypt(byteArray: ByteArray, iv: ByteArray): String {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
         val encryptedBytes = cipher.doFinal(byteArray)
         return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
     }
 
-    suspend fun decrypt(data: String?, iv: String): String? {
+     fun decrypt(data: String?, iv: String): String? {
         try {
             val ivByteArray = Base64.decode(iv, Base64.DEFAULT)
             cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, ivByteArray))
@@ -150,7 +150,7 @@ object AppKey {
         return null
     }
 
-    private suspend fun decryptByteArray(data: String, iv: String): ByteArray {
+     fun decryptByteArray(data: String?, iv: String): ByteArray {
         try {
             val ivByteArray = Base64.decode(iv, Base64.DEFAULT)
             cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, ivByteArray))
@@ -168,7 +168,7 @@ object AppKey {
         }
     }
 
-    suspend fun decryptByteArrFlow(data: String, iv: String): Flow<ByteArray> {
+    suspend fun decryptByteArrFlow(data: String?, iv: String): Flow<ByteArray> {
         return withContext(Dispatchers.Default) {
             flow { emit(decryptByteArray(data, iv)) }
         }

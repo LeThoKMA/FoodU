@@ -1,5 +1,7 @@
 package com.example.footu.ui.chat.activity
 
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.example.footu.MyPreference
 import com.example.footu.Request.HintRequest
@@ -7,11 +9,14 @@ import com.example.footu.Request.MessageRequest
 import com.example.footu.Response.HintResponse
 import com.example.footu.Response.MessageResponse
 import com.example.footu.base.BaseViewModel
+import com.example.footu.dagger2.App
 import com.example.footu.network.ApiService
 import com.example.footu.socket.SocketIoManage
 import com.example.footu.utils.AppKey
 import com.example.footu.utils.byteArrayToString
+import com.example.footu.utils.convertVideoToByteArray
 import com.example.footu.utils.generateRandomIV
+import com.example.footu.utils.optimizeAndConvertImageToByteArray
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -75,14 +80,27 @@ class UserChatViewModel @Inject constructor(
                 .map {
                     totalPage = it.data?.totalPage ?: 0
                     it.data?.messageList?.map { message ->
-                        message.copy(
-                            messageId = message.messageId,
-                            hintId = message.hintId,
-                            fromUser = message.fromUser,
-                            toUser = message.toUser,
-                            content = AppKey.decrypt(message.content, message.iv),
-                            time = message.time,
-                        )
+                        if (message.type == 0) {
+                            message.copy(
+                                messageId = message.messageId,
+                                hintId = message.hintId,
+                                fromUser = message.fromUser,
+                                toUser = message.toUser,
+                                content = AppKey.decrypt(message.content, message.iv),
+                                time = message.time,
+                            )
+                        } else {
+                            message.copy(
+                                messageId = message.messageId,
+                                hintId = message.hintId,
+                                fromUser = message.fromUser,
+                                toUser = message.toUser,
+                                byteArray = AppKey.decryptByteArray(message.content, message.iv),
+                                time = message.time,
+                                content = ""
+                            )
+                        }
+
                     }
                 }
                 .flowOn(Dispatchers.IO)
@@ -122,23 +140,10 @@ class UserChatViewModel @Inject constructor(
     }
 
     fun setupSocket() {
-            SocketIoManage.mSocket?.on("chat:${hintResponse?.id}") { args ->
-                viewModelScope.launch {
-                    println(this.coroutineContext)
-                    val receivedData =
-                        Gson().fromJson(args[0].toString(), MessageResponse::class.java)
-                    AppKey.decryptFlow(
-                        receivedData.content,
-                        receivedData.iv,
-                    ).map {
-                        val messageResponse = receivedData.copy(
-                            content = it,
-                        )
-                        messageResponse
-                    }.collect {
-                        _stateFlow.value = StateUi.Message(it)
-                    }
-                }
+        SocketIoManage.mSocket?.on("chat:${hintResponse?.id}") { args ->
+            val receivedData =
+                Gson().fromJson(args[0].toString(), MessageResponse::class.java)
+            onSendMessage(receivedData)
         }
     }
 
@@ -159,8 +164,104 @@ class UserChatViewModel @Inject constructor(
                     GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create()
                         .toJson(messageRequest),
                 )
-            }.collect {
-                SocketIoManage.mSocket?.emit("chat:${hintResponse?.id}", it)
+            }.flowOn(Dispatchers.Default)
+                .collect {
+                    SocketIoManage.mSocket?.emit("chat:${hintResponse?.id}", it)
+                }
+        }
+    }
+
+    fun sendImage(bitmap: Bitmap) {
+        viewModelScope.launch {
+            val iv = generateRandomIV()
+            val byteArrayMessage = optimizeAndConvertImageToByteArray(bitmap) ?: return@launch
+            AppKey.encryptByteArrFlow(byteArrayMessage, iv).map {
+                val toUserId =
+                    if (user?.id != hintResponse?.user1?.id) hintResponse?.user1?.id else hintResponse?.user2?.id
+                val messageRequest = MessageRequest(
+                    hintResponse?.id ?: 0,
+                    user?.id ?: 0,
+                    toUserId ?: 0,
+                    it,
+                    iv.byteArrayToString(),
+                    type = 1
+                )
+                return@map JSONObject(
+                    GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create()
+                        .toJson(messageRequest),
+                )
+            }.flowOn(Dispatchers.Default)
+                .collect {
+                    SocketIoManage.mSocket?.emit("chat:${hintResponse?.id}", it)
+                }
+        }
+
+    }
+
+    fun sendVideo(uri: Uri) {
+        viewModelScope.launch {
+            val iv = generateRandomIV()
+            val byteArrayMessage =
+                convertVideoToByteArray(App.app.applicationContext, uri) ?: return@launch
+            AppKey.encryptByteArrFlow(byteArrayMessage, iv).map {
+                val toUserId =
+                    if (user?.id != hintResponse?.user1?.id) hintResponse?.user1?.id else hintResponse?.user2?.id
+                val messageRequest = MessageRequest(
+                    hintResponse?.id ?: 0,
+                    user?.id ?: 0,
+                    toUserId ?: 0,
+                    it,
+                    iv.byteArrayToString(),
+                    type = 2
+                )
+                return@map JSONObject(
+                    GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create()
+                        .toJson(messageRequest),
+                )
+            }.flowOn(Dispatchers.Default)
+                .collect {
+                    SocketIoManage.mSocket?.emit("chat:${hintResponse?.id}", it)
+                }
+        }
+
+    }
+
+    private fun onSendMessage(messageResponse: MessageResponse) {
+        when (messageResponse.type) {
+            0 -> decryptTextMessage(messageResponse)
+            else -> decryptMediaMessage(messageResponse)
+        }
+    }
+
+    private fun decryptTextMessage(receivedData: MessageResponse) {
+        viewModelScope.launch {
+            AppKey.decryptFlow(
+                receivedData.content,
+                receivedData.iv,
+            ).map {
+                val messageResponse = receivedData.copy(
+                    content = it,
+                )
+                messageResponse
+            }.flowOn(Dispatchers.Default).collect {
+                _stateFlow.value = StateUi.Message(it)
+            }
+        }
+    }
+
+    private fun decryptMediaMessage(receivedData: MessageResponse) {
+        viewModelScope.launch {
+            AppKey.decryptByteArrFlow(
+                receivedData.content ?: "",
+                receivedData.iv,
+            ).map {
+                val messageResponse = receivedData.copy(
+                    byteArray = it,
+                    content = ""
+                )
+                messageResponse
+            }.flowOn(Dispatchers.Default).collect {
+                _stateFlow.value = StateUi.Message(it)
             }
         }
     }

@@ -49,14 +49,12 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
 
     private val pickMedia =
         registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            // Callback is invoked after the user selects a media item or closes the
-            // photo picker.
             if (uri?.let { isVideoFile(this, it) } == true) {
                 CoroutineScope(IO).launch {
                     val size = getVideoFileSize(uri, this@UserChatActivity)?.div(1024 * 1024) ?: 0
                     withContext(Main) {
                         if (size <= 10L) {
-                            uri.let { viewModel.uploadVideo(it, senderRoom, receiverRoom) }
+                            uri.let { viewModel.sendVideo(it) }
                         } else {
                             Toast.makeText(
                                 this@UserChatActivity,
@@ -70,10 +68,8 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
             } else {
                 val bitmap = convertUriToBitmap(this, uri)
                 bitmap?.let {
-                    viewModel.uploadImage(
-                        it, senderRoom = senderRoom,
-                        mReceiverUid = mReceiverUid,
-                        receiverRoom = receiverRoom
+                    viewModel.sendImage(
+                        it
                     )
                 }
             }
