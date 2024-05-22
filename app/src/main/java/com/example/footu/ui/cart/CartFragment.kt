@@ -28,15 +28,14 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissState
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -150,11 +149,16 @@ fun CartView(list: List<DetailItemChoose>, onChangeItem: (DetailItemChoose) -> U
 
         Text(
             text = "Tổng giá: ${totalPrice.formatToPrice()}",
-            modifier = Modifier.padding(end = 8.dp, top = 8.dp).align(End),
+            modifier = Modifier
+                .padding(end = 8.dp, top = 8.dp)
+                .align(End),
             fontWeight = FontWeight.Black,
         )
 
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.align(CenterHorizontally)) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.align(CenterHorizontally)
+        ) {
             Button(onClick = { onPickMethod(1) }, modifier = Modifier.padding(horizontal = 8.dp)) {
                 Text(text = "Đặt ship")
             }
@@ -169,39 +173,31 @@ fun CartView(list: List<DetailItemChoose>, onChangeItem: (DetailItemChoose) -> U
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemView(item: DetailItemChoose, onRemove: () -> Unit) {
-    val dismissState = rememberDismissState(
+    val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
-            if (it == DismissValue.DismissedToStart || it == DismissValue.DismissedToEnd) {
+            if (it == SwipeToDismissBoxValue.EndToStart || it == SwipeToDismissBoxValue.StartToEnd) {
                 onRemove()
                 true
             } else {
                 false
             }
         },
-        positionalThreshold = { 150.dp.toPx() },
+        positionalThreshold = { 150f },
     )
-    SwipeToDismiss(
-        directions = setOf(
-            DismissDirection.StartToEnd, // từ trái sang phải
-        ),
-        background = {
-            // Background khi vuốt để xóa
-            // Bạn có thể tùy chỉnh nội dung của background ở đây
-            DismissBackground(dismissState)
-        },
-        dismissContent = {
-            // Nội dung của mỗi item
-            ItemRow(
-                imgUrl = item.imgUrl[0],
-                name = item.name,
-                count = item.count,
-                unitPrice = item.priceForSize,
-                size = item.size ?: ItemSize.M,
-                description = item.textDescription,
-            )
-        },
+
+    SwipeToDismissBox(
         state = dismissState,
-    )
+        backgroundContent = { DismissBackground(dismissState = dismissState) }
+    ) {
+        ItemRow(
+            imgUrl = item.imgUrl[0],
+            name = item.name,
+            count = item.count,
+            unitPrice = item.priceForSize,
+            size = item.size ?: ItemSize.M,
+            description = item.textDescription,
+        )
+    }
 }
 
 @Composable
@@ -240,7 +236,9 @@ fun ItemRow(
             )
             Column(
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.weight(0.6f).padding(start = 16.dp),
+                modifier = Modifier
+                    .weight(0.6f)
+                    .padding(start = 16.dp),
             ) {
                 Text(text = name)
                 Text(
@@ -259,7 +257,9 @@ fun ItemRow(
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = End,
-                modifier = Modifier.weight(0.2f).padding(end = 8.dp),
+                modifier = Modifier
+                    .weight(0.2f)
+                    .padding(end = 8.dp),
             ) {
                 Text(text = "x$count")
                 Text(text = unitPrice.formatToPrice())
@@ -270,9 +270,9 @@ fun ItemRow(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DismissBackground(dismissState: DismissState) {
+fun DismissBackground(dismissState: SwipeToDismissBoxState) {
     val color = when (dismissState.dismissDirection) {
-        DismissDirection.StartToEnd -> Color(0xFFFF1744)
+        SwipeToDismissBoxValue.StartToEnd -> Color(0xFFFF1744)
         else -> Color.Transparent
     }
     Row(

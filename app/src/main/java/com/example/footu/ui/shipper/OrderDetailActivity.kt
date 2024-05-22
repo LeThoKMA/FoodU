@@ -50,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -57,6 +58,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.footu.ItemSize
 import com.example.footu.model.OrderShipModel
@@ -73,7 +75,6 @@ import java.util.Collections
 
 @AndroidEntryPoint
 class OrderDetailActivity : ComponentActivity() {
-    private val viewModel: OrderDetailViewModel by viewModels()
 
     @OptIn(ExperimentalMaterial3Api::class)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -109,11 +110,10 @@ class OrderDetailActivity : ComponentActivity() {
                     )
                 },
 
-            ) { paddingValues ->
+                ) { paddingValues ->
                 orderDetail?.let {
                     OrderDetailScreen(
                         it,
-                        viewModel,
                         paddingValues,
                         onAccepted = {
                             setResult(RESULT_OK)
@@ -130,10 +130,10 @@ class OrderDetailActivity : ComponentActivity() {
 @Composable
 fun OrderDetailScreen(
     item: OrderShipModel,
-    viewModel: OrderDetailViewModel,
     paddingValues: PaddingValues,
     onAccepted: () -> Unit,
     type: Int,
+    viewModel: OrderDetailViewModel = hiltViewModel()
 ) {
     val phoneNumber = item.customer?.phone
     val annotatedString = buildAnnotatedString {
@@ -200,15 +200,15 @@ fun OrderDetailScreen(
                         end = offset,
                     )
                         .firstOrNull()?.let { annotation ->
-                        val phoneNumberr = annotation.item
-                        val intent = Intent(Intent.ACTION_DIAL)
-                        intent.data = Uri.parse("tel:$phoneNumberr")
-                        context.startActivity(intent)
-                    }
+                            val phoneNumberr = annotation.item
+                            val intent = Intent(Intent.ACTION_DIAL)
+                            intent.data = Uri.parse("tel:$phoneNumberr")
+                            context.startActivity(intent)
+                        }
                 },
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
 
-            )
+                )
         }
 
         DetailClientText(title = "Giá:", content = item.totalPrice.formatToPrice())
@@ -224,56 +224,58 @@ fun OrderDetailScreen(
         Row(modifier = Modifier.align(End)) {
             Text(
                 text = "Nhắn tin",
-                modifier = Modifier.padding(8.dp).clickable {
-                    val intent = Intent(context, UserChatActivity::class.java)
-                    intent.putExtra(OTHER_USER_ID, item.customer)
-                    context.startActivity(intent)
-                },
-            )
-            AndroidView(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.Gray)
-                    .padding(8.dp),
-                factory = { context ->
-                    ZegoSendCallInvitationButton(context).apply {
-                        setIsVideoCall(true)
-                        resourceID = "zego_uikit_call"
-                        setInvitees(
-                            Collections.singletonList(
-                                ZegoUIKitUser(
-                                    item.customer?.id.toString(),
-                                    item.customer?.fullname.toString(),
-                                ),
-                            ),
-                        )
-                    }
-                },
+                    .padding(8.dp)
+                    .clickable {
+                        val intent = Intent(context, UserChatActivity::class.java)
+                        intent.putExtra(OTHER_USER_ID, item.customer)
+                        context.startActivity(intent)
+                    },
             )
-
-            AndroidView(
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 8.dp)
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.Gray)
-                    .padding(8.dp),
-                factory = { context ->
-                    ZegoSendCallInvitationButton(context).apply {
-                        setIsVideoCall(false)
-                        resourceID = "zego_uikit_call"
-                        setInvitees(
-                            Collections.singletonList(
-                                ZegoUIKitUser(
-                                    item.customer?.id.toString(),
-                                    item.customer?.fullname.toString(),
-                                ),
-                            ),
-                        )
-                    }
-                },
-            )
+//            AndroidView(
+//                modifier = Modifier
+//                    .size(40.dp)
+//                    .clip(RoundedCornerShape(16.dp))
+//                    .background(Color.Gray)
+//                    .padding(8.dp),
+//                factory = { context ->
+//                    ZegoSendCallInvitationButton(context).apply {
+//                        setIsVideoCall(true)
+//                        resourceID = "zego_uikit_call"
+//                        setInvitees(
+//                            Collections.singletonList(
+//                                ZegoUIKitUser(
+//                                    item.customer?.id.toString(),
+//                                    item.customer?.fullname.toString(),
+//                                ),
+//                            ),
+//                        )
+//                    }
+//                },
+//            )
+//
+//            AndroidView(
+//                modifier = Modifier
+//                    .padding(start = 16.dp, end = 8.dp)
+//                    .size(40.dp)
+//                    .clip(RoundedCornerShape(16.dp))
+//                    .background(Color.Gray)
+//                    .padding(8.dp),
+//                factory = { context ->
+//                    ZegoSendCallInvitationButton(context).apply {
+//                        setIsVideoCall(false)
+//                        resourceID = "zego_uikit_call"
+//                        setInvitees(
+//                            Collections.singletonList(
+//                                ZegoUIKitUser(
+//                                    item.customer?.id.toString(),
+//                                    item.customer?.fullname.toString(),
+//                                ),
+//                            ),
+//                        )
+//                    }
+//                },
+//            )
         }
 
         LazyColumn(
@@ -293,7 +295,6 @@ fun OrderDetailScreen(
                         .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
                         .fillMaxWidth(),
                 ) {
-//
                     Row(modifier = Modifier.padding(8.dp)) {
                         AsyncImage(
                             model = it.item?.imgUrl?.get(0),

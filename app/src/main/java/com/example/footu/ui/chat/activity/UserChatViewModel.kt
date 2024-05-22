@@ -277,7 +277,8 @@ class UserChatViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        SocketIoManage.mSocket?.off("chat:${hintResponse?.id}")
+        SocketIoManage.mSocket?.off()
+        //SocketIoManage.mSocket?.off("chat:${hintResponse?.id}")
         super.onCleared()
     }
 }

@@ -14,5 +14,4 @@ data class OrderShipModel(
     val address: String,
     val lat: Double?,
     val longitude: Double?,
-    val ipPrepaid: Int?
 ) : Parcelable

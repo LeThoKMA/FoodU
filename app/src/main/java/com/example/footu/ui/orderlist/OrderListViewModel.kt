@@ -31,7 +31,7 @@ class OrderListViewModel(val context: Context) : BaseViewModel() {
         fetchOrderList()
     }
 
-    fun fetchOrderList() {
+    private fun fetchOrderList() {
         viewModelScope.launch {
             flow { emit(apiService.getOrderList(page)) }
                 .onStart { onRetrievePostListStart() }

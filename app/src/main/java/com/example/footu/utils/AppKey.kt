@@ -131,7 +131,7 @@ object AppKey {
         }
     }
 
-     suspend fun encrypt(byteArray: ByteArray, iv: ByteArray): String {
+     private suspend fun encrypt(byteArray: ByteArray, iv: ByteArray): String {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
         val encryptedBytes = cipher.doFinal(byteArray)
         return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)

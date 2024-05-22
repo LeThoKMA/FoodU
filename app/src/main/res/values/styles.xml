@@ -11,6 +11,8 @@
         <item name="android:forceDarkAllowed" tools:ignore="NewApi">false</item>
 <!--        <item name="fontFamily">@font/roboto_medium</item>-->
 <!--        <item name="font">@font/roboto_medium</item>-->
+        <!-- enable window content transitions -->
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 
     <style name="Main" parent="Theme.MaterialComponents.Light.NoActionBar">

@@ -1,9 +1,11 @@
 package com.example.footu.ui.shipper.picked
 
 import android.app.Activity
+import android.app.ActivityOptions
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -24,9 +26,7 @@ class OrderShipPickedFragment :
     BaseFragment<OrderShipPickedFragmentBinding>(),
     OrderPickedCallback {
     private val viewModel: OrderShipPickedViewModel by viewModels()
-
     lateinit var adapter: OrdersPickedAdapter
-
     private var launcher: ActivityResultLauncher<Intent>? = null
     private var itemDelete: OrderShipModel? = null
 
@@ -72,9 +72,10 @@ class OrderShipPickedFragment :
     }
 
     override fun onClickDetail(item: OrderShipModel) {
+        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity())
         val intent = Intent(requireContext(), OrderDetailActivity::class.java)
         intent.putExtra("item", item)
         intent.putExtra("type", 0)
-        launcher?.launch(intent)
+        launcher?.launch(intent, options)
     }
 }

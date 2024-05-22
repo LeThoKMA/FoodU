@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.viewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -86,11 +87,12 @@ class OrderListScreen : BaseFragment<ActivityShipBinding>() {
         }
         newAdapter = NewOrdersAdapter(object : NewOnClickDetailCallBack {
             override fun onClickDetail(item: OrderShipModel) {
+                val options = ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity())
                 itemDelete = item
                 val intent = Intent(requireContext(), OrderDetailActivity::class.java)
                 intent.putExtra("item", item)
                 intent.putExtra("type", 0)
-                launcher?.launch(intent)
+                launcher?.launch(intent, options)
             }
         })
         binding.rvOrders.layoutManager = LinearLayoutManager(binding.root.context)
