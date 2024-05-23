@@ -1,7 +1,6 @@
 package com.example.footu.ui.shipper.picked
 
 import android.app.Activity
-import android.app.ActivityOptions
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,7 +15,7 @@ import com.example.footu.base.BaseFragment
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.OrderShipPickedFragmentBinding
 import com.example.footu.model.OrderShipModel
-import com.example.footu.ui.account.AccountFragment
+import com.example.footu.ui.map.MultipleRouterActivity
 import com.example.footu.ui.shipper.OrderDetailActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -39,20 +38,21 @@ class OrderShipPickedFragment :
     }
 
     override fun initView() {
-        launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == Activity.RESULT_OK) {
-                itemDelete?.let { it1 -> viewModel.onDeleteItem(it1) }
-                itemDelete = null
+        launcher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                if (it.resultCode == Activity.RESULT_OK) {
+                    itemDelete?.let { it1 -> viewModel.onDeleteItem(it1) }
+                    itemDelete = null
+                }
             }
-        }
         binding.rvOrders.layoutManager = LinearLayoutManager(binding.root.context)
         adapter = OrdersPickedAdapter(this)
         binding.rvOrders.adapter = adapter
     }
 
     override fun initListener() {
-        binding.ivAccount.setOnClickListener {
-            startActivity(Intent(binding.root.context, AccountFragment::class.java))
+        binding.ivRouters.setOnClickListener {
+            startActivity(Intent(binding.root.context, MultipleRouterActivity::class.java))
         }
         binding.refreshLayout.setOnRefreshListener {
             viewModel.hideSnackbar()

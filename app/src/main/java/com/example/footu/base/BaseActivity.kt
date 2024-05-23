@@ -50,6 +50,8 @@ abstract class BaseActivity<BINDING : ViewDataBinding> :
         setContentView(binding.root)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         loadingDialog = setupProgressDialog()
+        setColorForStatusBar(R.color.colorPrimary)
+        setLightIconStatusBar(true)
         observerDefaultLiveData(initViewModel())
         initView()
         initListener()

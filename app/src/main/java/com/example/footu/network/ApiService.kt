@@ -15,6 +15,7 @@ import com.example.footu.Response.HintMessageResponse
 import com.example.footu.Response.HintResponse
 import com.example.footu.Response.LoginResponse
 import com.example.footu.Response.MessageResponse
+import com.example.footu.Response.PointResponse
 import com.example.footu.Response.TotalMessageResponse
 import com.example.footu.model.Item
 import com.example.footu.model.ItemStatistic
@@ -121,4 +122,7 @@ interface ApiService {
 
     @GET("message")
     suspend fun getAllHintMessage(@Query("id") id: Int): BaseResponse<List<HintMessageResponse>>
+
+    @GET("pending-prepaid/routers")
+    suspend fun getRouters(): BaseResponse<List<PointResponse>>
 }

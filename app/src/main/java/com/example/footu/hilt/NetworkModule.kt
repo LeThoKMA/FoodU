@@ -2,7 +2,6 @@ package com.example.footu.hilt
 
 import android.content.Context
 import android.preference.PreferenceManager
-import com.example.footu.network.ApiMapService
 import com.example.footu.network.ApiService
 import dagger.Module
 import dagger.Provides
@@ -14,14 +13,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import javax.inject.Named
 
 @Module
 @InstallIn(ViewModelComponent::class)
 object NetworkModule {
-
     var mToken = ""
-    private const val TIME_OUT: Long = 10
+    private const val TIME_OUT: Long = 20
     private var mLanguage = "vi"
 
     /**
@@ -36,7 +33,9 @@ object NetworkModule {
     }
 
     @Provides
-    internal fun provideRetrofitInterface(@ApplicationContext context: Context): Retrofit {
+    internal fun provideRetrofitInterface(
+        @ApplicationContext context: Context,
+    ): Retrofit {
         val mPrefs = PreferenceManager.getDefaultSharedPreferences(context)
 
         if (mToken == "") {
@@ -48,12 +47,13 @@ object NetworkModule {
         httpClient.readTimeout(TIME_OUT, TimeUnit.SECONDS)
 
         httpClient.addInterceptor { chain ->
-            val request = chain.request().newBuilder()
-                .addHeader("Content-Type", "application/json")
-                .addHeader("Accept", "*/*")
-                .addHeader("Authorization", "Bearer $mToken")
-                .addHeader("Accept-Language", mLanguage)
-                .build()
+            val request =
+                chain.request().newBuilder()
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Accept", "*/*")
+                    .addHeader("Authorization", "Bearer $mToken")
+                    .addHeader("Accept-Language", mLanguage)
+                    .build()
             chain.proceed(request)
         }
 
@@ -63,46 +63,6 @@ object NetworkModule {
 
         return Retrofit.Builder()
             .baseUrl("http://10.0.2.2:8080/api/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(httpClient.build())
-            .build()
-    }
-}
-
-@Module
-@InstallIn(ViewModelComponent::class)
-object MapNetworkModule {
-
-    private const val TIME_OUT: Long = 10
-    private var mLanguage = "vi"
-
-    @Provides
-    internal fun provideMapApi(@Named("map") retrofit: Retrofit): ApiMapService {
-        return retrofit.create(ApiMapService::class.java)
-    }
-
-    @Provides
-    @Named("map")
-    internal fun provideRetrofitMap(): Retrofit {
-        val httpClient = OkHttpClient.Builder()
-        httpClient.connectTimeout(TIME_OUT, TimeUnit.SECONDS)
-        httpClient.readTimeout(TIME_OUT, TimeUnit.SECONDS)
-
-        httpClient.addInterceptor { chain ->
-            val request = chain.request().newBuilder()
-                .addHeader("Content-Type", "application/json")
-                .addHeader("Accept", "*/*")
-                .addHeader("Accept-Language", mLanguage)
-                .build()
-            chain.proceed(request)
-        }
-
-        val logging = HttpLoggingInterceptor()
-        logging.level = HttpLoggingInterceptor.Level.BODY
-        httpClient.addInterceptor(logging) // <-- this is the important line!
-
-        return Retrofit.Builder()
-            .baseUrl("https://maps.googleapis.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(httpClient.build())
             .build()

@@ -8,9 +8,13 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Environment
 import android.provider.OpenableColumns
+import androidx.annotation.DrawableRes
+import androidx.appcompat.content.res.AppCompatResources
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -195,5 +199,30 @@ suspend fun getVideoFileSize(uri: Uri, context: Context): Long? {
         }
 
         return@withContext fileSize
+    }
+}
+
+fun bitmapFromDrawableRes(context: Context, @DrawableRes resourceId: Int) =
+    convertDrawableToBitmap(AppCompatResources.getDrawable(context, resourceId))
+
+fun convertDrawableToBitmap(sourceDrawable: Drawable?): Bitmap? {
+    if (sourceDrawable == null) {
+        return null
+    }
+    return if (sourceDrawable is BitmapDrawable) {
+        sourceDrawable.bitmap
+    } else {
+// copying drawable object to not manipulate on the same reference
+        val constantState = sourceDrawable.constantState ?: return null
+        val drawable = constantState.newDrawable().mutate()
+        val bitmap: Bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888,
+        )
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        bitmap
     }
 }

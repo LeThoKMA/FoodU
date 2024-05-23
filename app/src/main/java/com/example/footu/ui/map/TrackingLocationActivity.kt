@@ -26,6 +26,7 @@ import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivityTrackingLocationBinding
 import com.example.footu.utils.LOCATION_PERMISSION_REQUEST_CODE
 import com.example.footu.utils.SHIPPER_ID
+import com.example.footu.utils.bitmapFromDrawableRes
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.mapbox.geojson.Point
@@ -132,36 +133,10 @@ class TrackingLocationActivity :
         }
     }
 
-    private fun bitmapFromDrawableRes(context: Context, @DrawableRes resourceId: Int) =
-        convertDrawableToBitmap(AppCompatResources.getDrawable(context, resourceId))
-
-    private fun convertDrawableToBitmap(sourceDrawable: Drawable?): Bitmap? {
-        if (sourceDrawable == null) {
-            return null
-        }
-        return if (sourceDrawable is BitmapDrawable) {
-            sourceDrawable.bitmap
-        } else {
-// copying drawable object to not manipulate on the same reference
-            val constantState = sourceDrawable.constantState ?: return null
-            val drawable = constantState.newDrawable().mutate()
-            val bitmap: Bitmap = Bitmap.createBitmap(
-                drawable.intrinsicWidth,
-                drawable.intrinsicHeight,
-                Bitmap.Config.ARGB_8888,
-            )
-            val canvas = Canvas(bitmap)
-            drawable.setBounds(0, 0, canvas.width, canvas.height)
-            drawable.draw(canvas)
-            bitmap
-        }
-    }
-
     override fun initViewModel(): BaseViewModel {
         return viewModel
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(
                 this,
