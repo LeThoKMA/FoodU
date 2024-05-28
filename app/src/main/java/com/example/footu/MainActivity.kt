@@ -24,7 +24,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>() {
-
     private val viewModel: MainViewModel by viewModels()
 
     private val orderShipPickedFragment by lazy { OrderShipPickedFragment() }
@@ -50,35 +49,37 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         setColorForStatusBar(R.color.colorPrimary)
         setLightIconStatusBar(true)
 
-        val requestPermission = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions(),
-        ) { permissions ->
-            if (permissions.getOrDefault(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    false,
-                ) || permissions.getOrDefault(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    false,
-                )
-            ) {
-                if (!isLocationEnabled()) {
-                    requestLocationEnable(this)
+        val requestPermission =
+            registerForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions(),
+            ) { permissions ->
+                if (permissions.getOrDefault(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        false,
+                    ) ||
+                    permissions.getOrDefault(
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        false,
+                    )
+                ) {
+                    if (!isLocationEnabled()) {
+                        requestLocationEnable(this)
+                    }
+                } else {
+                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    startActivity(intent)
                 }
-            } else {
-                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivity(intent)
-            }
 
-            if (!permissions.getOrDefault(
-                    Manifest.permission.POST_NOTIFICATIONS,
-                    false,
-                ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-            ) {
-                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-                startActivity(intent)
+                if (!permissions.getOrDefault(
+                        Manifest.permission.POST_NOTIFICATIONS,
+                        false,
+                    ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                ) {
+                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                    startActivity(intent)
+                }
             }
-        }
 
 // ...
 
@@ -194,25 +195,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     override fun onDestroy() {
         super.onDestroy()
     }
-
-//    private fun initializeFragment(tag: String, createFragment: () -> Fragment): Fragment {
-//        return supportFragmentManager.findFragmentByTag(tag) ?: createFragment().also { fragment ->
-//            supportFragmentManager
-//                .beginTransaction()
-//                .add(R.id.fragmentContainer, fragment, tag)
-// //                .hide(fragment)
-//                .commit()
-//        }
-//    }
-//
-//    private fun showFragment(currentFragment: Fragment, targetFragment: Fragment) {
-//        supportFragmentManager
-//            .beginTransaction()
-//            .replace(R.id.fragmentContainer, targetFragment)
-//            .commit()
-//        hideSoftKeyboard()
-//        loadingDialog?.hide()
-//    }
 
     @SuppressLint("HardwareIds")
     fun getID(context: Context): String? {

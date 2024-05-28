@@ -9,11 +9,19 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class MapRepository @Inject constructor(private val apiService: ApiService) {
-    private val dispatcher = Dispatchers.IO
-    suspend fun getRouters(): Flow<BaseResponse<List<PointResponse>>> {
-        return withContext(dispatcher) {
-            flow { emit(apiService.getRouters()) }
+class MapRepository
+    @Inject
+    constructor(private val apiService: ApiService) {
+        private val dispatcher = Dispatchers.IO
+
+        suspend fun getRouters(): Flow<BaseResponse<List<PointResponse>>> {
+            return withContext(dispatcher) {
+                flow { emit(apiService.getRouters()) }
+            }
         }
+
+        suspend fun getDetailPendingBill(id: Int) =
+            withContext(dispatcher) {
+                flow { emit(apiService.getDetailPendingBill(id)) }
+            }
     }
-}

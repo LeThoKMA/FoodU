@@ -22,8 +22,7 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object AppKey {
-
-//    private val appInfo = App.app.packageManager.getApplicationInfo(
+    //    private val appInfo = App.app.packageManager.getApplicationInfo(
 //        App.app.packageName,
 //        PackageManager.GET_META_DATA
 //    )
@@ -55,10 +54,11 @@ object AppKey {
         if (keyStore.containsAlias(KEY_ALIAS)) {
             return
         }
-        val keyPairGenerator = KeyPairGenerator.getInstance(
-            KeyProperties.KEY_ALGORITHM_EC,
-            KEYSTORE_TYPE,
-        )
+        val keyPairGenerator =
+            KeyPairGenerator.getInstance(
+                KeyProperties.KEY_ALGORITHM_EC,
+                KEYSTORE_TYPE,
+            )
         keyPairGenerator.initialize(
             KeyGenParameterSpec.Builder(
                 KEY_ALIAS.toString(),
@@ -109,14 +109,17 @@ object AppKey {
 
     suspend fun encryptFlow(
         plainText: String,
-        iv: ByteArray
+        iv: ByteArray,
     ): kotlinx.coroutines.flow.Flow<String> {
         return withContext(Dispatchers.Default) {
             flow { emit(encrypt(plainText, iv)) }
         }
     }
 
-    private suspend fun encrypt(plainText: String, iv: ByteArray): String {
+    private suspend fun encrypt(
+        plainText: String,
+        iv: ByteArray,
+    ): String {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
         val encryptedBytes = cipher.doFinal(plainText.toByteArray())
         return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
@@ -124,20 +127,26 @@ object AppKey {
 
     suspend fun encryptByteArrFlow(
         byteArray: ByteArray,
-        iv: ByteArray
+        iv: ByteArray,
     ): kotlinx.coroutines.flow.Flow<String> {
         return withContext(Dispatchers.Default) {
             flow { emit(encrypt(byteArray, iv)) }
         }
     }
 
-     private suspend fun encrypt(byteArray: ByteArray, iv: ByteArray): String {
+    private suspend fun encrypt(
+        byteArray: ByteArray,
+        iv: ByteArray,
+    ): String {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
         val encryptedBytes = cipher.doFinal(byteArray)
         return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
     }
 
-     fun decrypt(data: String?, iv: String): String? {
+    fun decrypt(
+        data: String?,
+        iv: String,
+    ): String? {
         try {
             val ivByteArray = Base64.decode(iv, Base64.DEFAULT)
             cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, ivByteArray))
@@ -150,7 +159,10 @@ object AppKey {
         return null
     }
 
-     fun decryptByteArray(data: String?, iv: String): ByteArray {
+    fun decryptByteArray(
+        data: String?,
+        iv: String,
+    ): ByteArray {
         try {
             val ivByteArray = Base64.decode(iv, Base64.DEFAULT)
             cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, ivByteArray))
@@ -162,13 +174,19 @@ object AppKey {
         return byteArrayOf()
     }
 
-    suspend fun decryptFlow(data: String?, iv: String): Flow<String?> {
+    suspend fun decryptFlow(
+        data: String?,
+        iv: String,
+    ): Flow<String?> {
         return withContext(Dispatchers.Default) {
             flow { emit(decrypt(data, iv)) }
         }
     }
 
-    suspend fun decryptByteArrFlow(data: String?, iv: String): Flow<ByteArray> {
+    suspend fun decryptByteArrFlow(
+        data: String?,
+        iv: String,
+    ): Flow<ByteArray> {
         return withContext(Dispatchers.Default) {
             flow { emit(decryptByteArray(data, iv)) }
         }

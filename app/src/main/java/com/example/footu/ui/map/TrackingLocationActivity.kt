@@ -4,20 +4,13 @@ import android.Manifest
 import android.animation.TypeEvaluator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Build
 import android.util.Log
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.activity.viewModels
-import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.footu.R
@@ -53,15 +46,16 @@ class TrackingLocationActivity :
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var lastLocation: Location? = null
     private lateinit var point: Point
-    private val locationObserver = object : LocationObserver {
-        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-            lastLocation = locationMatcherResult.enhancedLocation
-        }
+    private val locationObserver =
+        object : LocationObserver {
+            override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+                lastLocation = locationMatcherResult.enhancedLocation
+            }
 
-        override fun onNewRawLocation(rawLocation: Location) {
+            override fun onNewRawLocation(rawLocation: Location) {
 // no impl
+            }
         }
-    }
     private var shipperLocationAnnotation: PointAnnotation? = null
     private val pointAnnotationManager by lazy {
         binding.mapView.annotations.createPointAnnotationManager()
@@ -101,29 +95,34 @@ class TrackingLocationActivity :
     override fun initListener() {
     }
 
-    private fun addOrUpdateAnnotationToMap(latitude: Double, longitude: Double) {
+    private fun addOrUpdateAnnotationToMap(
+        latitude: Double,
+        longitude: Double,
+    ) {
 // Create an instance of the Annotation API and get the PointAnnotationManager.
         if (shipperLocationAnnotation == null) {
             bitmapFromDrawableRes(
                 this,
                 R.drawable.point,
             )?.let {
-                pointAnnotationOptions = PointAnnotationOptions()
-                    .withPoint(Point.fromLngLat(longitude, latitude))
-                    .withIconImage(it)
+                pointAnnotationOptions =
+                    PointAnnotationOptions()
+                        .withPoint(Point.fromLngLat(longitude, latitude))
+                        .withIconImage(it)
 
                 shipperLocationAnnotation = pointAnnotationManager.create(pointAnnotationOptions)
 
-                val cameraBoundsOptions = CameraBoundsOptions.Builder()
-                    .bounds(
-                        CoordinateBounds(
-                            point,
-                            shipperLocationAnnotation!!.point,
-                            true,
-                        ),
-                    )
-                    .minZoom(12.0)
-                    .build()
+                val cameraBoundsOptions =
+                    CameraBoundsOptions.Builder()
+                        .bounds(
+                            CoordinateBounds(
+                                point,
+                                shipperLocationAnnotation!!.point,
+                                true,
+                            ),
+                        )
+                        .minZoom(12.0)
+                        .build()
 // Fit camera to the bounding box
                 binding.mapView.getMapboxMap().setBounds(cameraBoundsOptions)
                 //    binding.mapView.getMapboxMap().setCamera()
@@ -159,14 +158,15 @@ class TrackingLocationActivity :
                     this@TrackingLocationActivity,
                     R.drawable.icon_map_small,
                 )?.let {
-                    val pointAnnotation = PointAnnotationOptions().withPoint(
-                        Point.fromLngLat(
-                            location.longitude,
-                            location.latitude,
-                        ),
-                    ).withIconImage(
-                        it,
-                    )
+                    val pointAnnotation =
+                        PointAnnotationOptions().withPoint(
+                            Point.fromLngLat(
+                                location.longitude,
+                                location.latitude,
+                            ),
+                        ).withIconImage(
+                            it,
+                        )
                     pointAnnotationManager.create(pointAnnotation)
                 }
                 binding.mapView.getMapboxMap().setCamera(
@@ -206,7 +206,10 @@ class TrackingLocationActivity :
         }
     }
 
-    private fun animateCars(oldPoint: Point, nextPoint: Point) {
+    private fun animateCars(
+        oldPoint: Point,
+        nextPoint: Point,
+    ) {
         cleanAnimation()
         animator =
             ValueAnimator.ofObject(
@@ -257,14 +260,15 @@ class TrackingLocationActivity :
                             this@TrackingLocationActivity,
                             R.drawable.ic_user_map,
                         )?.let {
-                            val pointAnnotation = PointAnnotationOptions().withPoint(
-                                Point.fromLngLat(
-                                    location.longitude,
-                                    location.latitude,
-                                ),
-                            ).withIconImage(
-                                it,
-                            )
+                            val pointAnnotation =
+                                PointAnnotationOptions().withPoint(
+                                    Point.fromLngLat(
+                                        location.longitude,
+                                        location.latitude,
+                                    ),
+                                ).withIconImage(
+                                    it,
+                                )
                             pointAnnotationManager.create(pointAnnotation)
                         }
                         binding.mapView.getMapboxMap().setCamera(

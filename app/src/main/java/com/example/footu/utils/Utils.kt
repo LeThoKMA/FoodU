@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -15,6 +16,7 @@ import android.os.Environment
 import android.provider.OpenableColumns
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
+import com.example.footu.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -33,14 +35,19 @@ fun generateRandomIV(): ByteArray {
     return iv
 }
 
-fun nameToAvatar(name: String, width: Int, height: Int): Bitmap {
+fun nameToAvatar(
+    name: String,
+    width: Int,
+    height: Int,
+): Bitmap {
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
-    val paint = Paint().apply {
-        color = Color.WHITE
-        textAlign = Paint.Align.CENTER
-        textSize = 32f
-    }
+    val paint =
+        Paint().apply {
+            color = Color.WHITE
+            textAlign = Paint.Align.CENTER
+            textSize = 32f
+        }
     val xPos = (canvas.width / 2).toFloat()
     val yPos = (canvas.height / 2 - (paint.descent() + paint.ascent()) / 2)
     canvas.drawText(name.first().toString(), xPos, yPos, paint)
@@ -87,14 +94,20 @@ fun optimizeAndConvertImageToByteArray(bitmap: Bitmap): ByteArray? {
     return byteArray
 }
 
-fun isVideoFile(context: Context, uri: Uri): Boolean {
+fun isVideoFile(
+    context: Context,
+    uri: Uri,
+): Boolean {
     val contentResolver: ContentResolver = context.contentResolver
     val type = contentResolver.getType(uri)
-    return type != null && type.startsWith("video");
+    return type != null && type.startsWith("video")
 }
 
 @SuppressLint("Range")
-fun createFileFromUri(context: Context, uri: Uri?): File? {
+fun createFileFromUri(
+    context: Context,
+    uri: Uri?,
+): File? {
     val contentResolver = context.contentResolver
 
     // Truy vấn thông tin về tài nguyên từ URI
@@ -133,7 +146,10 @@ fun createFileFromUri(context: Context, uri: Uri?): File? {
     return null
 }
 
-fun convertVideoToByteArray(context: Context, videoUri: Uri?): ByteArray? {
+fun convertVideoToByteArray(
+    context: Context,
+    videoUri: Uri?,
+): ByteArray? {
     val contentResolver = context.contentResolver
     var inputStream: InputStream? = null
     return try {
@@ -162,7 +178,10 @@ fun convertVideoToByteArray(context: Context, videoUri: Uri?): ByteArray? {
     }
 }
 
-fun convertUriToBitmap(context: Context, imageUri: Uri?): Bitmap? {
+fun convertUriToBitmap(
+    context: Context,
+    imageUri: Uri?,
+): Bitmap? {
     val contentResolver = context.contentResolver
     var inputStream: InputStream? = null
     return try {
@@ -185,7 +204,10 @@ fun convertUriToBitmap(context: Context, imageUri: Uri?): Bitmap? {
     }
 }
 
-suspend fun getVideoFileSize(uri: Uri, context: Context): Long? {
+suspend fun getVideoFileSize(
+    uri: Uri,
+    context: Context,
+): Long? {
     return withContext(Dispatchers.IO) {
         val contentResolver = context.contentResolver
         var fileSize: Long? = null
@@ -202,8 +224,10 @@ suspend fun getVideoFileSize(uri: Uri, context: Context): Long? {
     }
 }
 
-fun bitmapFromDrawableRes(context: Context, @DrawableRes resourceId: Int) =
-    convertDrawableToBitmap(AppCompatResources.getDrawable(context, resourceId))
+fun bitmapFromDrawableRes(
+    context: Context,
+    @DrawableRes resourceId: Int,
+) = convertDrawableToBitmap(AppCompatResources.getDrawable(context, resourceId))
 
 fun convertDrawableToBitmap(sourceDrawable: Drawable?): Bitmap? {
     if (sourceDrawable == null) {
@@ -215,14 +239,37 @@ fun convertDrawableToBitmap(sourceDrawable: Drawable?): Bitmap? {
 // copying drawable object to not manipulate on the same reference
         val constantState = sourceDrawable.constantState ?: return null
         val drawable = constantState.newDrawable().mutate()
-        val bitmap: Bitmap = Bitmap.createBitmap(
-            drawable.intrinsicWidth,
-            drawable.intrinsicHeight,
-            Bitmap.Config.ARGB_8888,
-        )
+        val bitmap: Bitmap =
+            Bitmap.createBitmap(
+                drawable.intrinsicWidth,
+                drawable.intrinsicHeight,
+                Bitmap.Config.ARGB_8888,
+            )
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)
         bitmap
     }
+}
+
+fun makerNumber(
+    context: Context,
+    number: Int,
+): Bitmap? {
+    val bitmap = bitmapFromDrawableRes(context, R.drawable.ic_map_number)
+    val canvas = bitmap?.let { Canvas(it) }
+    val paint =
+        Paint().apply {
+            textSize = 24f
+            color = Color.RED
+            typeface = Typeface.DEFAULT_BOLD
+            textAlign = Paint.Align.CENTER
+        }
+    canvas?.drawText(
+        number.toString(),
+        bitmap.width.div(2f),
+        bitmap.height.div(3f),
+        paint,
+    )
+    return bitmap
 }

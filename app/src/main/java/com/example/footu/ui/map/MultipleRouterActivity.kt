@@ -1,6 +1,8 @@
 package com.example.footu.ui.map
 
+import android.app.ActionBar.LayoutParams
 import android.location.Location
+import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -8,15 +10,21 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.footu.R
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
+import com.example.footu.databinding.ItemViewPointBinding
 import com.example.footu.databinding.MapboxActivityTurnByTurnExperienceBinding
+import com.example.footu.model.OrderShipModel
+import com.example.footu.model.PointWithId
 import com.example.footu.ui.map.MultipleRouterViewModel.UiState
 import com.example.footu.utils.bitmapFromDrawableRes
+import com.example.footu.utils.makerNumber
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
-import com.mapbox.maps.Style
+import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.OnPointAnnotationClickListener
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -27,6 +35,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.dropin.map.MapViewObserver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -35,9 +44,27 @@ class MultipleRouterActivity :
     BaseActivity<MapboxActivityTurnByTurnExperienceBinding>(),
     NavigationRouterCallback {
     private val viewModel: MultipleRouterViewModel by viewModels()
+    private val viewAnnotations =
+        hashMapOf<PointWithId, Pair<ItemViewPointBinding, ScreenCoordinate>?>()
     private var mapView: MapView? = null
     private val pointAnnotationManager by lazy {
-        mapView?.annotations?.createPointAnnotationManager()
+        mapView?.annotations?.createPointAnnotationManager()?.apply {
+            addClickListener(
+                OnPointAnnotationClickListener { pointAnnotation ->
+                    // Chuyển đổi tọa độ thành vị trí pixel trên màn hình
+                    val screenCoordinate =
+                        mapView?.getMapboxMap()?.pixelForCoordinate(pointAnnotation.point)
+                    val pointWithId =
+                        viewAnnotations.keys.find { it.point == pointAnnotation.point }
+                    pointWithId?.id?.let {
+                        viewModel.handleEvent(MultipleRouterViewModel.Event.DetailBill(it))
+                        val binding = ItemViewPointBinding.inflate(layoutInflater)
+                        viewAnnotations[pointWithId] = Pair(binding, screenCoordinate!!)
+                    }
+                    false
+                },
+            )
+        }
     }
     private lateinit var pointAnnotationOptions: PointAnnotationOptions
     private var lastLocation: Location? = null
@@ -54,6 +81,19 @@ class MultipleRouterActivity :
             }
         }
 
+    private val mapViewObserver =
+        object : MapViewObserver() {
+            override fun onAttached(mapView: MapView) {
+                super.onAttached(mapView)
+                this@MultipleRouterActivity.mapView = mapView
+            }
+
+            override fun onDetached(mapView: MapView) {
+                super.onDetached(mapView)
+                this@MultipleRouterActivity.mapView = null
+            }
+        }
+
     override fun observerData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -66,13 +106,19 @@ class MultipleRouterActivity :
         when (uiState) {
             is UiState.Position -> {
                 uiState.location?.let {
-                    showLocationInMap(it)
+                    //     showLocationInMap(it)
                 }
             }
 
             is UiState.Routers -> {
-                requestRoutes(uiState.routers.values.toList())
+                requestRoutes(uiState.routers)
             }
+
+            is UiState.DetailBill -> {
+                uiState.data?.let { addDynamicView(it) }
+            }
+
+            else -> {}
         }
     }
 
@@ -105,21 +151,29 @@ class MultipleRouterActivity :
         )
     }
 
+    private fun addMakerWithPoint(
+        point: Point,
+        number: Int,
+    ) {
+        makerNumber(
+            this,
+            number = number,
+        )?.let {
+            val pointAnnotation =
+                PointAnnotationOptions().withPoint(
+                    point,
+                )
+                    .withIconImage(it)
+            pointAnnotationManager?.create(pointAnnotation)
+        }
+    }
+
     override fun getContentLayout(): Int {
         return R.layout.mapbox_activity_turn_by_turn_experience
     }
 
     override fun initView() {
-        binding.navigationView.customizeViewBinders {
-            this.mapViewBinder?.getMapView(this@MultipleRouterActivity)?.apply {
-                mapView = this
-                this.getMapboxMap().apply {
-                    loadStyleUri(
-                        Style.MAPBOX_STREETS,
-                    )
-                }
-            }
-        }
+        binding.navigationView.registerMapObserver(mapViewObserver)
     }
 
     override fun initListener() {
@@ -129,23 +183,50 @@ class MultipleRouterActivity :
         return viewModel
     }
 
-    private fun requestRoutes(points: List<Point>) {
+    private fun requestRoutes(points: List<PointWithId>) {
+        points.forEachIndexed { index, point ->
+            if (index != points.lastIndex && index != 0) {
+                addMakerWithPoint(point.point, index)
+                viewAnnotations[point] = null
+            }
+        }
+        val listPoint = points.map { it.point }
         MapboxNavigationApp.current()?.requestRoutes(
             routeOptions =
                 RouteOptions
                     .builder()
+                    .profile(DirectionsCriteria.PROFILE_DRIVING)
                     .applyDefaultNavigationOptions()
-                    .coordinatesList(points)
+                    .coordinatesList(listPoint)
+                    .alternatives(true)
                     .build(),
             this,
         )
     }
 
+    fun addDynamicView(detail: OrderShipModel) {
+        val pair = viewAnnotations[viewAnnotations.keys.find { it.id == detail.id }] ?: return
+        val layoutParams =
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+            )
+        layoutParams.leftMargin = pair.second.x.toInt()
+        layoutParams.topMargin = pair.second.y.toInt()
+
+        // Thêm view động vào MapView hoặc FrameLayout bao quanh MapView
+        val binding = pair.first
+        binding.tvName.text = detail.customer?.fullname
+        binding.tvId.text = detail.id.toString()
+        mapView?.addView(binding.root, layoutParams)
+    }
+
     override fun onDestroy() {
-        super.onDestroy()
+        binding.navigationView.unregisterMapObserver(mapViewObserver)
         binding.navigationView.api.routeReplayEnabled(false)
         MapboxNavigationApp.current()?.setNavigationRoutes(emptyList())
         MapboxNavigationApp.current()?.unregisterLocationObserver(locationObserver)
+        super.onDestroy()
     }
 
     override fun onPause() {

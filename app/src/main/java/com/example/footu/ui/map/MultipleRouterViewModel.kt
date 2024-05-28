@@ -1,12 +1,13 @@
 package com.example.footu.ui.map
 
-import android.content.Context
 import android.location.Location
 import androidx.lifecycle.viewModelScope
 import com.example.footu.base.BaseViewModel
+import com.example.footu.model.OrderShipModel
+import com.example.footu.model.PointWithId
 import com.mapbox.geojson.Point
+import com.mapbox.maps.extension.style.expressions.dsl.generated.get
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -21,10 +22,9 @@ import javax.inject.Inject
 class MultipleRouterViewModel
     @Inject
     constructor(
-        @ApplicationContext context: Context,
         private val mapRepository: MapRepository,
     ) : BaseViewModel() {
-        private val mUiStateFlow: MutableStateFlow<UiState> = MutableStateFlow(UiState.Routers())
+        private val mUiStateFlow: MutableStateFlow<UiState> = MutableStateFlow(UiState.Position())
         val uiState: StateFlow<UiState> = mUiStateFlow
 
         init {
@@ -42,7 +42,22 @@ class MultipleRouterViewModel
                     }
                 }
 
+                is Event.DetailBill -> {
+                    getDetailBill(event.idBill)
+                }
+
                 else -> {}
+            }
+        }
+
+        private fun getDetailBill(idBill: Int) {
+            viewModelScope.launch {
+                mapRepository.getDetailPendingBill(idBill).onStart { onRetrievePostListStart() }
+                    .catch { handleApiError(it) }
+                    .onCompletion { onRetrievePostListFinish() }
+                    .collect {
+                        mUiStateFlow.value = UiState.DetailBill(it.data)
+                    }
             }
         }
 
@@ -50,31 +65,32 @@ class MultipleRouterViewModel
             viewModelScope.launch {
                 mapRepository.getRouters().onStart { onRetrievePostListStart() }
                     .map {
-                        println(it.data)
-                        val hashMap = hashMapOf<Int?, Point>()
-                        it.data?.forEach { pointResponse ->
-                            hashMap[pointResponse.id] =
-                                Point.fromLngLat(pointResponse.longitude, pointResponse.latitude)
+                        it.data?.map { pointResponse ->
+                            PointWithId(
+                                pointResponse.id,
+                                Point.fromLngLat(pointResponse.longitude, pointResponse.latitude),
+                            )
                         }
-                        println(hashMap)
-
-                        hashMap
                     }
                     .catch { handleApiError(it) }
                     .onCompletion { onRetrievePostListFinish() }
                     .collect {
-                        mUiStateFlow.value = UiState.Routers(it)
+                        it?.let { mUiStateFlow.value = UiState.Routers(it) }
                     }
             }
         }
 
         sealed class Event {
             data class Position(val location: Location?) : Event()
+
+            data class DetailBill(val idBill: Int) : Event()
         }
 
         sealed class UiState {
-            data class Routers(val routers: HashMap<Int?, Point> = hashMapOf()) : UiState()
+            data class Routers(val routers: List<PointWithId> = listOf()) : UiState()
 
             data class Position(val location: Location? = null) : UiState()
+
+            data class DetailBill(val data: OrderShipModel? = null) : UiState()
         }
     }
