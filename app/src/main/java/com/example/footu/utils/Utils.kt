@@ -50,7 +50,7 @@ fun nameToAvatar(
         }
     val xPos = (canvas.width / 2).toFloat()
     val yPos = (canvas.height / 2 - (paint.descent() + paint.ascent()) / 2)
-    canvas.drawText(name.first().toString(), xPos, yPos, paint)
+    canvas.drawText(name.first().uppercaseChar().toString(), xPos, yPos, paint)
     return bitmap
 }
 

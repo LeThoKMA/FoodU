@@ -15,41 +15,45 @@ import com.example.footu.model.User
 import com.example.footu.utils.displayImage
 import com.example.footu.utils.nameToAvatar
 import com.example.footu.utils.randomColor
-import com.makeramen.roundedimageview.RoundedImageView
 
 class HintMessageAdapter(private val onClickDetail: (User) -> Unit) :
-    ListAdapter<HintMessageResponse, HintMessageAdapter.ViewHolder>(object :
-        DiffUtil.ItemCallback<HintMessageResponse>() {
-        override fun areItemsTheSame(
-            oldItem: HintMessageResponse,
-            newItem: HintMessageResponse,
-        ): Boolean {
-            return oldItem.id == newItem.id
-        }
+    ListAdapter<HintMessageResponse, HintMessageAdapter.ViewHolder>(
+        object :
+            DiffUtil.ItemCallback<HintMessageResponse>() {
+            override fun areItemsTheSame(
+                oldItem: HintMessageResponse,
+                newItem: HintMessageResponse,
+            ): Boolean {
+                return oldItem.id == newItem.id
+            }
 
-        override fun areContentsTheSame(
-            oldItem: HintMessageResponse,
-            newItem: HintMessageResponse,
-        ): Boolean {
-            return oldItem == newItem
-        }
-    }) {
+            override fun areContentsTheSame(
+                oldItem: HintMessageResponse,
+                newItem: HintMessageResponse,
+            ): Boolean {
+                return oldItem == newItem
+            }
+        },
+    ) {
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val rootView: ConstraintLayout = view.findViewById(R.id.root)
         private val avatar: ImageView = view.findViewById(R.id.avatar)
         private val name: TextView = view.findViewById(R.id.tvName)
         private val content: TextView = view.findViewById(R.id.tvContent)
 
-        fun bindView(hintMessageResponse: HintMessageResponse, onClickDetail: (User) -> Unit) {
+        fun bindView(
+            hintMessageResponse: HintMessageResponse,
+            onClickDetail: (User) -> Unit,
+        ) {
             avatar.setBackgroundColor(randomColor())
             avatar.displayImage(
                 nameToAvatar(
-                    hintMessageResponse.otherUser?.username.toString(),
+                    hintMessageResponse.otherUser?.fullname.toString(),
                     60,
-                    60
-                )
+                    60,
+                ),
             )
-            name.text = hintMessageResponse.otherUser?.username
+            name.text = hintMessageResponse.otherUser?.fullname
             val isYour =
                 hintMessageResponse.otherUser != hintMessageResponse.lastMessage?.fromUser
             content.text =
@@ -57,20 +61,26 @@ class HintMessageAdapter(private val onClickDetail: (User) -> Unit) :
             rootView.setOnClickListener {
                 hintMessageResponse.otherUser?.let { it1 ->
                     onClickDetail.invoke(
-                        it1
+                        it1,
                     )
                 }
             }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.item_hint_chat, parent, false)
         return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: ViewHolder,
+        position: Int,
+    ) {
         holder.bindView(getItem(position), onClickDetail)
     }
 }

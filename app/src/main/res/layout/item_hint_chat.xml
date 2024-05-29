@@ -11,16 +11,18 @@
         android:layout_height="60dp"
         android:layout_marginVertical="8dp"
         android:layout_marginStart="4dp"
-        android:background="@color/blue"
         android:padding="4dp"
-        app:cardCornerRadius="48dp"
+        app:cardCornerRadius="36dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/avatar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/RoundImage"
+            app:strokeColor="@android:color/transparent" />
     </androidx.cardview.widget.CardView>
 
     <TextView

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background color -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/color_gray" /> <!-- Màu nền của CardView -->
+            <corners android:radius="36dp" /> <!-- Bán kính góc -->
+        </shape>
+    </item>
+    <!-- Border -->
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:width="2dp"
+            android:color="#000000" /> <!-- Màu đường viền -->
+            <corners android:radius="36dp" /> <!-- Bán kính góc khớp với CardView -->
+        </shape>
+    </item>
+</layer-list>

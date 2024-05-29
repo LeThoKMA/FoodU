@@ -19,6 +19,7 @@ import com.example.footu.ui.Order.CategoryAdapter
 import com.example.footu.ui.Order.DescriptionProductAdapter
 import com.example.footu.ui.Order.OrderActivity
 import com.example.footu.utils.ITEM_TYPE
+import com.makeramen.roundedimageview.RoundedImageView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -46,11 +47,12 @@ class HomeFragment :
         binding.viewFlipper.inAnimation = inAnimation
         binding.viewFlipper.outAnimation = outAnimation
 
-        categoryAdapter = CategoryAdapter(listCategory, onClickItem = {
-            val intent = Intent(requireContext(), OrderActivity::class.java)
-            intent.putExtra(ITEM_TYPE, it)
-            startActivity(intent)
-        })
+        categoryAdapter =
+            CategoryAdapter(listCategory, onClickItem = {
+                val intent = Intent(requireContext(), OrderActivity::class.java)
+                intent.putExtra(ITEM_TYPE, it)
+                startActivity(intent)
+            })
         binding.rvType.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.rvType.adapter = categoryAdapter
@@ -80,8 +82,9 @@ class HomeFragment :
 
         viewModel.banner.observe(viewLifecycleOwner) {
             it.forEach {
-                val imgView = ImageView(requireContext())
+                val imgView = RoundedImageView(requireContext())
                 imgView.scaleType = ImageView.ScaleType.CENTER_CROP
+                imgView.cornerRadius = 32f
                 Glide.with(this).load(it).into(imgView)
                 binding.viewFlipper.addView(imgView)
             }

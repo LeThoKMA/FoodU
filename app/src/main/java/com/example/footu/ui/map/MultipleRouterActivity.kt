@@ -1,10 +1,8 @@
 package com.example.footu.ui.map
 
-import android.app.ActionBar.LayoutParams
 import android.content.Intent
 import android.location.Location
 import android.net.Uri
-import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -61,8 +59,6 @@ class MultipleRouterActivity :
                         viewAnnotations.keys.find { it.point == pointAnnotation.point }
                     pointWithId?.id?.let {
                         viewModel.handleEvent(MultipleRouterViewModel.Event.DetailBill(it))
-//                        val binding = ItemViewPointBinding.inflate(layoutInflater)
-//                        viewAnnotations[pointWithId] = Pair(binding, screenCoordinate!!)
                     }
                     false
                 },
@@ -138,23 +134,6 @@ class MultipleRouterActivity :
                     .build(),
             this,
         )
-    }
-
-    private fun addDynamicView(detail: OrderShipModel) {
-        val pair = viewAnnotations[viewAnnotations.keys.find { it.id == detail.id }] ?: return
-        val layoutParams =
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-            )
-        layoutParams.leftMargin = pair.second.x.toInt()
-        layoutParams.topMargin = pair.second.y.toInt()
-
-        // Thêm view động vào MapView hoặc FrameLayout bao quanh MapView
-        val binding = pair.first
-        binding.tvName.text = detail.customer?.fullname
-        binding.tvId.text = detail.id.toString()
-        mapView?.addView(binding.root, layoutParams)
     }
 
     private fun handleUiState(uiState: UiState) {

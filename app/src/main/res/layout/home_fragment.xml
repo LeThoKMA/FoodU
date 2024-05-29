@@ -7,9 +7,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <ViewFlipper
+            android:layout_margin="8dp"
             android:id="@+id/view_flipper"
             android:layout_width="0dp"
-            android:layout_height="200dp"
+            android:background="@drawable/bg_trans_32rd"
+            android:layout_height="225dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -17,10 +19,12 @@
         </ViewFlipper>
 
         <androidx.recyclerview.widget.RecyclerView
+            android:layout_marginTop="4dp"
             android:id="@+id/rv_type"
             android:paddingHorizontal="8dp"
             android:paddingVertical="8dp"
             android:layout_width="0dp"
+            android:background="@drawable/bg_item_real_estate_sale"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:orientation="horizontal"
             android:layout_height="wrap_content"
