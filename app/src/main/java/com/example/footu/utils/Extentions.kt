@@ -6,34 +6,28 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.os.Build
 import android.util.Base64
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.view.drawToBitmap
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.makeramen.roundedimageview.RoundedImageView
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
-import kotlin.random.Random
 
 const val currencyUnit = "₫"
 
 fun Activity.hideSoftKeyboard() {
     currentFocus?.let {
-        val inputMethodManager = ContextCompat.getSystemService(
-            this,
-            InputMethodManager::class.java,
-        )
+        val inputMethodManager =
+            ContextCompat.getSystemService(
+                this,
+                InputMethodManager::class.java,
+            )
         inputMethodManager?.hideSoftInputFromWindow(it.windowToken, 0)
     }
 }
@@ -72,9 +66,10 @@ fun Context.createNotificationChanel() {
         val name = "food_app"
         val descriptionText = "hello world"
         val importance = NotificationManager.IMPORTANCE_MAX
-        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-            description = descriptionText
-        }
+        val channel =
+            NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
         // Register the channel with the system
         val notificationManager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -91,4 +86,7 @@ fun ImageView.displayImage(bitmap: Bitmap) {
         .into(this)
 }
 
-
+fun ImageView.displayImage(url: String) {
+    Glide.with(this.context).load(url)
+        .into(this)
+}

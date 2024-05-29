@@ -186,7 +186,7 @@ fun convertUriToBitmap(
     var inputStream: InputStream? = null
     return try {
         // Mở InputStream từ URI
-        inputStream = contentResolver.openInputStream(imageUri!!)
+        inputStream = imageUri?.let { contentResolver.openInputStream(it) }
 
         // Đọc dữ liệu từ InputStream và chuyển đổi thành đối tượng Bitmap
         BitmapFactory.decodeStream(inputStream)

@@ -3,74 +3,109 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tool="http://schemas.android.com/tools">
 
-    <androidx.cardview.widget.CardView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginVertical="6dp"
-        app:cardBackgroundColor="@color/white_background"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="8dp"
-        app:cardUseCompatPadding="true"
-        app:strokeColor="@color/color_gray">
+        android:background="@drawable/bg_bottom_sheet_border_top"
+        android:paddingBottom="32dp">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <TextView
+            android:id="@+id/tvId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp">
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tool:text="Đơn số : 32" />
 
-            <TextView
-                android:id="@+id/tvId"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tool:text="Đơn số : 32" />
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@id/tvId"
+            app:layout_constraintTop_toBottomOf="@id/tvId"
+            tool:text="Le Tho" />
 
-            <TextView
-                android:id="@+id/tvName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                app:layout_constraintStart_toStartOf="@id/tvId"
-                app:layout_constraintTop_toBottomOf="@id/tvId"
-                tool:text="Le Tho" />
+        <TextView
+            android:id="@+id/tvAddress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:maxLines="2"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvId"
+            app:layout_constraintTop_toBottomOf="@id/tvName" />
 
-            <TextView
-                android:id="@+id/tvCall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:padding="4dp"
-                android:text="Call"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:drawableStartCompat="@drawable/ic_call"
-                app:layout_constraintStart_toStartOf="@id/tvId"
-                app:layout_constraintTop_toBottomOf="@id/tvName" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcItems"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintStart_toStartOf="@id/tvId"
+            app:layout_constraintTop_toBottomOf="@id/tvAddress" />
 
-            <TextView
-                android:id="@+id/tvMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:drawableStart="@drawable/ic_message_in_point"
-                android:padding="4dp"
-                android:text="Message"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@id/tvCall"
-                app:layout_constraintStart_toEndOf="@id/tvCall"
-                app:layout_constraintTop_toTopOf="@id/tvCall" />
+        <TextView
+            android:id="@+id/tvCall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:padding="4dp"
+            android:text="Gọi"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:drawableStartCompat="@drawable/ic_call"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvId"
+            app:layout_constraintTop_toBottomOf="@id/rcItems" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+        <TextView
+            android:id="@+id/tvMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:drawableStart="@drawable/ic_message_in_point"
+            android:padding="4dp"
+            android:text="Nhắn tin"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/tvCall"
+            app:layout_constraintStart_toEndOf="@id/tvCall"
+            app:layout_constraintTop_toTopOf="@id/tvCall" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/chatFragment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tvMessage"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/fabChat"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:src="@drawable/ic_full_size"
+            android:background="@color/transparent"
+            app:layout_constraintEnd_toEndOf="@id/chatFragment"
+            app:layout_constraintTop_toTopOf="@id/chatFragment"
+           />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -2,7 +2,6 @@ package com.example.footu.ui.chat.activity
 
 import android.app.Activity
 import android.os.Build
-import android.util.Log
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -12,7 +11,6 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.footu.R
 import com.example.footu.Response.MessageResponse
@@ -59,7 +57,7 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
                             Toast.makeText(
                                 this@UserChatActivity,
                                 "Video có kích thước tối đa 10MB",
-                                Toast.LENGTH_SHORT
+                                Toast.LENGTH_SHORT,
                             )
                                 .show()
                         }
@@ -69,7 +67,7 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
                 val bitmap = convertUriToBitmap(this, uri)
                 bitmap?.let {
                     viewModel.sendImage(
-                        it
+                        it,
                     )
                 }
             }
@@ -99,9 +97,10 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
     private fun setupData(list: List<MessageResponse>?) {
         val newList = adapter.currentList.toMutableList()
         list?.let { newList.addAll(it) }
-        adapter.submitList(newList)
-        if (mPage == 0) {
-            binding.recycleChat.scrollToPosition(0)
+        adapter.submitList(newList) {
+            if (mPage == 0) {
+                binding.recycleChat.scrollToPosition(0)
+            }
         }
     }
 
@@ -139,18 +138,24 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
         binding.imvBack.setOnClickListener {
             finish()
         }
-        binding.recycleChat.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (dy < 0) { // Chỉ kiểm tra khi cuộn lên
-                    if (!recyclerView.canScrollVertically(-1)) {
-                        // Gọi API để tải thêm dữ liệu khi cuộn lên đầu danh sách
-                        mPage++
-                        viewModel.loadMoreDataMessage(mPage)
+        binding.recycleChat.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int,
+                ) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    if (dy < 0) { // Chỉ kiểm tra khi cuộn lên
+                        if (!recyclerView.canScrollVertically(-1)) {
+                            // Gọi API để tải thêm dữ liệu khi cuộn lên đầu danh sách
+                            mPage++
+                            viewModel.loadMoreDataMessage(mPage)
+                        }
                     }
                 }
-            }
-        })
+            },
+        )
         binding.imgPick.setOnClickListener {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
         }

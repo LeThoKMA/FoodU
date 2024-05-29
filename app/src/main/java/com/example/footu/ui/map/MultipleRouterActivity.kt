@@ -1,7 +1,9 @@
 package com.example.footu.ui.map
 
 import android.app.ActionBar.LayoutParams
+import android.content.Intent
 import android.location.Location
+import android.net.Uri
 import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
@@ -15,6 +17,7 @@ import com.example.footu.databinding.MapboxActivityTurnByTurnExperienceBinding
 import com.example.footu.model.OrderShipModel
 import com.example.footu.model.PointWithId
 import com.example.footu.ui.map.MultipleRouterViewModel.UiState
+import com.example.footu.ui.map.dialog.DetailBillBottomSheetDialog
 import com.example.footu.utils.bitmapFromDrawableRes
 import com.example.footu.utils.makerNumber
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -58,15 +61,14 @@ class MultipleRouterActivity :
                         viewAnnotations.keys.find { it.point == pointAnnotation.point }
                     pointWithId?.id?.let {
                         viewModel.handleEvent(MultipleRouterViewModel.Event.DetailBill(it))
-                        val binding = ItemViewPointBinding.inflate(layoutInflater)
-                        viewAnnotations[pointWithId] = Pair(binding, screenCoordinate!!)
+//                        val binding = ItemViewPointBinding.inflate(layoutInflater)
+//                        viewAnnotations[pointWithId] = Pair(binding, screenCoordinate!!)
                     }
                     false
                 },
             )
         }
     }
-    private lateinit var pointAnnotationOptions: PointAnnotationOptions
     private var lastLocation: Location? = null
 
     private val locationObserver =
@@ -102,6 +104,59 @@ class MultipleRouterActivity :
         }
     }
 
+    override fun getContentLayout(): Int {
+        return R.layout.mapbox_activity_turn_by_turn_experience
+    }
+
+    override fun initView() {
+        binding.navigationView.registerMapObserver(mapViewObserver)
+    }
+
+    override fun initListener() {
+    }
+
+    override fun initViewModel(): BaseViewModel {
+        return viewModel
+    }
+
+    private fun requestRoutes(points: List<PointWithId>) {
+        points.forEachIndexed { index, point ->
+            if (index != points.lastIndex && index != 0) {
+                addMakerWithPoint(point.point, index)
+                viewAnnotations[point] = null
+            }
+        }
+        val listPoint = points.map { it.point }
+        MapboxNavigationApp.current()?.requestRoutes(
+            routeOptions =
+                RouteOptions
+                    .builder()
+                    .profile(DirectionsCriteria.PROFILE_DRIVING)
+                    .applyDefaultNavigationOptions()
+                    .coordinatesList(listPoint)
+                    .alternatives(true)
+                    .build(),
+            this,
+        )
+    }
+
+    private fun addDynamicView(detail: OrderShipModel) {
+        val pair = viewAnnotations[viewAnnotations.keys.find { it.id == detail.id }] ?: return
+        val layoutParams =
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+            )
+        layoutParams.leftMargin = pair.second.x.toInt()
+        layoutParams.topMargin = pair.second.y.toInt()
+
+        // Thêm view động vào MapView hoặc FrameLayout bao quanh MapView
+        val binding = pair.first
+        binding.tvName.text = detail.customer?.fullname
+        binding.tvId.text = detail.id.toString()
+        mapView?.addView(binding.root, layoutParams)
+    }
+
     private fun handleUiState(uiState: UiState) {
         when (uiState) {
             is UiState.Position -> {
@@ -115,11 +170,29 @@ class MultipleRouterActivity :
             }
 
             is UiState.DetailBill -> {
-                uiState.data?.let { addDynamicView(it) }
+                uiState.data?.let { showDialogDetailBill(it) }
             }
 
             else -> {}
         }
+    }
+
+    private fun showDialogDetailBill(orderShipModel: OrderShipModel) {
+        val dialog =
+            DetailBillBottomSheetDialog.newInstance(
+                orderShipModel,
+                onClickCall = {
+                    if (orderShipModel.customer?.phone != null) {
+                        val intent = Intent(Intent.ACTION_DIAL)
+                        intent.data = Uri.parse("tel:${orderShipModel.customer.phone}")
+                        startActivity(intent)
+                    } else {
+                        // TODO add zegoCloud call
+                    }
+                },
+                onClickChat = {},
+            )
+        dialog.show(supportFragmentManager, DetailBillBottomSheetDialog.TAG)
     }
 
     private fun showLocationInMap(location: Location) {
@@ -166,59 +239,6 @@ class MultipleRouterActivity :
                     .withIconImage(it)
             pointAnnotationManager?.create(pointAnnotation)
         }
-    }
-
-    override fun getContentLayout(): Int {
-        return R.layout.mapbox_activity_turn_by_turn_experience
-    }
-
-    override fun initView() {
-        binding.navigationView.registerMapObserver(mapViewObserver)
-    }
-
-    override fun initListener() {
-    }
-
-    override fun initViewModel(): BaseViewModel {
-        return viewModel
-    }
-
-    private fun requestRoutes(points: List<PointWithId>) {
-        points.forEachIndexed { index, point ->
-            if (index != points.lastIndex && index != 0) {
-                addMakerWithPoint(point.point, index)
-                viewAnnotations[point] = null
-            }
-        }
-        val listPoint = points.map { it.point }
-        MapboxNavigationApp.current()?.requestRoutes(
-            routeOptions =
-                RouteOptions
-                    .builder()
-                    .profile(DirectionsCriteria.PROFILE_DRIVING)
-                    .applyDefaultNavigationOptions()
-                    .coordinatesList(listPoint)
-                    .alternatives(true)
-                    .build(),
-            this,
-        )
-    }
-
-    fun addDynamicView(detail: OrderShipModel) {
-        val pair = viewAnnotations[viewAnnotations.keys.find { it.id == detail.id }] ?: return
-        val layoutParams =
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-            )
-        layoutParams.leftMargin = pair.second.x.toInt()
-        layoutParams.topMargin = pair.second.y.toInt()
-
-        // Thêm view động vào MapView hoặc FrameLayout bao quanh MapView
-        val binding = pair.first
-        binding.tvName.text = detail.customer?.fullname
-        binding.tvId.text = detail.id.toString()
-        mapView?.addView(binding.root, layoutParams)
     }
 
     override fun onDestroy() {

@@ -93,7 +93,7 @@ dependencies {
 
     implementation "androidx.drawerlayout:drawerlayout:1.1.1"
 
-    implementation 'com.github.bumptech.glide:glide:4.14.2'
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
     androidTestImplementation platform('androidx.compose:compose-bom:2024.05.00')
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
