@@ -15,22 +15,28 @@ import com.example.footu.utils.formatToPrice
 class OrdersAdapter(
     var list: List<OrderShipModel>,
     val context: Context,
-    val callBack: OnClickDetailCallBack,
+    private val callBack: OnClickDetailCallBack,
 ) :
     RecyclerView.Adapter<ViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): RecyclerView.ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        val binding = DataBindingUtil.inflate(
-            layoutInflater,
-            R.layout.item_order_ship,
-            parent,
-            false,
-        ) as ItemOrderShipBinding
+        val binding =
+            DataBindingUtil.inflate(
+                layoutInflater,
+                R.layout.item_order_ship,
+                parent,
+                false,
+            ) as ItemOrderShipBinding
         return ViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+    ) {
         (holder as ViewHolder).bindView(list[position], callBack)
     }
 
@@ -39,15 +45,18 @@ class OrdersAdapter(
     }
 
     class ViewHolder(val binding: ItemOrderShipBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bindView(item: OrderShipModel, callBack: OnClickDetailCallBack) {
+        fun bindView(
+            item: OrderShipModel,
+            callBack: OnClickDetailCallBack,
+        ) {
             item.billItemList.get(0).item?.imgUrl?.let {
                 Glide.with(binding.root.context)
                     .load(it[0]).into(binding.imgItem)
             }
             binding.tvName.text = item.customer?.fullname
-            //binding.tvPhone.text = item.customer?.phone
+            // binding.tvPhone.text = item.customer?.phone
             binding.tvPrice.text = item.totalPrice.formatToPrice()
-            binding.root.setOnClickListener {
+            binding.cardView.setOnClickListener {
                 callBack.onClickDetail(item)
             }
         }
