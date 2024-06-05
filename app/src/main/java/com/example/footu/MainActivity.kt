@@ -18,6 +18,7 @@ import com.example.footu.ui.account.AccountFragment
 import com.example.footu.ui.chat.ChatFragment
 import com.example.footu.ui.shipper.home.OrderListScreen
 import com.example.footu.ui.shipper.picked.OrderShipPickedFragment
+import com.example.footu.utils.ID_CHANNEL_LOCATION_SOCKET
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
@@ -109,8 +110,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         )
 
         initFirebase()
-        LocationEmitter.emitLocation()
         setupPager()
+        startLocationService()
+    }
+
+    private fun startLocationService() {
+        val intent = Intent(this, SocketService::class.java)
+        intent.putExtra(ID_CHANNEL_LOCATION_SOCKET, MyPreference.getInstance()?.getUser()?.id)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
     }
 
     private fun initFirebase() {
