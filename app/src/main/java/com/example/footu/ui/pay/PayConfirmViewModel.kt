@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.footu.MyPreferencee
+import com.example.footu.EncryptPreference
 import com.example.footu.R
 import com.example.footu.Request.ItemBillRequest
 import com.example.footu.Request.UserOrderRequest
@@ -39,7 +39,7 @@ import javax.inject.Inject
 class PayConfirmViewModel @Inject constructor(
     val apiService: ApiService,
     @ApplicationContext context: Context,
-    val sharePref: MyPreferencee,
+    val sharePref: EncryptPreference,
 ) : BaseViewModel() {
 
     private val _message = MutableLiveData<String>()

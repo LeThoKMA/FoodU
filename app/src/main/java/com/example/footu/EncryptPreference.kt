@@ -10,7 +10,7 @@ import com.example.footu.utils.PREF_REFRESH_TOKEN
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-class MyPreferencee @Inject constructor(
+class EncryptPreference @Inject constructor(
     @ApplicationContext context: Context,
 ) {
     private var pref: SharedPreferences? = null

@@ -17,7 +17,7 @@ class MainViewModel
 @Inject
 constructor(
     private val apiService: ApiService,
-    private val sharePref: MyPreferencee,
+    private val sharePref: EncryptPreference,
 ) : BaseViewModel() {
 
     val user = sharePref.getUser()

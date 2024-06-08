@@ -3,7 +3,7 @@ package com.example.footu.ui.shipper
 // import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallConfigProvider
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import com.example.footu.MyPreferencee
+import com.example.footu.EncryptPreference
 import com.example.footu.base.BaseViewModel
 import com.example.footu.dagger2.App
 import com.example.footu.model.OrderShipModel
@@ -35,7 +35,7 @@ constructor(
     private val apiService: ApiService,
     @ApplicationContext
     private val context: Context,
-    private val sharePref: MyPreferencee,
+    private val sharePref: EncryptPreference,
 ) : BaseViewModel() {
     private val _onSuccess = MutableStateFlow(false)
     val onSuccess: StateFlow<Boolean> = _onSuccess.asStateFlow()

@@ -1,7 +1,7 @@
 package com.example.footu.hilt
 
 import android.content.Context
-import com.example.footu.MyPreferencee
+import com.example.footu.EncryptPreference
 import com.example.footu.dagger2.App
 import dagger.Module
 import dagger.Provides
@@ -36,7 +36,7 @@ object ModuleRepository {
 object SharePrefModule {
     @Singleton
     @Provides
-    fun provideSharePref(@ApplicationContext context: Context): MyPreferencee {
-        return MyPreferencee(context)
+    fun provideSharePref(@ApplicationContext context: Context): EncryptPreference {
+        return EncryptPreference(context)
     }
 }

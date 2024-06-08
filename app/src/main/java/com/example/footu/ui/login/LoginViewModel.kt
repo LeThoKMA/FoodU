@@ -5,7 +5,7 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.footu.MyPreferencee
+import com.example.footu.EncryptPreference
 import com.example.footu.Request.RefreshTokenRequest
 import com.example.footu.Request.RegisterRequest
 import com.example.footu.base.BaseViewModel
@@ -33,7 +33,7 @@ class LoginViewModel
 constructor(
     val apiService: ApiService,
     val appInstance: App,
-    val sharePref: MyPreferencee,
+    val sharePref: EncryptPreference,
 ) : BaseViewModel() {
     private val _doLogin = MutableLiveData<Int?>()
     val doLogin: LiveData<Int?> = _doLogin

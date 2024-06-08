@@ -3,7 +3,7 @@ package com.example.footu.ui.chat.activity
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
-import com.example.footu.MyPreferencee
+import com.example.footu.EncryptPreference
 import com.example.footu.Request.HintRequest
 import com.example.footu.Request.MessageRequest
 import com.example.footu.Response.HintResponse
@@ -38,7 +38,7 @@ class UserChatViewModel
 @Inject
 constructor(
     val apiService: ApiService,
-    private val sharePref: MyPreferencee,
+    private val sharePref: EncryptPreference,
 ) : BaseViewModel() {
     private val user = sharePref.getUser()
     private val _stateFlow = MutableStateFlow<StateUi>(StateUi.TotalMessage())

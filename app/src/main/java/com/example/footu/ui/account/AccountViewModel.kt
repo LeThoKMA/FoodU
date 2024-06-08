@@ -3,7 +3,7 @@ package com.example.footu.ui.account
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.footu.MyPreferencee
+import com.example.footu.EncryptPreference
 import com.example.footu.Request.ChangePassRequest
 import com.example.footu.base.BaseViewModel
 import com.example.footu.network.ApiService
@@ -22,7 +22,7 @@ class AccountViewModel @Inject constructor(
     var apiService: ApiService,
     @ApplicationContext
     var context: Context,
-    private val sharePref: MyPreferencee
+    private val sharePref: EncryptPreference
 ) : BaseViewModel() {
     val logout = MutableLiveData<Boolean>()
     val message = MutableLiveData<String>()

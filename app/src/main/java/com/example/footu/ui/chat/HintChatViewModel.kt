@@ -1,7 +1,7 @@
 package com.example.footu.ui.chat
 
 import androidx.lifecycle.viewModelScope
-import com.example.footu.MyPreferencee
+import com.example.footu.EncryptPreference
 import com.example.footu.Response.HintMessageResponse
 import com.example.footu.base.BaseViewModel
 import com.example.footu.network.ApiService
@@ -16,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HintChatViewModel @Inject constructor(
     private val apiService: ApiService,
-    private val sharePref: MyPreferencee
+    private val sharePref: EncryptPreference
 ) : BaseViewModel() {
 
     private val user = sharePref.getUser()
