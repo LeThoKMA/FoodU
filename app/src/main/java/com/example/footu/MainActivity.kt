@@ -116,7 +116,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     private fun startLocationService() {
         val intent = Intent(this, SocketService::class.java)
-        intent.putExtra(ID_CHANNEL_LOCATION_SOCKET, MyPreference.getInstance()?.getUser()?.id)
+        intent.putExtra(ID_CHANNEL_LOCATION_SOCKET, viewModel.user.id)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent)
         } else {

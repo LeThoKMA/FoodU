@@ -273,3 +273,4 @@ fun makerNumber(
     )
     return bitmap
 }
+

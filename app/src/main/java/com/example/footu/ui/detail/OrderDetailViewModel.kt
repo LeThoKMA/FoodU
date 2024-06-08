@@ -1,7 +1,7 @@
 package com.example.footu.ui.detail
 
 import androidx.lifecycle.viewModelScope
-import com.example.footu.MyPreference
+import com.example.footu.MyPreferencee
 import com.example.footu.base.BaseViewModel
 import com.example.footu.model.OrderShipModel
 import com.example.footu.network.ApiService
@@ -18,10 +18,11 @@ import javax.inject.Inject
 @HiltViewModel
 class OrderDetailViewModel @Inject constructor(
     val apiService: ApiService,
+    private val sharePref: MyPreferencee,
 ) : BaseViewModel() {
     private val _ordersDetail = MutableStateFlow<List<OrderShipModel>>(emptyList())
     val ordersDetail: StateFlow<List<OrderShipModel>> = _ordersDetail
-    private val user = MyPreference.getInstance()?.getUser()
+    private val user = sharePref.getUser()
 
     init {
         viewModelScope.launch {

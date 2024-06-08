@@ -3,17 +3,14 @@ package com.example.footu.ui.login
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import com.example.footu.MainActivity
 import com.example.footu.MainActivityForUser
-import com.example.footu.MyPreference
 import com.example.footu.R
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
 import com.example.footu.databinding.ActivitySplashScreenBinding
-import com.example.footu.model.User
 import dagger.hilt.android.AndroidEntryPoint
 
 @SuppressLint("CustomSplashScreen")
@@ -32,6 +29,12 @@ class SplashScreen : BaseActivity<ActivitySplashScreenBinding>() {
                 finishAffinity()
             }
         }
+        viewModel.loginBack.observe(this) {
+            if (it) {
+                startActivity(Intent(this, SignInActivity::class.java))
+                finishAffinity()
+            }
+        }
     }
 
     override fun getContentLayout(): Int {
@@ -40,16 +43,11 @@ class SplashScreen : BaseActivity<ActivitySplashScreenBinding>() {
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun initView() {
-        val preference = MyPreference.getInstance()
-        Log.e(">>>>>>", preference?.getUser().toString())
-        if (preference?.getUser() == User()) {
+        if (!viewModel.haveToken()) {
             startActivity(Intent(this, SignInActivity::class.java))
             finishAffinity()
         } else {
-            viewModel.signIn(
-                preference?.getUser()?.username.toString(),
-                preference?.getPasswd().toString(),
-            )
+            viewModel.fetchUserInfo()
         }
     }
 

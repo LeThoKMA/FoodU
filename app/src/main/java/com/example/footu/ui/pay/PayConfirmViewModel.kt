@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.footu.MyPreference
+import com.example.footu.MyPreferencee
 import com.example.footu.R
 import com.example.footu.Request.ItemBillRequest
 import com.example.footu.Request.UserOrderRequest
@@ -39,6 +39,7 @@ import javax.inject.Inject
 class PayConfirmViewModel @Inject constructor(
     val apiService: ApiService,
     @ApplicationContext context: Context,
+    val sharePref: MyPreferencee,
 ) : BaseViewModel() {
 
     private val _message = MutableLiveData<String>()
@@ -50,7 +51,7 @@ class PayConfirmViewModel @Inject constructor(
     private val _isShowDialog = MutableLiveData(false)
     val isShowDialog: LiveData<Boolean> = _isShowDialog
 
-    val user = MyPreference.getInstance()?.getUser()
+    val user = sharePref.getUser()
 
     private var idOrder = -1
     private val accessToken = context.getString(R.string.mapbox_access_token)
@@ -71,7 +72,17 @@ class PayConfirmViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val billItems = mutableListOf<ItemBillRequest>()
-            itemList.forEach { billItems.add(ItemBillRequest(it.id, it.count, it.totalPrice, it.size?.ordinal, it.textDescription)) }
+            itemList.forEach {
+                billItems.add(
+                    ItemBillRequest(
+                        it.id,
+                        it.count,
+                        it.totalPrice,
+                        it.size?.ordinal,
+                        it.textDescription,
+                    ),
+                )
+            }
             val request = UserOrderRequest(billItems, promotionUser?.id, price)
             val userLocationModel =
                 UserLocationModel(user!!.id, user.fullname, latLong.first, latLong.second)

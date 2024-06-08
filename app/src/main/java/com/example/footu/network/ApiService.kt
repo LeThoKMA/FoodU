@@ -4,6 +4,7 @@ import com.example.footu.Request.ChangePassRequest
 import com.example.footu.Request.ConfirmBillRequest
 import com.example.footu.Request.HintRequest
 import com.example.footu.Request.ItemBillRequest
+import com.example.footu.Request.RefreshTokenRequest
 import com.example.footu.Request.RegisterRequest
 import com.example.footu.Request.UserOrderRequest
 import com.example.footu.Response.BaseResponse
@@ -15,6 +16,7 @@ import com.example.footu.Response.HintMessageResponse
 import com.example.footu.Response.HintResponse
 import com.example.footu.Response.LoginResponse
 import com.example.footu.Response.PointResponse
+import com.example.footu.Response.RefreshTokenResponse
 import com.example.footu.Response.TotalMessageResponse
 import com.example.footu.model.Item
 import com.example.footu.model.ItemStatistic
@@ -36,6 +38,9 @@ interface ApiService {
     suspend fun login(
         @Body user: LoginRequest,
     ): BaseResponse<LoginResponse>
+
+    @POST("auth/refresh-token")
+    suspend fun refreshToken(@Body request: RefreshTokenRequest): BaseResponse<RefreshTokenResponse>
 
     @GET("home/all")
     suspend fun getItems(): BaseResponse<List<Item>>

@@ -3,10 +3,9 @@ package com.example.footu.ui.account
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.footu.MyPreference
+import com.example.footu.MyPreferencee
 import com.example.footu.Request.ChangePassRequest
 import com.example.footu.base.BaseViewModel
-import com.example.footu.hilt.Repository
 import com.example.footu.network.ApiService
 import com.example.footu.utils.toast
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +22,7 @@ class AccountViewModel @Inject constructor(
     var apiService: ApiService,
     @ApplicationContext
     var context: Context,
-    val repository: Repository,
+    private val sharePref: MyPreferencee
 ) : BaseViewModel() {
     val logout = MutableLiveData<Boolean>()
     val message = MutableLiveData<String>()
@@ -33,7 +32,7 @@ class AccountViewModel @Inject constructor(
             flow { emit(apiService.logout()) }
                 .catch { handleApiError(it) }
                 .collect {
-                    MyPreference.getInstance()?.logout()
+                    sharePref.logout()
                     logout.postValue(true)
                 }
         }

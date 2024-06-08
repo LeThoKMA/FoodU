@@ -8,6 +8,8 @@ import com.example.footu.base.BaseViewModel
 import com.example.footu.model.Item
 import com.example.footu.network.ApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
@@ -33,7 +35,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun fetchItems() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             flow {
                 emit(
                     Triple(
@@ -43,6 +45,7 @@ class HomeViewModel @Inject constructor(
                     ),
                 )
             }.onStart { onRetrievePostListStart() }
+                .catch { handleApiError(it) }
                 .onCompletion { onRetrievePostListFinish() }
                 .collect {
                     dataItems.postValue(it.first.data as ArrayList<Item>?)

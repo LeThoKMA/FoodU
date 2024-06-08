@@ -1,7 +1,6 @@
 package com.example.footu.Response
 
 import android.os.Parcelable
-import com.example.footu.MyPreference
 import com.example.footu.model.User
 import kotlinx.parcelize.Parcelize
 
@@ -16,10 +15,11 @@ data class MessageResponse(
     val time: String,
     val type: Int = 0,
     @Transient
-    var byteArray: ByteArray? = byteArrayOf()
+    var byteArray: ByteArray? = byteArrayOf(),
+    @Transient
+    var isSendByUser: Boolean = false,
 
 ) : Parcelable {
-    val isSendByUser get() = fromUser.id == MyPreference.getInstance()?.getUser()?.id
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
