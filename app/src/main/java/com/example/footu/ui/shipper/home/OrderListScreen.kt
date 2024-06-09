@@ -51,7 +51,6 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class OrderListScreen : BaseFragment<ActivityShipBinding>() {
-
     private var launcher: ActivityResultLauncher<Intent>? = null
 
     private val viewModel: OrderShipViewModel by viewModels()
@@ -79,36 +78,39 @@ class OrderListScreen : BaseFragment<ActivityShipBinding>() {
     }
 
     override fun initView() {
-        launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == Activity.RESULT_OK) {
-                itemDelete?.let { it1 -> viewModel.onDeleteItem(it1) }
-                itemDelete = null
-            }
-        }
-        newAdapter = NewOrdersAdapter(object : NewOnClickDetailCallBack {
-            override fun onClickDetail(item: OrderShipModel) {
-                val options = ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity())
-                itemDelete = item
-                val intent = Intent(requireContext(), OrderDetailActivity::class.java)
-                intent.putExtra("item", item)
-                intent.putExtra("type", 0)
-                launcher?.launch(intent, options)
-            }
-        })
-        binding.rvOrders.layoutManager = LinearLayoutManager(binding.root.context)
-        adapter = OrdersAdapter(
-            viewModel.state.value.orderList,
-            binding.root.context,
-            object : OnClickDetailCallBack {
-                override fun onClickDetail(item: OrderShipModel) {
-                    itemDelete = item
-                    val intent = Intent(binding.root.context, OrderDetailActivity::class.java)
-                    intent.putExtra("item", item)
-                    intent.putExtra("type", 0)
-                    launcher?.launch(intent)
+        launcher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                if (it.resultCode == Activity.RESULT_OK) {
+                    itemDelete?.let { it1 -> viewModel.onDeleteItem(it1) }
+                    itemDelete = null
                 }
-            },
-        )
+            }
+        newAdapter =
+            NewOrdersAdapter(
+                object : NewOnClickDetailCallBack {
+                    override fun onClickDetail(item: OrderShipModel) {
+                        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity())
+                        itemDelete = item
+                        val intent = Intent(requireContext(), OrderDetailActivity::class.java)
+                        intent.putExtra("item", item)
+                        launcher?.launch(intent, options)
+                    }
+                },
+            )
+        binding.rvOrders.layoutManager = LinearLayoutManager(binding.root.context)
+        adapter =
+            OrdersAdapter(
+                viewModel.state.value.orderList,
+                binding.root.context,
+                object : OnClickDetailCallBack {
+                    override fun onClickDetail(item: OrderShipModel) {
+                        itemDelete = item
+                        val intent = Intent(binding.root.context, OrderDetailActivity::class.java)
+                        intent.putExtra("item", item)
+                        launcher?.launch(intent)
+                    }
+                },
+            )
         binding.rvOrders.adapter = newAdapter
     }
 
@@ -134,13 +136,14 @@ class OrderListScreen : BaseFragment<ActivityShipBinding>() {
             mutableStateOf(uiState.value.orderList)
         }
 
-        val onClickItem = remember<(OrderShipModel) -> Unit> {
-            {
+        val onClickItem =
+            remember<(OrderShipModel) -> Unit> {
+                {
 //              //  val intent = Intent(this.context, OrderDetailActivity::class.java)
 //                intent.putExtra("item", it)
 //                startActivity(intent)
+                }
             }
-        }
 
         SideEffect {
             viewModel.viewModelScope.launch {
@@ -151,9 +154,10 @@ class OrderListScreen : BaseFragment<ActivityShipBinding>() {
         }
 
         Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 itemsIndexed(
@@ -161,26 +165,29 @@ class OrderListScreen : BaseFragment<ActivityShipBinding>() {
                     key = { index: Int, item: OrderShipModel -> item.id },
                 ) { index, item ->
 
-                    val url = remember {
-                        mutableStateOf(item.billItemList[0].item?.imgUrl ?: "")
-                    }
+                    val url =
+                        remember {
+                            mutableStateOf(item.billItemList[0].item?.imgUrl ?: "")
+                        }
 
                     Row(
-                        modifier = Modifier
-                            .padding(vertical = 4.dp, horizontal = 8.dp)
-                            .fillMaxWidth()
-                            .fillMaxSize(0.2f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .shadow(2.dp)
-                            .clickable { onClickItem.invoke(item) },
+                        modifier =
+                            Modifier
+                                .padding(vertical = 4.dp, horizontal = 8.dp)
+                                .fillMaxWidth()
+                                .fillMaxSize(0.2f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .shadow(2.dp)
+                                .clickable { onClickItem.invoke(item) },
                     ) {
                         AsyncImage(
                             model = url,
                             contentDescription = index.toString(),
-                            modifier = Modifier
-                                .padding(horizontal = 4.dp)
-                                .fillMaxHeight()
-                                .width(80.dp),
+                            modifier =
+                                Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .fillMaxHeight()
+                                    .width(80.dp),
                         )
                         Column {
                             Text(

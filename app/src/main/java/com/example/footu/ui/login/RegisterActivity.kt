@@ -14,6 +14,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class RegisterActivity :
     BaseActivity<ActivityAddUserBinding>() {
     private val viewModel: LoginViewModel by viewModels()
+
     override fun getContentLayout(): Int {
         return R.layout.activity_add_user
     }
@@ -30,6 +31,7 @@ class RegisterActivity :
                 binding.edtName.text.toString(),
                 binding.edtPasswd.text.toString(),
                 binding.edtConfirmPasswd.text.toString(),
+                binding.edtAccount.text.toString(),
             )
         }
     }

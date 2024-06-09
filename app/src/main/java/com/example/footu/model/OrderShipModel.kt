@@ -14,4 +14,6 @@ data class OrderShipModel(
     val address: String,
     val lat: Double?,
     val longitude: Double?,
-) : Parcelable
+) : Parcelable {
+    val isPicked get() = shipper != null
+}

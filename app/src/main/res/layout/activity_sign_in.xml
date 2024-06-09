@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="18dp"
                 android:layout_marginTop="14dp"
-                android:text="Số điện thoại"
+                android:text="Tài khoản"
                 android:textColor="@color/black"
                 android:textSize="13sp"
                 android:textStyle="bold"

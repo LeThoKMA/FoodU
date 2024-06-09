@@ -75,7 +75,6 @@ class OrderShipPickedFragment :
         val options = ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity())
         val intent = Intent(requireContext(), OrderDetailActivity::class.java)
         intent.putExtra("item", item)
-        intent.putExtra("type", 0)
         launcher?.launch(intent, options)
     }
 }

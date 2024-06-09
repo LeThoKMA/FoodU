@@ -76,9 +76,6 @@ class OrderDetailActivity : ComponentActivity() {
             intent.getParcelableExtra("item")
         }
     }
-    private val type by lazy {
-        intent.getIntExtra("type", -1)
-    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -116,7 +113,7 @@ class OrderDetailActivity : ComponentActivity() {
                             setResult(RESULT_OK)
                             finish()
                         },
-                        type,
+                        it.isPicked,
                     )
                 }
             }
@@ -129,7 +126,7 @@ fun OrderDetailScreen(
     item: OrderShipModel,
     paddingValues: PaddingValues,
     onAccepted: () -> Unit,
-    type: Int,
+    isPicked: Boolean,
     viewModel: OrderDetailViewModel = hiltViewModel(),
 ) {
     val phoneNumber = item.customer?.phone
@@ -360,9 +357,9 @@ fun OrderDetailScreen(
                     .wrapContentHeight(),
         ) {
             Button(
-                onClick = { if (type == 0) onAccept() else onDone() },
+                onClick = { if (!isPicked) onAccept() else onDone() },
             ) {
-                Text(text = if (type == 0) "Nhận đơn" else "Hoàn thành đơn hàng")
+                Text(text = if (!isPicked) "Nhận đơn" else "Hoàn thành đơn hàng")
             }
         }
     }

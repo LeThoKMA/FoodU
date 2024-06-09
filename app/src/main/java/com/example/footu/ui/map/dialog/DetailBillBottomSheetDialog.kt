@@ -21,6 +21,13 @@ class DetailBillBottomSheetDialog : BottomSheetDialogFragment(R.layout.item_view
     private var binding: ItemViewPointBinding? = null
     private var onClickCall: () -> Unit = {}
     private var onClickChat: () -> Unit = {}
+    private var showChat: Boolean = false
+        set(value) {
+            field = value
+            binding?.chatFragment?.visibility = if (value) View.VISIBLE else View.GONE
+            binding?.fabChat?.visibility = if (value) View.VISIBLE else View.GONE
+        }
+    private var chatFragment: FloatingChatFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,18 +66,22 @@ class DetailBillBottomSheetDialog : BottomSheetDialogFragment(R.layout.item_view
             onClickCall.invoke()
         }
         binding?.tvMessage?.setOnClickListener {
-            val chatFragment =
-                data?.customer?.let { it1 ->
-                    FloatingChatFragment.newInstance(it1)
-                }
-            chatFragment?.let {
-                childFragmentManager.commit {
-                    setReorderingAllowed(true)
-                    add(R.id.chatFragment, chatFragment, FloatingChatFragment.TAG)
+            showChat = !showChat
+            if (showChat) {
+                val existingFragment = childFragmentManager.findFragmentByTag(FloatingChatFragment.TAG)
+                if (existingFragment == null) {
+                    chatFragment =
+                        data?.customer?.let { customer ->
+                            FloatingChatFragment.newInstance(customer)
+                        }
+                    chatFragment?.let { fragment ->
+                        childFragmentManager.commit {
+                            setReorderingAllowed(true)
+                            add(R.id.chatFragment, fragment, FloatingChatFragment.TAG)
+                        }
+                    }
                 }
             }
-            binding?.chatFragment?.visibility = View.VISIBLE
-            binding?.fabChat?.visibility = View.VISIBLE
         }
 
         binding?.fabChat?.setOnClickListener {
@@ -79,19 +90,6 @@ class DetailBillBottomSheetDialog : BottomSheetDialogFragment(R.layout.item_view
             startActivity(intent)
             this.dismiss()
         }
-//        binding?.chatFragment?.setOnTouchListener { v, event ->
-//            when (event.action) {
-//                MotionEvent.ACTION_DOWN -> {
-//                    bottomSheetBehavior.isDraggable = true
-//                }
-//
-//                else -> {
-//                    bottomSheetBehavior.isDraggable = false
-//                }
-//            }
-//            view.performClick()
-//            true
-//        }
     }
 
     companion object {
