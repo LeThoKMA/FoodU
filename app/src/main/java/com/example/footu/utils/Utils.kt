@@ -17,6 +17,7 @@ import android.provider.OpenableColumns
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
 import com.example.footu.R
+import com.mapbox.geojson.Point
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -26,6 +27,10 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.security.SecureRandom
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 fun generateRandomIV(): ByteArray {
@@ -274,3 +279,20 @@ fun makerNumber(
     return bitmap
 }
 
+fun calculateDistance(
+    start: Point,
+    end: Point,
+): Double {
+    val earthRadius = 6371000.0 // bán kính trái đất tính bằng mét
+
+    val dLat = Math.toRadians(end.latitude() - start.latitude())
+    val dLng = Math.toRadians(end.longitude() - start.longitude())
+
+    val a =
+        sin(dLat / 2) * sin(dLat / 2) +
+            cos(Math.toRadians(start.latitude())) * cos(Math.toRadians(end.latitude())) *
+            sin(dLng / 2) * sin(dLng / 2)
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return earthRadius * c
+}

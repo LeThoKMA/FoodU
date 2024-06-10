@@ -1,6 +1,8 @@
 package com.example.footu.ui.map
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.TypeEvaluator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
@@ -8,7 +10,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import android.util.Log
-import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.LinearInterpolator
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -36,7 +38,6 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -45,7 +46,10 @@ class TrackingLocationActivity :
     BaseActivity<ActivityTrackingLocationBinding>() {
     private val viewModel: TrackingLocationViewModel by viewModels()
     private var animator: ValueAnimator? = null
-    private var animateDuration = 10100L
+    private var listPoint = mutableListOf<Point>()
+    private var animateDuration = 9000L
+    private val speed = 11 // m/s
+    private var isAnimate = false
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var lastLocation: Location? = null
     private lateinit var point: Point
@@ -69,8 +73,10 @@ class TrackingLocationActivity :
         lifecycleScope.launch(Dispatchers.Main) {
             viewModel.locationStateFlow.collectLatest {
                 if (it?.lat != null && it.long != null) {
-                    addOrUpdateAnnotationToMap(it.lat, it.long)
-                    delay(10000)
+                    listPoint.add(Point.fromLngLat(it.long, it.lat))
+                    if (!isAnimate) {
+                        addOrUpdateAnnotationToMap(it.lat, it.long)
+                    }
                 }
             }
         }
@@ -219,6 +225,7 @@ class TrackingLocationActivity :
         nextPoint: Point,
     ) {
         cleanAnimation()
+        isAnimate = true
         animator =
             ValueAnimator.ofObject(
                 TypeEvaluator<Point> { fraction, startValue, endValue ->
@@ -230,17 +237,41 @@ class TrackingLocationActivity :
                 oldPoint,
                 nextPoint,
             ).apply {
+//                val distance = calculateDistance(oldPoint, nextPoint)
+//
+//                // Tính thời gian animation dựa trên khoảng cách và tốc độ
+//                duration = (distance / speed * 1000).toLong() // chuyển sang milliseconds
                 duration = animateDuration
-                interpolator = AccelerateDecelerateInterpolator()
+                interpolator = LinearInterpolator()
                 addUpdateListener { valueAnimator ->
                     (valueAnimator.animatedValue as Point).let {
                         shipperLocationAnnotation?.point = it
+                    }
+                    if (valueAnimator.animatedFraction >= 0.9f && listPoint.size >= 2) {
+                        val currentPoint = shipperLocationAnnotation?.point ?: nextPoint
+                        val point = listPoint[1]
+                        listPoint.removeAt(0)
+                        animateCars(currentPoint, point)
                     }
                 }
                 start()
                 addUpdateListener {
                     pointAnnotationManager.update(shipperLocationAnnotation!!)
                 }
+                addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            super.onAnimationEnd(animation)
+//                            if (listPoint.size >= 2) {
+//                                val point = listPoint[1]
+//                                listPoint.removeAt(0)
+//                                animateCars(shipperLocationAnnotation?.point!!, point)
+//                            } else {
+                            isAnimate = false
+                            // }
+                        }
+                    },
+                )
             }
     }
 
@@ -303,5 +334,11 @@ class TrackingLocationActivity :
                 // Xử lý tương ứng, ví dụ: hiển thị thông báo rằng quyền không được cấp
             }
         }
+    }
+
+    override fun onDestroy() {
+        MapboxNavigationApp.current()?.unregisterLocationObserver(locationObserver)
+        cleanAnimation()
+        super.onDestroy()
     }
 }

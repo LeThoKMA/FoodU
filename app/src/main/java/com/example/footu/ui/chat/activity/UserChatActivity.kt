@@ -16,19 +16,27 @@ import com.example.footu.R
 import com.example.footu.Response.MessageResponse
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
+import com.example.footu.dagger2.App
 import com.example.footu.databinding.ActivityUserChatBinding
 import com.example.footu.model.User
 import com.example.footu.ui.chat.adapter.MessageAdapter
+import com.example.footu.utils.APP_ID
+import com.example.footu.utils.APP_SIGN
 import com.example.footu.utils.OTHER_USER_ID
 import com.example.footu.utils.convertUriToBitmap
 import com.example.footu.utils.getVideoFileSize
 import com.example.footu.utils.isVideoFile
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig
+import com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton
+import com.zegocloud.uikit.service.defines.ZegoUIKitUser
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Collections
 
 @AndroidEntryPoint
 class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
@@ -158,6 +166,51 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
         )
         binding.imgPick.setOnClickListener {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
+        }
+        binding.imgCallVideo.setOnClickListener {
+            val callInvitationConfig = ZegoUIKitPrebuiltCallInvitationConfig()
+            ZegoUIKitPrebuiltCallService.init(
+                App.getInstance(),
+                APP_ID,
+                APP_SIGN,
+                viewModel.user.id.toString(),
+                viewModel.user.fullname,
+                callInvitationConfig,
+            )
+            val button = ZegoSendCallInvitationButton(this)
+            button.setIsVideoCall(true)
+            button.setResourceID("zego_uikit_call")
+            button.setInvitees(
+                Collections.singletonList(
+                    ZegoUIKitUser(
+                        otherUserId?.id.toString(),
+                        otherUserId?.fullname,
+                    ),
+                ),
+            )
+        }
+        binding.imgCallVideo.setOnClickListener {
+            val callInvitationConfig = ZegoUIKitPrebuiltCallInvitationConfig()
+            ZegoUIKitPrebuiltCallService.init(
+                App.getInstance(),
+                APP_ID,
+                APP_SIGN,
+                viewModel.user.id.toString(),
+                viewModel.user.fullname,
+                callInvitationConfig,
+            )
+            val button = ZegoSendCallInvitationButton(this)
+            button.setIsVideoCall(false)
+            button.setResourceID("zego_uikit_call")
+            button.setInvitees(
+                Collections.singletonList(
+                    ZegoUIKitUser(
+                        otherUserId?.id.toString(),
+                        otherUserId?.fullname,
+                    ),
+                ),
+            )
+            println( otherUserId?.id)
         }
     }
 

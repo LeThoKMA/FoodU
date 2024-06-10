@@ -1,6 +1,7 @@
 package com.example.footu
 
 import android.Manifest
+import android.Manifest.permission.SYSTEM_ALERT_WINDOW
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -20,6 +21,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
+import com.example.footu.dagger2.App
 import com.example.footu.databinding.ActivityMainBinding
 import com.example.footu.model.DetailItemChoose
 import com.example.footu.ui.account.AccountFragment
@@ -27,9 +29,13 @@ import com.example.footu.ui.cart.CartFragment
 import com.example.footu.ui.chat.ChatFragment
 import com.example.footu.ui.detail.OrderDetailFragment
 import com.example.footu.ui.home.HomeFragment
+import com.example.footu.utils.APP_ID
+import com.example.footu.utils.APP_SIGN
 import com.example.footu.utils.ITEMS_CHOOSE
 import com.example.footu.utils.ITEMS_CHOOSE_ACTION
 import com.example.footu.utils.hideSoftKeyboard
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -38,7 +44,6 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
-
     private val viewModel: MainUserViewModel by viewModels()
 
     private val homeFragment by lazy {
@@ -61,15 +66,19 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
     }
     private var job: Job? = null
 
-    private val broadcastItems = object : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, p1: Intent?) {
-            if (p1?.hasExtra(ITEMS_CHOOSE) == true) {
-                val receivedList: ArrayList<DetailItemChoose> =
-                    p1.getParcelableArrayListExtra(ITEMS_CHOOSE)!!
-                viewModel.handleItemsCart(receivedList)
+    private val broadcastItems =
+        object : BroadcastReceiver() {
+            override fun onReceive(
+                p0: Context?,
+                p1: Intent?,
+            ) {
+                if (p1?.hasExtra(ITEMS_CHOOSE) == true) {
+                    val receivedList: ArrayList<DetailItemChoose> =
+                        p1.getParcelableArrayListExtra(ITEMS_CHOOSE)!!
+                    viewModel.handleItemsCart(receivedList)
+                }
             }
         }
-    }
 
     override fun observerData() {
         viewModel.totalPrice.observe(this) {
@@ -86,13 +95,14 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
                 animation.interpolator = LinearInterpolator()
                 animation.start()
 
-                job = lifecycleScope.launch {
-                    while (this.isActive) {
-                        binding.fab.startAnimation(scaleUp)
-                        delay(2500L)
-                        binding.fab.startAnimation(scaleDown)
+                job =
+                    lifecycleScope.launch {
+                        while (this.isActive) {
+                            binding.fab.startAnimation(scaleUp)
+                            delay(2500L)
+                            binding.fab.startAnimation(scaleDown)
+                        }
                     }
-                }
             } else {
                 job?.cancel()
                 binding.fab.visibility = View.GONE
@@ -120,55 +130,11 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
     override fun initView() {
         setColorForStatusBar(R.color.colorPrimary)
         setLightIconStatusBar(true)
-        val requestPermission = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions(),
-        ) { permissions ->
-            if (permissions.getOrDefault(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    false,
-                ) || permissions.getOrDefault(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    false,
-                )
-            ) {
-                if (!isLocationEnabled()) {
-                    requestLocationEnable(this)
-                }
-            } else {
-                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivity(intent)
-            }
-        }
-
-// ...
-
-// Before you perform the actual permission request, check whether your app
-// already has the permissions, and whether your app needs to show a permission
-// rationale dialog. For more details, see Request permissions.
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            requestPermission.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO,
-                ),
-            )
-        } else {
-            requestPermission.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO,
-                ),
-            )
-        }
+        requestPermission()
         val intentFilter = IntentFilter(ITEMS_CHOOSE_ACTION)
         registerReceiver(broadcastItems, intentFilter)
         setupPager()
+        configCallService()
     }
 
     override fun initListener() {
@@ -214,7 +180,10 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
         return viewModel
     }
 
-    private fun showFragment(currentFragment: Fragment, targetFragment: Fragment) {
+    private fun showFragment(
+        currentFragment: Fragment,
+        targetFragment: Fragment,
+    ) {
         supportFragmentManager
             .beginTransaction()
             .hide(currentFragment)
@@ -224,8 +193,108 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
         loadingDialog?.hide()
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun requestPermission() {
+        val requestPermission =
+            registerForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions(),
+            ) { permissions ->
+                if (!permissions.getOrDefault(
+                        Manifest.permission.POST_NOTIFICATIONS,
+                        false,
+                    ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                ) {
+                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                    startActivity(intent)
+                }
+
+                if (permissions.getOrDefault(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        false,
+                    ) ||
+                    permissions.getOrDefault(
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        false,
+                    )
+                ) {
+                    if (!isLocationEnabled()) {
+                        requestLocationEnable(this)
+                    }
+                } else {
+                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    startActivity(intent)
+                }
+            }
+
+// ...
+
+// Before you perform the actual permission request, check whether your app
+// already has the permissions, and whether your app needs to show a permission
+// rationale dialog. For more details, see Request permissions.
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermission.launch(
+                arrayOf(
+                    SYSTEM_ALERT_WINDOW,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                ),
+            )
+        } else {
+            requestPermission.launch(
+                arrayOf(
+                    SYSTEM_ALERT_WINDOW,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                ),
+            )
+        }
+    }
+
+    private fun configCallService() {
+        val callInvitationConfig = ZegoUIKitPrebuiltCallInvitationConfig()
+        // callInvitationConfig.notifyWhenAppRunningInBackgroundOrQuit = true
+        //      callInvitationConfig.provider =
+//            ZegoUIKitPrebuiltCallConfigProvider { invitationData ->
+//                var config: ZegoUIKitPrebuiltCallConfig? = null
+//                val isVideoCall = invitationData.type == ZegoInvitationType.VIDEO_CALL.value
+//                val isGroupCall = invitationData.invitees.size > 1
+//                config = if (isVideoCall && isGroupCall) {
+//                    ZegoUIKitPrebuiltCallConfig.groupVideoCall()
+//                } else if (!isVideoCall && isGroupCall) {
+//                    ZegoUIKitPrebuiltCallConfig.groupVoiceCall()
+//                } else if (!isVideoCall) {
+//                    ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall()
+//                } else {
+//                    ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()
+//                }
+//                config
+//            }
+//        val notificationConfig = ZegoNotificationConfig()
+//        notificationConfig.sound = "zego_uikit_sound_call"
+//        notificationConfig.channelID = "CallInvitation"
+//        notificationConfig.channelName = "CallInvitation"
+
+        ZegoUIKitPrebuiltCallService.init(
+            App.getInstance(),
+            APP_ID,
+            APP_SIGN,
+            viewModel.user.id.toString(),
+            viewModel.user.fullname,
+            callInvitationConfig,
+        )
+    }
+
     override fun onDestroy() {
-        super.onDestroy()
         unregisterReceiver(broadcastItems)
+        job?.cancel()
+        super.onDestroy()
     }
 }

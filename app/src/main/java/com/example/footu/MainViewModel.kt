@@ -14,20 +14,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel
-@Inject
-constructor(
-    private val apiService: ApiService,
-    private val sharePref: EncryptPreference,
-) : BaseViewModel() {
+    @Inject
+    constructor(
+        private val apiService: ApiService,
+        private val sharePref: EncryptPreference,
+    ) : BaseViewModel() {
+        val user = sharePref.getUser()
 
-    val user = sharePref.getUser()
-    fun registerFirebase(request: RegisterFirebaseModel) {
-        viewModelScope.launch {
-            flow { emit(apiService.registerFirebase(request)) }
-                .onStart { }
-                .onCompletion { }
-                .catch { handleApiError(it) }
-                .collect {}
+        fun registerFirebase(request: RegisterFirebaseModel) {
+            viewModelScope.launch {
+                flow { emit(apiService.registerFirebase(request)) }
+                    .onStart { }
+                    .onCompletion { }
+                    .catch { handleApiError(it) }
+                    .collect {}
+            }
         }
     }
-}

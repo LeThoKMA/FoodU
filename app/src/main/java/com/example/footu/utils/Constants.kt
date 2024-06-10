@@ -1,6 +1,5 @@
 package com.example.footu.utils
 
-
 const val ITEMS_PICKED = "ITEMS_PICKED"
 const val ANDROID = "android"
 const val DIMEN = "dimen"
@@ -18,4 +17,5 @@ const val OTHER_USER_ID = "OTHER_USER_ID"
 const val ID_CHANNEL_LOCATION_SOCKET = "ID_CHANNEL_LOCATION_SOCKET"
 const val PREF_ACCESS_TOKEN = "PREF_ACCESS_TOKEN"
 const val PREF_REFRESH_TOKEN = "PREF_REFRESH_TOKEN"
-
+const val APP_ID = 170453157L
+const val APP_SIGN = "a68d4d145f2b669973f6596306b74c3a05c670b0b6298466b220a9349d073995"

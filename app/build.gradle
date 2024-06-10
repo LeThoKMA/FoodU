@@ -150,10 +150,12 @@ dependencies {
     implementation "com.github.bumptech.glide:compose:1.0.0-alpha.5"
     implementation("io.coil-kt:coil-compose:2.4.0")
 
+//    implementation 'com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:+'
+//// Add this line to your module-level build.gradle file's dependencies, usually named [app].
+//    implementation 'com.github.ZEGOCLOUD:zego_uikit_signaling_plugin_android:+'
+//    // Add this line to your module-level build.gradle file's dependencies, usually named [app].
+
     implementation 'com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:+'
-// Add this line to your module-level build.gradle file's dependencies, usually named [app].
-    implementation 'com.github.ZEGOCLOUD:zego_uikit_signaling_plugin_android:+'
-    // Add this line to your module-level build.gradle file's dependencies, usually named [app].
 
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
     implementation 'com.google.firebase:firebase-messaging:23.2.1'

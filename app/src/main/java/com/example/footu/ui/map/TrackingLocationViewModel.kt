@@ -45,9 +45,6 @@ class TrackingLocationViewModel
                         println(receivedData)
                         _locationStateFlow.send(receivedData)
                     }
-//                _locationStateFlow.update {
-//                    it?.copy(oldLocation = it.newLocation, newLocation = receivedData)
-//                }
                 }
             }
         }

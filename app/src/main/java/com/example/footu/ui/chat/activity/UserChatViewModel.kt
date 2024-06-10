@@ -40,7 +40,7 @@ class UserChatViewModel
         val apiService: ApiService,
         private val sharePref: EncryptPreference,
     ) : BaseViewModel() {
-        private val user = sharePref.getUser()
+         val user = sharePref.getUser()
         private val _stateFlow = MutableStateFlow<StateUi>(StateUi.TotalMessage())
         private var hintResponse: HintResponse? = null
         private var totalPage = 0
