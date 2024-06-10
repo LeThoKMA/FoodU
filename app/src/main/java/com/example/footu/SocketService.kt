@@ -25,6 +25,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
 
 class SocketService() : Service() {
@@ -79,6 +80,7 @@ class SocketService() : Service() {
                 .setContentText("Bạn đang chia sẻ vị trí")
                 .setSmallIcon(R.drawable.beverage_drink_svgrepo_com)
                 .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW) // Set priority to low to avoid heads-up notification
         if (android.os.Build.VERSION.SDK_INT >=
             android.os.Build.VERSION_CODES.S
         ) {
@@ -104,7 +106,7 @@ class SocketService() : Service() {
                     return@launch
                 }
                 locationClient.getCurrentLocation(
-                    Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+                    Priority.PRIORITY_HIGH_ACCURACY,
                     CancellationTokenSource().token,
                 ).addOnSuccessListener { location ->
                     location?.let {
@@ -116,7 +118,7 @@ class SocketService() : Service() {
                             )
                         SocketIoManage.mSocket?.emit("send_locate", obj)
                     }
-                }
+                }.await()
             }
         }
     }

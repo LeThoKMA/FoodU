@@ -311,7 +311,8 @@ fun OrderDetailScreen(
                         )
 
                         Column(
-                            verticalArrangement = Arrangement.SpaceBetween,
+                            verticalArrangement = Arrangement.SpaceEvenly,
+                            horizontalAlignment = Alignment.Start,
                             modifier = Modifier.align(CenterVertically),
                         ) {
                             Text(
@@ -326,7 +327,11 @@ fun OrderDetailScreen(
                             )
                             Text(text = it.description ?: "", maxLines = 3, fontSize = 16.sp)
                         }
-                        Row {
+                        Column(
+                            verticalArrangement = Arrangement.SpaceEvenly,
+                            horizontalAlignment = Alignment.End,
+                            modifier = Modifier.align(CenterVertically),
+                        ) {
                             Text(
                                 text = "Số lượng: ${it.quantity}",
                                 modifier = Modifier.padding(3.dp),
@@ -334,15 +339,17 @@ fun OrderDetailScreen(
                             )
 
                             Text(
-                                text =
+                                text = "Size: ${
                                     when (it.size) {
                                         ItemSize.S.ordinal -> ItemSize.S.name
                                         ItemSize.M.ordinal -> ItemSize.M.name
                                         ItemSize.L.ordinal -> ItemSize.L.name
                                         else -> ""
-                                    },
+                                    }
+                                }",
                                 fontSize = 16.sp,
                             )
+                            Text(text = "", maxLines = 3, fontSize = 16.sp)
                         }
                     }
                 }

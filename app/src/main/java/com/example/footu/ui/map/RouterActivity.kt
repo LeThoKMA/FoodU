@@ -2,6 +2,7 @@ package com.example.footu.ui.map
 
 import android.location.Location
 import android.os.Build
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.footu.R
@@ -36,38 +37,42 @@ class RouterActivity :
     private val viewModel: RouterViewModel by viewModels()
     private var lastLocation: Location? = null
     private val destination by lazy {
-        val orderDetail = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra("item", OrderShipModel::class.java)
-        } else {
-            intent.getParcelableExtra("item")
-        }
+        val orderDetail =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra("item", OrderShipModel::class.java)
+            } else {
+                intent.getParcelableExtra("item")
+            }
         Point.fromLngLat(orderDetail?.longitude!!, orderDetail.lat!!)
     }
 
-    private val locationObserver = object : LocationObserver {
-        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-            lastLocation = locationMatcherResult.enhancedLocation
-            viewModel.handleEvent(RouterViewModel.Event.Position(lastLocation))
-        }
+    private val locationObserver =
+        object : LocationObserver {
+            override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+                lastLocation = locationMatcherResult.enhancedLocation
+                viewModel.handleEvent(RouterViewModel.Event.Position(lastLocation))
+                Log.e(">>>>>>>", lastLocation.toString())
+            }
 
-        override fun onNewRawLocation(rawLocation: Location) {
+            override fun onNewRawLocation(rawLocation: Location) {
 // no impl
-        }
-    }
-
-    private val mapViewObserver = object : MapViewObserver() {
-        override fun onAttached(mapView: com.mapbox.maps.MapView) {
-            mapView.gestures.addOnMapLongClickListener(
-                this@RouterActivity,
-            )
+            }
         }
 
-        override fun onDetached(mapView: com.mapbox.maps.MapView) {
-            mapView.gestures.removeOnMapLongClickListener(
-                this@RouterActivity,
-            )
+    private val mapViewObserver =
+        object : MapViewObserver() {
+            override fun onAttached(mapView: com.mapbox.maps.MapView) {
+                mapView.gestures.addOnMapLongClickListener(
+                    this@RouterActivity,
+                )
+            }
+
+            override fun onDetached(mapView: com.mapbox.maps.MapView) {
+                mapView.gestures.removeOnMapLongClickListener(
+                    this@RouterActivity,
+                )
+            }
         }
-    }
 
     override fun observerData() {
         lifecycleScope.launch {
@@ -88,7 +93,9 @@ class RouterActivity :
     }
 
     override fun initView() {
+        MapboxNavigationApp.attach(this)
         binding.navigationView.registerMapObserver(mapViewObserver)
+        MapboxNavigationApp.current()?.registerLocationObserver(locationObserver)
     }
 
     override fun initListener() {
@@ -105,15 +112,19 @@ class RouterActivity :
         return false
     }
 
-    private fun requestRoutes(origin: Point, destination: Point) {
+    private fun requestRoutes(
+        origin: Point,
+        destination: Point,
+    ) {
         MapboxNavigationApp.current()?.requestRoutes(
-            routeOptions = RouteOptions
-                .builder()
-                .applyDefaultNavigationOptions()
-                .applyLanguageAndVoiceUnitOptions(this)
-                .coordinatesList(listOf(origin, destination))
-                .alternatives(true)
-                .build(),
+            routeOptions =
+                RouteOptions
+                    .builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(this)
+                    .coordinatesList(listOf(origin, destination))
+                    .alternatives(true)
+                    .build(),
             this,
         )
     }
@@ -136,14 +147,23 @@ class RouterActivity :
         MapboxNavigationApp.current()?.registerLocationObserver(locationObserver)
     }
 
-    override fun onCanceled(routeOptions: RouteOptions, routerOrigin: RouterOrigin) {
+    override fun onCanceled(
+        routeOptions: RouteOptions,
+        routerOrigin: RouterOrigin,
+    ) {
     }
 
-    override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+    override fun onFailure(
+        reasons: List<RouterFailure>,
+        routeOptions: RouteOptions,
+    ) {
     }
 
-    override fun onRoutesReady(routes: List<NavigationRoute>, routerOrigin: RouterOrigin) {
+    override fun onRoutesReady(
+        routes: List<NavigationRoute>,
+        routerOrigin: RouterOrigin,
+    ) {
         binding.navigationView.api.routeReplayEnabled(true)
-        binding.navigationView.api.startRoutePreview(routes)
+        binding.navigationView.api.startActiveGuidance(routes)
     }
 }

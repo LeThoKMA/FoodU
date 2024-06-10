@@ -35,6 +35,8 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -63,8 +65,8 @@ class TrackingLocationActivity :
     private lateinit var pointAnnotationOptions: PointAnnotationOptions
 
     override fun observerData() {
-        lifecycleScope.launch {
-            viewModel.locationStateFlow.collect {
+        lifecycleScope.launch(Dispatchers.Main) {
+            viewModel.locationStateFlow.collectLatest {
                 if (it?.lat != null && it.long != null) {
                     addOrUpdateAnnotationToMap(it.lat, it.long)
                 }
@@ -128,7 +130,10 @@ class TrackingLocationActivity :
                 //    binding.mapView.getMapboxMap().setCamera()
             }
         } else {
-            animateCars(shipperLocationAnnotation!!.point, Point.fromLngLat(longitude, latitude))
+            animateCars(
+                shipperLocationAnnotation!!.point,
+                Point.fromLngLat(longitude, latitude),
+            )
         }
     }
 
@@ -136,6 +141,7 @@ class TrackingLocationActivity :
         return viewModel
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(
                 this,

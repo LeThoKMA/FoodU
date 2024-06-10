@@ -106,6 +106,7 @@ class MultipleRouterActivity :
 
     override fun initView() {
         binding.navigationView.registerMapObserver(mapViewObserver)
+        MapboxNavigationApp.current()?.registerLocationObserver(locationObserver)
     }
 
     override fun initListener() {
@@ -116,6 +117,16 @@ class MultipleRouterActivity :
     }
 
     private fun requestRoutes(points: List<PointWithId>) {
+//        var randoms = points.subList(1, points.size - 1).shuffled()
+//        randoms = randoms.toMutableList()
+//        randoms.add(0, points[0])
+//        randoms.add(points[0])
+//        randoms.forEachIndexed { index, point ->
+//            if (index != points.lastIndex && index != 0) {
+//                addMakerWithPoint(point.point, index)
+//                viewAnnotations[point] = null
+//            }
+//        }
         points.forEachIndexed { index, point ->
             if (index != points.lastIndex && index != 0) {
                 addMakerWithPoint(point.point, index)
