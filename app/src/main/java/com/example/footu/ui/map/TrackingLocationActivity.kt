@@ -36,6 +36,7 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -44,7 +45,7 @@ class TrackingLocationActivity :
     BaseActivity<ActivityTrackingLocationBinding>() {
     private val viewModel: TrackingLocationViewModel by viewModels()
     private var animator: ValueAnimator? = null
-    private var animateDuration = 10000L
+    private var animateDuration = 10100L
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var lastLocation: Location? = null
     private lateinit var point: Point
@@ -69,6 +70,7 @@ class TrackingLocationActivity :
             viewModel.locationStateFlow.collectLatest {
                 if (it?.lat != null && it.long != null) {
                     addOrUpdateAnnotationToMap(it.lat, it.long)
+                    delay(10000)
                 }
             }
         }
