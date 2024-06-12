@@ -14,7 +14,6 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
-import com.example.footu.dagger2.App
 import com.example.footu.databinding.ActivityMainBinding
 import com.example.footu.model.RegisterFirebaseModel
 import com.example.footu.ui.account.AccountFragment
@@ -259,7 +258,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 //        notificationConfig.channelName = "CallInvitation"
 
         ZegoUIKitPrebuiltCallService.init(
-            App.getInstance(),
+            this.application,
             APP_ID,
             APP_SIGN,
             viewModel.user.id.toString(),

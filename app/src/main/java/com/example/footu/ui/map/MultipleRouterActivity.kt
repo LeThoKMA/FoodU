@@ -1,5 +1,6 @@
 package com.example.footu.ui.map
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.location.Location
 import android.net.Uri
@@ -261,11 +262,13 @@ class MultipleRouterActivity :
     ) {
     }
 
+    @SuppressLint("MissingPermission")
     override fun onRoutesReady(
         routes: List<NavigationRoute>,
         routerOrigin: RouterOrigin,
     ) {
         binding.navigationView.api.routeReplayEnabled(true)
         binding.navigationView.api.startRoutePreview(routes)
+        MapboxNavigationApp.current()?.startTripSession(true)
     }
 }

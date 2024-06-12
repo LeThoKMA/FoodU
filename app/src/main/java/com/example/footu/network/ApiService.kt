@@ -40,7 +40,9 @@ interface ApiService {
     ): BaseResponse<LoginResponse>
 
     @POST("auth/refresh-token")
-    suspend fun refreshToken(@Body request: RefreshTokenRequest): BaseResponse<RefreshTokenResponse>
+    suspend fun refreshToken(
+        @Body request: RefreshTokenRequest,
+    ): BaseResponse<RefreshTokenResponse>
 
     @GET("home/all")
     suspend fun getItems(): BaseResponse<List<Item>>
@@ -156,6 +158,7 @@ interface ApiService {
     suspend fun fetchMessage(
         @Path("id") id: Int,
         @Query("page") page: Int,
+        @Query("old_id") oldId: Long? = -1,
     ): BaseResponse<TotalMessageResponse>
 
     @GET("message")

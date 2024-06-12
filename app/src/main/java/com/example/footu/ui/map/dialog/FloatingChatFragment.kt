@@ -103,7 +103,8 @@ class FloatingChatFragment : BaseFragment<FloatingFragmentUserChatBinding>() {
                         if (!recyclerView.canScrollVertically(-1)) {
                             // Gọi API để tải thêm dữ liệu khi cuộn lên đầu danh sách
                             mPage++
-                            viewModel.loadMoreDataMessage(mPage)
+                            val oldId = adapter.currentList.last().messageId
+                            viewModel.loadMoreDataMessage(mPage, oldId)
                         }
                     }
                 }

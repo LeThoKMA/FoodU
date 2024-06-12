@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import javax.inject.Inject
@@ -40,7 +41,7 @@ class UserChatViewModel
         val apiService: ApiService,
         private val sharePref: EncryptPreference,
     ) : BaseViewModel() {
-         val user = sharePref.getUser()
+        val user = sharePref.getUser()
         private val _stateFlow = MutableStateFlow<StateUi>(StateUi.TotalMessage())
         private var hintResponse: HintResponse? = null
         private var totalPage = 0
@@ -120,10 +121,21 @@ class UserChatViewModel
             }
         }
 
-        fun loadMoreDataMessage(page: Int = 0) {
+        fun loadMoreDataMessage(
+            page: Int = 0,
+            lastMessageId: Long?,
+        ) {
             if (page <= totalPage) {
                 viewModelScope.launch {
-                    flow { emit(apiService.fetchMessage(hintResponse?.id!!, page)) }.onStart {
+                    flow {
+                        emit(
+                            apiService.fetchMessage(
+                                hintResponse?.id!!,
+                                page,
+                                lastMessageId,
+                            ),
+                        )
+                    }.onStart {
                         onRetrievePostListStart()
                     }.catch {
                         handleApiError(it)
@@ -200,6 +212,7 @@ class UserChatViewModel
                             .toJson(messageRequest),
                     )
                 }.flowOn(Dispatchers.Default)
+                    .take(1)
                     .collect {
                         SocketIoManage.mSocket?.emit("chat:${hintResponse?.id}", it)
                     }
@@ -227,6 +240,7 @@ class UserChatViewModel
                             .toJson(messageRequest),
                     )
                 }.flowOn(Dispatchers.Default)
+                    .take(1)
                     .collect {
                         SocketIoManage.mSocket?.emit("chat:${hintResponse?.id}", it)
                     }

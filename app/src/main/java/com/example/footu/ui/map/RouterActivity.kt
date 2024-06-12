@@ -1,9 +1,13 @@
 package com.example.footu.ui.map
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import android.util.Log
 import androidx.activity.viewModels
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.footu.R
 import com.example.footu.base.BaseActivity
@@ -159,11 +163,13 @@ class RouterActivity :
     ) {
     }
 
+    @SuppressLint("MissingPermission")
     override fun onRoutesReady(
         routes: List<NavigationRoute>,
         routerOrigin: RouterOrigin,
     ) {
         binding.navigationView.api.routeReplayEnabled(true)
-        binding.navigationView.api.startActiveGuidance(routes)
+        binding.navigationView.api.startRoutePreview(routes)
+        MapboxNavigationApp.current()?.startTripSession(true)
     }
 }

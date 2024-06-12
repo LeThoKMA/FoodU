@@ -29,6 +29,15 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Lee Tho" />
 
+
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/compose_view"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:padding="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
             <ImageView
                 android:id="@+id/imv_back"
                 android:layout_width="wrap_content"
@@ -40,28 +49,28 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/imgCallNormal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:padding="8dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_call_normal"
-                app:layout_constraintBottom_toBottomOf="@id/imgCallVideo"
-                app:layout_constraintEnd_toStartOf="@+id/imgCallVideo"
-                app:layout_constraintTop_toTopOf="@id/imgCallVideo" />
+<!--            <ImageView-->
+<!--                android:id="@+id/imgCallNormal"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginEnd="4dp"-->
+<!--                android:padding="8dp"-->
+<!--                android:scaleType="centerCrop"-->
+<!--                android:src="@drawable/ic_call_normal"-->
+<!--                app:layout_constraintBottom_toBottomOf="@id/imgCallVideo"-->
+<!--                app:layout_constraintEnd_toStartOf="@+id/imgCallVideo"-->
+<!--                app:layout_constraintTop_toTopOf="@id/imgCallVideo" />-->
 
-            <ImageView
-                android:id="@+id/imgCallVideo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_video_call"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+<!--            <ImageView-->
+<!--                android:id="@+id/imgCallVideo"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:padding="8dp"-->
+<!--                android:scaleType="centerCrop"-->
+<!--                android:src="@drawable/ic_video_call"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent" />-->
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 

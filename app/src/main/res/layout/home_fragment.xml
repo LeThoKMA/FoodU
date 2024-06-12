@@ -21,10 +21,10 @@
         <androidx.recyclerview.widget.RecyclerView
             android:layout_marginTop="4dp"
             android:id="@+id/rv_type"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="8dp"
+            android:layout_margin="8dp"
             android:layout_width="0dp"
-            android:background="@drawable/bg_item_real_estate_sale"
+            android:background="@drawable/bg_white_radius_10"
+            android:elevation="4dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:orientation="horizontal"
             android:layout_height="wrap_content"

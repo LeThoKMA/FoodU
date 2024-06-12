@@ -1,13 +1,30 @@
 package com.example.footu.ui.chat.activity
 
+import android.Manifest
 import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Build
+import android.provider.MediaStore
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -16,17 +33,19 @@ import com.example.footu.R
 import com.example.footu.Response.MessageResponse
 import com.example.footu.base.BaseActivity
 import com.example.footu.base.BaseViewModel
-import com.example.footu.dagger2.App
 import com.example.footu.databinding.ActivityUserChatBinding
 import com.example.footu.model.User
 import com.example.footu.ui.chat.adapter.MessageAdapter
 import com.example.footu.utils.APP_ID
 import com.example.footu.utils.APP_SIGN
 import com.example.footu.utils.OTHER_USER_ID
+import com.example.footu.utils.REQUEST_CAMERA_PERMISSION
+import com.example.footu.utils.REQUEST_IMAGE_CAPTURE
 import com.example.footu.utils.convertUriToBitmap
 import com.example.footu.utils.getVideoFileSize
 import com.example.footu.utils.isVideoFile
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService
+import com.zegocloud.uikit.prebuilt.call.config.ZegoNotificationConfig
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig
 import com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser
@@ -132,8 +151,59 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
         setColorForStatusBar(R.color.colorPrimary)
         setLightIconStatusBar(true)
         otherUserId?.let { viewModel.getHintIdAndMessageData(it.id) }
+        initCallService()
         binding.tvName.text = otherUserId?.fullname
         binding.recycleChat.adapter = adapter
+        binding.composeView.setContent {
+            Row {
+                AndroidView(
+                    modifier =
+                        Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.Transparent)
+                            .padding(8.dp),
+                    factory = { context ->
+                        ZegoSendCallInvitationButton(context).apply {
+                            setIsVideoCall(true)
+                            resourceID = "zego_uikit_call"
+                            setInvitees(
+                                Collections.singletonList(
+                                    ZegoUIKitUser(
+                                        otherUserId?.id.toString(),
+                                        otherUserId?.fullname.toString(),
+                                    ),
+                                ),
+                            )
+                        }
+                    },
+                )
+
+                AndroidView(
+                    modifier =
+                        Modifier
+                            .padding(start = 16.dp, end = 8.dp)
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.Transparent)
+                            .padding(8.dp),
+                    factory = { context ->
+                        ZegoSendCallInvitationButton(context).apply {
+                            setIsVideoCall(false)
+                            resourceID = "zego_uikit_call"
+                            setInvitees(
+                                Collections.singletonList(
+                                    ZegoUIKitUser(
+                                        otherUserId?.id.toString(),
+                                        otherUserId?.fullname.toString(),
+                                    ),
+                                ),
+                            )
+                        }
+                    },
+                )
+            }
+        }
     }
 
     override fun initListener() {
@@ -158,7 +228,8 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
                         if (!recyclerView.canScrollVertically(-1)) {
                             // Gọi API để tải thêm dữ liệu khi cuộn lên đầu danh sách
                             mPage++
-                            viewModel.loadMoreDataMessage(mPage)
+                            val lastMessageId = adapter.currentList.last().messageId
+                            viewModel.loadMoreDataMessage(mPage, lastMessageId)
                         }
                     }
                 }
@@ -167,50 +238,8 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
         binding.imgPick.setOnClickListener {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
         }
-        binding.imgCallVideo.setOnClickListener {
-            val callInvitationConfig = ZegoUIKitPrebuiltCallInvitationConfig()
-            ZegoUIKitPrebuiltCallService.init(
-                App.getInstance(),
-                APP_ID,
-                APP_SIGN,
-                viewModel.user.id.toString(),
-                viewModel.user.fullname,
-                callInvitationConfig,
-            )
-            val button = ZegoSendCallInvitationButton(this)
-            button.setIsVideoCall(true)
-            button.setResourceID("zego_uikit_call")
-            button.setInvitees(
-                Collections.singletonList(
-                    ZegoUIKitUser(
-                        otherUserId?.id.toString(),
-                        otherUserId?.fullname,
-                    ),
-                ),
-            )
-        }
-        binding.imgCallVideo.setOnClickListener {
-            val callInvitationConfig = ZegoUIKitPrebuiltCallInvitationConfig()
-            ZegoUIKitPrebuiltCallService.init(
-                App.getInstance(),
-                APP_ID,
-                APP_SIGN,
-                viewModel.user.id.toString(),
-                viewModel.user.fullname,
-                callInvitationConfig,
-            )
-            val button = ZegoSendCallInvitationButton(this)
-            button.setIsVideoCall(false)
-            button.setResourceID("zego_uikit_call")
-            button.setInvitees(
-                Collections.singletonList(
-                    ZegoUIKitUser(
-                        otherUserId?.id.toString(),
-                        otherUserId?.fullname,
-                    ),
-                ),
-            )
-            println( otherUserId?.id)
+        binding.imgNew.setOnClickListener {
+            dispatchTakePictureIntent()
         }
     }
 
@@ -235,5 +264,89 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
             hideSoftKeyboard(this)
         }
         return super.dispatchTouchEvent(ev)
+    }
+
+    private fun initCallService() {
+        val appID: Long = APP_ID
+        val appSign = APP_SIGN
+
+        val callInvitationConfig = ZegoUIKitPrebuiltCallInvitationConfig()
+        val notificationConfig = ZegoNotificationConfig()
+        notificationConfig.sound = "zego_uikit_sound_call"
+        notificationConfig.channelID = "CallInvitation"
+        notificationConfig.channelName = "CallInvitation"
+        ZegoUIKitPrebuiltCallService.init(
+            this.application,
+            appID,
+            appSign,
+            viewModel.user.id.toString(),
+            viewModel.user.fullname,
+            callInvitationConfig,
+        )
+    }
+
+    private fun dispatchTakePictureIntent() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+            == PackageManager.PERMISSION_DENIED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                listOf(Manifest.permission.CAMERA).toTypedArray(),
+                REQUEST_CAMERA_PERMISSION,
+            )
+        } else {
+            openCamera()
+        }
+    }
+
+    private fun openCamera() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (takePictureIntent.resolveActivity(packageManager) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+        } else {
+            // Thông báo cho người dùng rằng    không có ứng dụng camera nào được cài đặt
+            Toast.makeText(this, "Không tìm thấy ứng dụng camera", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            val extras = data?.extras
+            val bitmap = extras?.get("data") as Bitmap
+            viewModel.sendImage(
+                bitmap,
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Quyền được cấp, thực hiện các thao tác cần thiết ở đây
+                openCamera()
+            } else {
+                // Người dùng từ chối cấp quyền, bạn có thể hiển thị thông báo thông báo tùy ý
+                Toast.makeText(
+                    this,
+                    "Không thể truy cập camera mà không có quyền",
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ZegoUIKitPrebuiltCallService.endCall()
     }
 }

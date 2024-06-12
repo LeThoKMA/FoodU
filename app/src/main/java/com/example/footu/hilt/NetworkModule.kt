@@ -62,7 +62,7 @@ object NetworkModule {
         httpClient.addInterceptor(logging) // <-- this is the important line!
 
         return Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/api/")
+            .baseUrl("http://192.168.30.53:8080/api/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(httpClient.build())
             .build()

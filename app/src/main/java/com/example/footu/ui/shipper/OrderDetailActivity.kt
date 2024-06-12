@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.footu.ItemSize
@@ -65,7 +67,10 @@ import com.example.footu.ui.shipper.ui.theme.Ivory
 import com.example.footu.ui.shipper.ui.theme.Primary
 import com.example.footu.utils.OTHER_USER_ID
 import com.example.footu.utils.formatToPrice
+import com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton
+import com.zegocloud.uikit.service.defines.ZegoUIKitUser
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Collections
 
 @AndroidEntryPoint
 class OrderDetailActivity : ComponentActivity() {
@@ -231,50 +236,50 @@ fun OrderDetailScreen(
                             context.startActivity(intent)
                         },
             )
-//            AndroidView(
-//                modifier = Modifier
-//                    .size(40.dp)
-//                    .clip(RoundedCornerShape(16.dp))
-//                    .background(Color.Gray)
-//                    .padding(8.dp),
-//                factory = { context ->
-//                    ZegoSendCallInvitationButton(context).apply {
-//                        setIsVideoCall(true)
-//                        resourceID = "zego_uikit_call"
-//                        setInvitees(
-//                            Collections.singletonList(
-//                                ZegoUIKitUser(
-//                                    item.customer?.id.toString(),
-//                                    item.customer?.fullname.toString(),
-//                                ),
-//                            ),
-//                        )
-//                    }
-//                },
-//            )
-//
-//            AndroidView(
-//                modifier = Modifier
-//                    .padding(start = 16.dp, end = 8.dp)
-//                    .size(40.dp)
-//                    .clip(RoundedCornerShape(16.dp))
-//                    .background(Color.Gray)
-//                    .padding(8.dp),
-//                factory = { context ->
-//                    ZegoSendCallInvitationButton(context).apply {
-//                        setIsVideoCall(false)
-//                        resourceID = "zego_uikit_call"
-//                        setInvitees(
-//                            Collections.singletonList(
-//                                ZegoUIKitUser(
-//                                    item.customer?.id.toString(),
-//                                    item.customer?.fullname.toString(),
-//                                ),
-//                            ),
-//                        )
-//                    }
-//                },
-//            )
+            AndroidView(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.Gray)
+                    .padding(8.dp),
+                factory = { context ->
+                    ZegoSendCallInvitationButton(context).apply {
+                        setIsVideoCall(true)
+                        resourceID = "zego_uikit_call"
+                        setInvitees(
+                            Collections.singletonList(
+                                ZegoUIKitUser(
+                                    item.customer?.id.toString(),
+                                    item.customer?.fullname.toString(),
+                                ),
+                            ),
+                        )
+                    }
+                },
+            )
+
+            AndroidView(
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 8.dp)
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.Gray)
+                    .padding(8.dp),
+                factory = { context ->
+                    ZegoSendCallInvitationButton(context).apply {
+                        setIsVideoCall(false)
+                        resourceID = "zego_uikit_call"
+                        setInvitees(
+                            Collections.singletonList(
+                                ZegoUIKitUser(
+                                    item.customer?.id.toString(),
+                                    item.customer?.fullname.toString(),
+                                ),
+                            ),
+                        )
+                    }
+                },
+            )
         }
 
         LazyColumn(
