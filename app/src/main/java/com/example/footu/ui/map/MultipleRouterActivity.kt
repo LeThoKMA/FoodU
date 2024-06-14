@@ -111,6 +111,9 @@ class MultipleRouterActivity :
     }
 
     override fun initListener() {
+        binding.imvBack.setOnClickListener {
+            finish()
+        }
     }
 
     override fun initViewModel(): BaseViewModel {

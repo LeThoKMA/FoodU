@@ -1,13 +1,9 @@
 package com.example.footu.ui.map
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
-import android.util.Log
 import androidx.activity.viewModels
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.footu.R
 import com.example.footu.base.BaseActivity
@@ -55,7 +51,6 @@ class RouterActivity :
             override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
                 lastLocation = locationMatcherResult.enhancedLocation
                 viewModel.handleEvent(RouterViewModel.Event.Position(lastLocation))
-                Log.e(">>>>>>>", lastLocation.toString())
             }
 
             override fun onNewRawLocation(rawLocation: Location) {
@@ -103,6 +98,9 @@ class RouterActivity :
     }
 
     override fun initListener() {
+        binding.imvBack.setOnClickListener {
+            finish()
+        }
     }
 
     override fun initViewModel(): BaseViewModel {

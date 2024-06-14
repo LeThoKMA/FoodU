@@ -83,26 +83,28 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
     override fun observerData() {
         viewModel.totalPrice.observe(this) {
             if (it > 0) {
-                binding.fab.alpha = 0f
-                binding.fab.visibility = View.VISIBLE
-                binding.fab.animate()
-                    .alpha(1f).duration = 1000
+                if (job == null) {
+                    binding.fab.alpha = 0f
+                    binding.fab.visibility = View.VISIBLE
+                    binding.fab.animate()
+                        .alpha(1f).duration = 1000
 
-                val animation =
-                    ObjectAnimator.ofFloat(binding.fab, "translationZ", 0f, 100f, 0f)
-                animation.duration = 2000 // Độ trễ mỗi chu kỳ
-                animation.repeatCount = ObjectAnimator.INFINITE // Lặp vô hạn
-                animation.interpolator = LinearInterpolator()
-                animation.start()
+                    val animation =
+                        ObjectAnimator.ofFloat(binding.fab, "translationZ", 0f, 100f, 0f)
+                    animation.duration = 2000 // Độ trễ mỗi chu kỳ
+                    animation.repeatCount = ObjectAnimator.INFINITE // Lặp vô hạn
+                    animation.interpolator = LinearInterpolator()
+                    animation.start()
 
-                job =
-                    lifecycleScope.launch {
-                        while (this.isActive) {
-                            binding.fab.startAnimation(scaleUp)
-                            delay(2500L)
-                            binding.fab.startAnimation(scaleDown)
+                    job =
+                        lifecycleScope.launch {
+                            while (this.isActive) {
+                                binding.fab.startAnimation(scaleUp)
+                                delay(2500L)
+                                binding.fab.startAnimation(scaleDown)
+                            }
                         }
-                    }
+                }
             } else {
                 job?.cancel()
                 binding.fab.visibility = View.GONE
@@ -171,7 +173,16 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
                     viewModel.itemsChoose.values.toMutableList(),
                     viewModel.totalPrice.value ?: 0,
                     onChangeItem = { viewModel.onChangeItem(it) },
+                    onDismiss = {
+                        viewModel.resetCart()
+                        binding.fab.clearAnimation()
+                        job?.cancel()
+                        binding.fab.visibility = View.GONE
+                    },
                 )
+            job?.cancel()
+            binding.fab.clearAnimation()
+            binding.fab.visibility = View.GONE
             dialog.show(supportFragmentManager, CartFragment.TAG)
         }
     }
@@ -294,7 +305,9 @@ class MainActivityForUser : BaseActivity<ActivityMainBinding>() {
 
     override fun onDestroy() {
         unregisterReceiver(broadcastItems)
+        ZegoUIKitPrebuiltCallService.endCall()
         job?.cancel()
+        binding.fab.clearAnimation()
         super.onDestroy()
     }
 }

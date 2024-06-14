@@ -324,6 +324,21 @@ class UserChatActivity : BaseActivity<ActivityUserChatBinding>() {
         }
     }
 
+    override fun onPause() {
+        viewModel.onPauseSocket()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        viewModel.setupSocket()
+        super.onResume()
+    }
+
+    override fun onStop() {
+        adapter.submitList(null)
+        super.onStop()
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,

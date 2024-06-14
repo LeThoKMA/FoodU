@@ -37,4 +37,9 @@ class MainUserViewModel
         fun onChangeItem(item: DetailItemChoose) {
             itemsChoose.remove(Pair(item.id, item.size?.ordinal))
         }
+
+        fun resetCart() {
+            itemsChoose.clear()
+            _totalPrice.value = 0
+        }
     }

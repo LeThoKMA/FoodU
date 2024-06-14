@@ -14,33 +14,29 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HintChatViewModel @Inject constructor(
-    private val apiService: ApiService,
-    private val sharePref: EncryptPreference
-) : BaseViewModel() {
+class HintChatViewModel
+    @Inject
+    constructor(
+        private val apiService: ApiService,
+        private val sharePref: EncryptPreference,
+    ) : BaseViewModel() {
+        private val user = sharePref.getUser()
+        private val _uiState = MutableStateFlow(mutableListOf<HintMessageResponse>())
+        val uiState: StateFlow<MutableList<HintMessageResponse>> = _uiState
 
-    private val user = sharePref.getUser()
-    private val _uiState = MutableStateFlow(mutableListOf<HintMessageResponse>())
-    val uiState: StateFlow<MutableList<HintMessageResponse>> = _uiState
-
-    init {
-        getAllHintMessage()
-    }
-
-    private fun getAllHintMessage() {
-        viewModelScope.launch {
-            flow { emit(apiService.getAllHintMessage(user.id)) }
-                .map {
-                    it.data?.map { data ->
-                        val dmpUser =
-                            if (data.lastMessage?.fromUser?.id == user.id) data.lastMessage.toUser else data.lastMessage?.fromUser
-                        data.copy(otherUser = dmpUser)
+        fun getAllHintMessage() {
+            viewModelScope.launch {
+                flow { emit(apiService.getAllHintMessage(user.id)) }
+                    .map {
+                        it.data?.map { data ->
+                            val dmpUser =
+                                if (data.lastMessage?.fromUser?.id == user.id) data.lastMessage.toUser else data.lastMessage?.fromUser
+                            data.copy(otherUser = dmpUser)
+                        }
                     }
-                }
-                .collect {
-                    _uiState.value = it?.toMutableList() ?: mutableListOf()
-                }
-
+                    .collect {
+                        _uiState.value = it?.toMutableList() ?: mutableListOf()
+                    }
+            }
         }
     }
-}

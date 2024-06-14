@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.footu.R
 import com.example.footu.Response.CategoryResponse
@@ -31,6 +32,7 @@ class HomeFragment :
     private var categoryAdapter: CategoryAdapter? = null
     private lateinit var descriptionAdapter: DescriptionProductAdapter
     private var listCategory = mutableListOf<CategoryResponse>()
+    private var page = 0
 
     override fun getContentLayout(): Int {
         return R.layout.home_fragment
@@ -59,6 +61,23 @@ class HomeFragment :
     }
 
     override fun initListener() {
+        binding.rvDescriptionProduct.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int,
+                ) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    val linearLayoutManager: LinearLayoutManager =
+                        recyclerView.layoutManager as LinearLayoutManager
+                    if (dy > 0 && linearLayoutManager.findLastCompletelyVisibleItemPosition() == descriptionAdapter.currentList.size - 1) {
+                        page++
+                        viewModel.loadMoreItems(page)
+                    }
+                }
+            },
+        )
     }
 
     override fun onDestroy() {
@@ -71,8 +90,10 @@ class HomeFragment :
 
     override fun observerLiveData() {
         viewModel.dataItems.observe(viewLifecycleOwner) {
-            if (it != null) {
-                descriptionAdapter.submitList(it)
+            if (it.isNotEmpty()) {
+                val newList = descriptionAdapter.currentList.toMutableList()
+                newList.addAll(it)
+                descriptionAdapter.submitList(newList)
             }
         }
 
@@ -98,7 +119,9 @@ class HomeFragment :
 
         viewModel.category.observe(viewLifecycleOwner) {
             listCategory.clear()
-            it?.let { it1 -> listCategory.addAll(it1) }
+            it?.let { it1 ->
+                listCategory.addAll(it1)
+            }
             categoryAdapter?.notifyDataSetChanged()
         }
     }

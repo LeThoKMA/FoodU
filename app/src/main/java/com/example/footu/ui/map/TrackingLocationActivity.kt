@@ -10,9 +10,16 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import android.view.animation.LinearInterpolator
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.footu.R
@@ -68,6 +75,7 @@ class TrackingLocationActivity :
         binding.mapView.annotations.createPointAnnotationManager()
     }
     private lateinit var pointAnnotationOptions: PointAnnotationOptions
+    private val dialog by lazy { setupProgressDialog() }
 
     override fun observerData() {
         lifecycleScope.launch(Dispatchers.Main) {
@@ -78,6 +86,7 @@ class TrackingLocationActivity :
                         addOrUpdateAnnotationToMap(it.lat, it.long)
                     }
                 }
+                dialog.dismiss()
             }
         }
     }
@@ -100,6 +109,7 @@ class TrackingLocationActivity :
                 Style.MAPBOX_STREETS,
             )
         }
+        dialog.show()
     }
 
     override fun initListener() {
@@ -340,5 +350,27 @@ class TrackingLocationActivity :
         MapboxNavigationApp.current()?.unregisterLocationObserver(locationObserver)
         cleanAnimation()
         super.onDestroy()
+    }
+
+    private fun setupProgressDialog(): AlertDialog {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this, R.style.CustomDialog)
+        builder.setCancelable(false)
+
+        val myLayout = LayoutInflater.from(this)
+        val dialogView: View = myLayout.inflate(R.layout.fragment_progress_dialog, null)
+        val textView = dialogView.findViewById<TextView>(R.id.title)
+        textView.text = "Tìm kiếm vị trị shipper"
+        builder.setView(dialogView)
+
+        val dialog: AlertDialog = builder.create()
+        val window: Window? = dialog.window
+        if (window != null) {
+            val layoutParams = WindowManager.LayoutParams()
+            layoutParams.copyFrom(dialog.window?.attributes)
+            layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT
+            layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
+            dialog.window?.attributes = layoutParams
+        }
+        return dialog
     }
 }

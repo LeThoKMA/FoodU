@@ -3,7 +3,6 @@ package com.example.footu.ui.chat
 import android.content.Intent
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -20,11 +19,12 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class ChatFragment : BaseFragment<ChatFragmentBinding>() {
     private val viewModel: HintChatViewModel by viewModels()
-    private val hintMessageAdapter = HintMessageAdapter(onClickDetail = {
-        val intent = Intent(requireContext(), UserChatActivity::class.java)
-        intent.putExtra(OTHER_USER_ID, it)
-        startActivity(intent)
-    })
+    private val hintMessageAdapter =
+        HintMessageAdapter(onClickDetail = {
+            val intent = Intent(requireContext(), UserChatActivity::class.java)
+            intent.putExtra(OTHER_USER_ID, it)
+            startActivity(intent)
+        })
 
     override fun getContentLayout(): Int {
         return R.layout.chat_fragment
@@ -55,5 +55,10 @@ class ChatFragment : BaseFragment<ChatFragmentBinding>() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        viewModel.getAllHintMessage()
+        super.onResume()
     }
 }

@@ -230,6 +230,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     override fun onDestroy() {
+        ZegoUIKitPrebuiltCallService.endCall()
         super.onDestroy()
     }
 

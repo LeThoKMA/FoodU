@@ -16,51 +16,52 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class OrderShipPickedViewModel @Inject constructor(
-    private val apiService: ApiService,
-) :
+class OrderShipPickedViewModel
+    @Inject
+    constructor(
+        private val apiService: ApiService,
+    ) :
     BaseViewModel() {
+        private val _uiState = MutableStateFlow(State())
+        val uiState = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(State())
-    val uiState = _uiState.asStateFlow()
+//    init {
+//        viewModelScope.launch {
+//            flow { emit(apiService.getOrdersPicked()) }
+//                .onStart { onRetrievePostListStart() }
+//                .onCompletion { onRetrievePostListFinish() }
+//                .catch { handleApiError(it) }
+//                .collect { data ->
+//                    _uiState.update {
+//                        it.copy(orders = data.data ?: listOf())
+//                    }
+//                }
+//        }
+//    }
 
-    init {
-        viewModelScope.launch {
-            flow { emit(apiService.getOrdersPicked()) }
-                .onStart { onRetrievePostListStart() }
-                .onCompletion { onRetrievePostListFinish() }
-                .catch { handleApiError(it) }
-                .collect { data ->
-                    _uiState.update {
-                        it.copy(orders = data.data ?: listOf())
+        fun loadData() {
+            viewModelScope.launch {
+                flow { emit(apiService.getOrdersPicked()) }
+                    .onStart { onRetrievePostListStart() }
+                    .onCompletion { onRetrievePostListFinish() }
+                    .catch { handleApiError(it) }
+                    .collect { data ->
+                        _uiState.update {
+                            it.copy(orders = data.data ?: listOf())
+                        }
                     }
-                }
+            }
         }
-    }
 
-    fun loadData() {
-        viewModelScope.launch {
-            flow { emit(apiService.getOrdersPicked()) }
-                .onStart { onRetrievePostListStart() }
-                .onCompletion { onRetrievePostListFinish() }
-                .catch { handleApiError(it) }
-                .collect { data ->
-                    _uiState.update {
-                        it.copy(orders = data.data ?: listOf())
-                    }
-                }
+        fun onDeleteItem(item: OrderShipModel) {
+            val list = _uiState.value.orders.toMutableList()
+            list.remove(item)
+            _uiState.update { it.copy(orders = list) }
         }
-    }
 
-    fun onDeleteItem(item: OrderShipModel) {
-        val list = _uiState.value.orders.toMutableList()
-        list.remove(item)
-        _uiState.update { it.copy(orders = list) }
-    }
+        fun hideSnackbar() {
+            onHideSnackbar()
+        }
 
-    fun hideSnackbar() {
-        onHideSnackbar()
+        data class State(var orders: List<OrderShipModel> = listOf())
     }
-
-    data class State(var orders: List<OrderShipModel> = listOf())
-}

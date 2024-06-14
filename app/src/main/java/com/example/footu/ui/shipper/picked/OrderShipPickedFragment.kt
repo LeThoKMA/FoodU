@@ -77,4 +77,9 @@ class OrderShipPickedFragment :
         intent.putExtra("item", item)
         launcher?.launch(intent, options)
     }
+
+    override fun onResume() {
+        viewModel.loadData()
+        super.onResume()
+    }
 }

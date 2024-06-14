@@ -46,6 +46,7 @@ class UserChatViewModel
         private var hintResponse: HintResponse? = null
         private var totalPage = 0
         val stateFlow: StateFlow<StateUi> = _stateFlow
+        private var isSocketSetup = true
 
         fun getHintIdAndMessageData(otherId: Int) {
             viewModelScope.launch(Dispatchers.IO) {
@@ -191,6 +192,7 @@ class UserChatViewModel
                     Gson().fromJson(args[0].toString(), MessageResponse::class.java)
                 onSendMessage(receivedData)
             }
+            isSocketSetup = true
         }
 
         fun sendMessage(content: String) {
@@ -334,5 +336,17 @@ class UserChatViewModel
         override fun onCleared() {
             SocketIoManage.mSocket?.off()
             super.onCleared()
+        }
+
+        fun onPauseSocket() {
+            isSocketSetup = false
+            SocketIoManage.mSocket?.off()
+        }
+
+        fun onResumeSocket() {
+            if (!isSocketSetup) {
+                setupSocket()
+                isSocketSetup = true
+            }
         }
     }

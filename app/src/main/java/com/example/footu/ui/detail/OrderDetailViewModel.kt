@@ -16,22 +16,24 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class OrderDetailViewModel @Inject constructor(
-    val apiService: ApiService,
-    private val sharePref: EncryptPreference,
-) : BaseViewModel() {
-    private val _ordersDetail = MutableStateFlow<List<OrderShipModel>>(emptyList())
-    val ordersDetail: StateFlow<List<OrderShipModel>> = _ordersDetail
-    private val user = sharePref.getUser()
+class OrderDetailViewModel
+    @Inject
+    constructor(
+        val apiService: ApiService,
+        private val sharePref: EncryptPreference,
+    ) : BaseViewModel() {
+        private val _ordersDetail = MutableStateFlow<List<OrderShipModel>>(emptyList())
+        val ordersDetail: StateFlow<List<OrderShipModel>> = _ordersDetail
+        private val user = sharePref.getUser()
 
-    init {
-        viewModelScope.launch {
-            flow { emit(apiService.getOrdersDetail(user!!.id)) }.onStart { onRetrievePostListStart() }
-                .onCompletion { onRetrievePostListFinish() }
-                .catch { handleApiError(it) }
-                .collect {
-                    _ordersDetail.value = it.data ?: emptyList()
-                }
+        fun initData() {
+            viewModelScope.launch {
+                flow { emit(apiService.getOrdersDetail(user!!.id)) }.onStart { onRetrievePostListStart() }
+                    .onCompletion { onRetrievePostListFinish() }
+                    .catch { handleApiError(it) }
+                    .collect {
+                        _ordersDetail.value = it.data ?: emptyList()
+                    }
+            }
         }
     }
-}

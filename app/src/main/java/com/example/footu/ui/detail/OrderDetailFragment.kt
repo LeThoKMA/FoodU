@@ -23,11 +23,12 @@ class OrderDetailFragment :
     override fun initViewModel() = viewModel
 
     override fun initView() {
-        ordersDetailAdapter = OrdersDetailAdapter(onClick = {
-            val intent = Intent(requireContext(), TrackingLocationActivity::class.java)
-            intent.putExtra(SHIPPER_ID, it)
-            startActivity(intent)
-        })
+        ordersDetailAdapter =
+            OrdersDetailAdapter(onClick = {
+                val intent = Intent(requireContext(), TrackingLocationActivity::class.java)
+                intent.putExtra(SHIPPER_ID, it)
+                startActivity(intent)
+            })
         binding.rcItem.layoutManager = LinearLayoutManager(requireContext())
         binding.rcItem.adapter = ordersDetailAdapter
     }
@@ -42,5 +43,10 @@ class OrderDetailFragment :
                 // ordersDetailAdapter.notifyDataSetChanged()
             }
         }
+    }
+
+    override fun onResume() {
+        viewModel.initData()
+        super.onResume()
     }
 }

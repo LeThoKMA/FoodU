@@ -1,14 +1,19 @@
 package com.example.footu.ui.pay
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.location.Location
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.LinearLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -48,6 +53,7 @@ class ConfirmActivity :
 
     private val viewModel: PayConfirmViewModel by viewModels()
     lateinit var adapter: ItemConfirmAdapter
+    private var mPaymentRedirectedUrl = ""
 
     // lateinit var promotionAdapter: ItemPromotionAdapter
     var promotions: MutableList<PromotionUser> = mutableListOf()
@@ -60,8 +66,8 @@ class ConfirmActivity :
 
     private var type = -1
 
-    private val merchantName = "The Coffe House"
-    private val merchantCode = "123456"
+    private val merchantName = "CGV Cinemas"
+    private val merchantCode = "CGV19072017"
     private val merchantNameLabel = "Nhà cung cấp"
     private val description = "Thanh toán đồ uống"
     var dialogForShip: AlertDialog? = null
@@ -149,9 +155,9 @@ class ConfirmActivity :
                     priceAfterDiscount,
                     binding.tvAddress.text.toString(),
                     latLong = latLong,
-                ) { requestPayment() }
+                ) { viewModel.requestPaymentVnPay(priceAfterDiscount, "Thanh toán hoá đơn") }
             } else {
-                requestPayment()
+                viewModel.requestPaymentVnPay(priceAfterDiscount, "Thanh toán hoá đơn")
             }
         }
         binding.imvBack.setOnClickListener {
@@ -159,9 +165,10 @@ class ConfirmActivity :
         }
 
         binding.mapView.getMapboxMap().addOnFlingListener {
-            latLong = binding.mapView.getMapboxMap().cameraState.center.let {
-                Pair(it.latitude(), it.longitude())
-            }
+            latLong =
+                binding.mapView.getMapboxMap().cameraState.center.let {
+                    Pair(it.latitude(), it.longitude())
+                }
             viewModel.getAddress(latLong.first, latLong.second)
         }
     }
@@ -191,6 +198,79 @@ class ConfirmActivity :
             viewModel.address.collect {
                 binding.tvAddress.text = it
             }
+        }
+        viewModel.urlRedirect.observe(this) {
+            binding.webView.visibility = View.VISIBLE
+            openWebView(it)
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun openWebView(url: String) {
+        println("URL PAYMENT: $url")
+        val webView = binding.webView
+        webView.visibility = View.VISIBLE
+        webView.getSettings().javaScriptEnabled = true
+        val webViewClient =
+            object : WebViewClient() {
+                override fun onPageStarted(
+                    view: WebView?,
+                    url: String?,
+                    favicon: Bitmap?,
+                ) {
+                    mPaymentRedirectedUrl = url.toString()
+                    super.onPageStarted(view, url, favicon)
+                }
+
+                override fun onPageFinished(
+                    view: WebView?,
+                    url: String?,
+                ) {
+                    mPaymentRedirectedUrl = url.toString()
+                    super.onPageFinished(view, url)
+                    handlePaymentResult()
+                }
+
+                @Deprecated("Deprecated in Java")
+                override fun onReceivedError(
+                    view: WebView?,
+                    errorCode: Int,
+                    description: String?,
+                    failingUrl: String?,
+                ) {
+                    super.onReceivedError(view, errorCode, description, failingUrl)
+                    mPaymentRedirectedUrl = failingUrl.toString()
+                    handlePaymentResult()
+                }
+
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                ): Boolean {
+                    mPaymentRedirectedUrl = request?.url.toString()
+                    return super.shouldOverrideUrlLoading(view, request)
+                }
+            }
+        webView.webViewClient = webViewClient
+        webView.loadUrl(url)
+    }
+
+    private fun handlePaymentResult() {
+        if (mPaymentRedirectedUrl.contains("vnp_TransactionStatus=00")) {
+            binding.webView.visibility = View.GONE
+            viewModel.confirmBill(
+                items,
+                promotionsPicked,
+                priceAfterDiscount,
+                type,
+                latLong,
+            )
+        } else if (mPaymentRedirectedUrl.contains("vnp_TransactionStatus=02")) {
+            toast("Không thể thanh toán")
+            finish()
+        } else if (mPaymentRedirectedUrl.contains("Error")) {
+            toast("Không thể thanh toán")
+            finish()
         }
     }
 
@@ -234,20 +314,17 @@ class ConfirmActivity :
         AppMoMoLib.getInstance().requestMoMoCallBack(this, eventValue)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+    ) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode === AppMoMoLib.getInstance().REQUEST_CODE_MOMO && resultCode === -1) {
             if (data != null) {
                 Log.e(">>>>>>>>>>", data.getIntExtra("status", -1).toString())
                 if (data.getIntExtra("status", -1) === 0) {
                     // TOKEN IS AVAILABLE
-                    viewModel.confirmBill(
-                        items,
-                        promotionsPicked,
-                        priceAfterDiscount,
-                        type,
-                        latLong,
-                    )
                     // this.toast("message: " + "Get token " + data.getStringExtra("message"))
                     val token = data.getStringExtra("data") // Token response
                     val phoneNumber = data.getStringExtra("phonenumber")
@@ -322,11 +399,12 @@ class ConfirmActivity :
             // for ActivityCompat#requestPermissions for more details.
             return null
         }
-        val task = fusedLocationClient.getCurrentLocation(
-            Priority.PRIORITY_BALANCED_POWER_ACCURACY,
-            CancellationTokenSource().token,
-        ).addOnSuccessListener { location ->
-        }.await()
+        val task =
+            fusedLocationClient.getCurrentLocation(
+                Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+                CancellationTokenSource().token,
+            ).addOnSuccessListener { location ->
+            }.await()
 
         return task
     }

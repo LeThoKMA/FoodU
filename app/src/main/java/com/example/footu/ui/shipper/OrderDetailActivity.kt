@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,7 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -45,7 +43,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
-import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -56,10 +53,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.footu.ItemSize
+import com.example.footu.R
 import com.example.footu.model.OrderShipModel
 import com.example.footu.ui.chat.activity.UserChatActivity
 import com.example.footu.ui.map.RouterActivity
@@ -67,10 +65,7 @@ import com.example.footu.ui.shipper.ui.theme.Ivory
 import com.example.footu.ui.shipper.ui.theme.Primary
 import com.example.footu.utils.OTHER_USER_ID
 import com.example.footu.utils.formatToPrice
-import com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton
-import com.zegocloud.uikit.service.defines.ZegoUIKitUser
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Collections
 
 @AndroidEntryPoint
 class OrderDetailActivity : ComponentActivity() {
@@ -88,6 +83,8 @@ class OrderDetailActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             LocalContext.provides(this)
+            val context = LocalContext.current
+            val primaryColor = ContextCompat.getColor(context, R.color.colorPrimary)
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -105,6 +102,19 @@ class OrderDetailActivity : ComponentActivity() {
                         navigationIcon = {
                             IconButton(onClick = { finish() }) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, "", tint = Color.White)
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = {
+                                val intent = Intent(context, UserChatActivity::class.java)
+                                intent.putExtra(OTHER_USER_ID, orderDetail?.customer)
+                                context.startActivity(intent)
+                            }) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.Send,
+                                    contentDescription = "Send",
+                                    tint = Color.White,
+                                )
                             }
                         },
                     )
@@ -224,64 +234,6 @@ fun OrderDetailScreen(
             context.startActivity(intent)
         }
 
-        Row(modifier = Modifier.align(End)) {
-            Text(
-                text = "Nhắn tin",
-                modifier =
-                    Modifier
-                        .padding(8.dp)
-                        .clickable {
-                            val intent = Intent(context, UserChatActivity::class.java)
-                            intent.putExtra(OTHER_USER_ID, item.customer)
-                            context.startActivity(intent)
-                        },
-            )
-            AndroidView(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.Gray)
-                    .padding(8.dp),
-                factory = { context ->
-                    ZegoSendCallInvitationButton(context).apply {
-                        setIsVideoCall(true)
-                        resourceID = "zego_uikit_call"
-                        setInvitees(
-                            Collections.singletonList(
-                                ZegoUIKitUser(
-                                    item.customer?.id.toString(),
-                                    item.customer?.fullname.toString(),
-                                ),
-                            ),
-                        )
-                    }
-                },
-            )
-
-            AndroidView(
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 8.dp)
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.Gray)
-                    .padding(8.dp),
-                factory = { context ->
-                    ZegoSendCallInvitationButton(context).apply {
-                        setIsVideoCall(false)
-                        resourceID = "zego_uikit_call"
-                        setInvitees(
-                            Collections.singletonList(
-                                ZegoUIKitUser(
-                                    item.customer?.id.toString(),
-                                    item.customer?.fullname.toString(),
-                                ),
-                            ),
-                        )
-                    }
-                },
-            )
-        }
-
         LazyColumn(
             modifier =
                 Modifier
@@ -302,7 +254,10 @@ fun OrderDetailScreen(
                             .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
                             .fillMaxWidth(),
                 ) {
-                    Row(modifier = Modifier.padding(8.dp)) {
+                    Row(
+                        modifier = Modifier.padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
                         AsyncImage(
                             model = it.item?.imgUrl?.get(0),
                             contentDescription = it.item?.id.toString(),
@@ -334,8 +289,8 @@ fun OrderDetailScreen(
                         }
                         Column(
                             verticalArrangement = Arrangement.SpaceEvenly,
-                            horizontalAlignment = Alignment.End,
-                            modifier = Modifier.align(CenterVertically),
+                            horizontalAlignment = Alignment.Start,
+                            modifier = Modifier.align(CenterVertically).padding(start = 32.dp),
                         ) {
                             Text(
                                 text = "Số lượng: ${it.quantity}",
@@ -365,6 +320,7 @@ fun OrderDetailScreen(
             horizontalArrangement = Arrangement.Center,
             modifier =
                 Modifier
+                    .padding(bottom = 16.dp)
                     .fillMaxWidth()
                     .wrapContentHeight(),
         ) {

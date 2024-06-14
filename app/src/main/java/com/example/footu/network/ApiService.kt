@@ -18,6 +18,7 @@ import com.example.footu.Response.LoginResponse
 import com.example.footu.Response.PointResponse
 import com.example.footu.Response.RefreshTokenResponse
 import com.example.footu.Response.TotalMessageResponse
+import com.example.footu.Response.UrlResponse
 import com.example.footu.model.Item
 import com.example.footu.model.ItemStatistic
 import com.example.footu.model.LoginRequest
@@ -45,7 +46,9 @@ interface ApiService {
     ): BaseResponse<RefreshTokenResponse>
 
     @GET("home/all")
-    suspend fun getItems(): BaseResponse<List<Item>>
+    suspend fun getItems(
+        @Query("page") page: Int = 0,
+    ): BaseResponse<List<Item>>
 
     @POST("bill")
     suspend fun makeBill(
@@ -173,4 +176,10 @@ interface ApiService {
     suspend fun getDetailPendingBill(
         @Query("id") id: Int,
     ): BaseResponse<OrderShipModel>
+
+    @POST("vnpay/submitOrder")
+    suspend fun vnPaySubmitOrder(
+        @Query("amount") amount: Int,
+        @Query("orderInfo") orderInfo: String,
+    ): BaseResponse<UrlResponse>
 }

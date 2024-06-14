@@ -65,7 +65,10 @@ import com.example.footu.utils.formatToPrice
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class CartFragment(val onChangeItem: (DetailItemChoose) -> Unit) : DialogFragment() {
+class CartFragment(
+    private val onChangeItem: (DetailItemChoose) -> Unit,
+    private val onDismiss: () -> Unit = {},
+) : DialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -83,7 +86,14 @@ class CartFragment(val onChangeItem: (DetailItemChoose) -> Unit) : DialogFragmen
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                CartView(items?.toList() ?: emptyList(), onChangeItem = { onChangeItem.invoke(it) })
+                CartView(
+                    items?.toList() ?: emptyList(),
+                    onChangeItem = { onChangeItem.invoke(it) },
+                    onDismiss = {
+                        dismiss()
+                        onDismiss()
+                    },
+                )
             }
         }
     }
@@ -105,41 +115,51 @@ class CartFragment(val onChangeItem: (DetailItemChoose) -> Unit) : DialogFragmen
             items: List<DetailItemChoose>,
             price: Int,
             onChangeItem: (DetailItemChoose) -> Unit,
-        ) = CartFragment(onChangeItem).apply {
-            arguments = bundleOf(
-                ITEMS to items,
-                TOTAL_PRICE to price,
-            )
+            onDismiss: () -> Unit,
+        ) = CartFragment(onChangeItem, onDismiss).apply {
+            arguments =
+                bundleOf(
+                    ITEMS to items,
+                    TOTAL_PRICE to price,
+                )
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CartView(list: List<DetailItemChoose>, onChangeItem: (DetailItemChoose) -> Unit) {
+fun CartView(
+    list: List<DetailItemChoose>,
+    onChangeItem: (DetailItemChoose) -> Unit,
+    onDismiss: () -> Unit = {},
+) {
     val context = LocalContext.current
-    val stateList = remember {
-        list.toMutableStateList()
-    }
+    val stateList =
+        remember {
+            list.toMutableStateList()
+        }
     val totalPrice by rememberUpdatedState(newValue = stateList.sumOf { it.price })
     val onPickMethod: (Int) -> Unit = {
+        val tmpList = stateList.toMutableList()
         val intent = Intent(context, ConfirmActivity::class.java)
         intent.putParcelableArrayListExtra(
             ITEMS_PICKED,
-            list as ArrayList<out Parcelable>,
+            tmpList as ArrayList<out Parcelable>,
         )
         intent.putExtra(ORDER_TYPE, it)
         intent.putExtra("price", totalPrice)
         context.startActivity(intent)
+        onDismiss()
     }
-    val onRemove = remember<(DetailItemChoose) -> Unit> {
-        {
-            stateList.remove(it)
-            onChangeItem.invoke(it)
+    val onRemove =
+        remember<(DetailItemChoose) -> Unit> {
+            {
+                stateList.remove(it)
+                onChangeItem.invoke(it)
+            }
         }
-    }
 
-    Column() {
+    Column {
         LazyColumn(modifier = Modifier.weight(0.75f)) {
             items(stateList.toList(), key = { item -> "${item.id}:${item.size}" }) {
                 ItemView(it, onRemove = { onRemove(it) })
@@ -149,15 +169,16 @@ fun CartView(list: List<DetailItemChoose>, onChangeItem: (DetailItemChoose) -> U
 
         Text(
             text = "Tổng giá: ${totalPrice.formatToPrice()}",
-            modifier = Modifier
-                .padding(end = 8.dp, top = 8.dp)
-                .align(End),
+            modifier =
+                Modifier
+                    .padding(end = 8.dp, top = 8.dp)
+                    .align(End),
             fontWeight = FontWeight.Black,
         )
 
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.align(CenterHorizontally)
+            modifier = Modifier.align(CenterHorizontally),
         ) {
             Button(onClick = { onPickMethod(1) }, modifier = Modifier.padding(horizontal = 8.dp)) {
                 Text(text = "Đặt ship")
@@ -172,22 +193,26 @@ fun CartView(list: List<DetailItemChoose>, onChangeItem: (DetailItemChoose) -> U
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemView(item: DetailItemChoose, onRemove: () -> Unit) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart || it == SwipeToDismissBoxValue.StartToEnd) {
-                onRemove()
-                true
-            } else {
-                false
-            }
-        },
-        positionalThreshold = { 150f },
-    )
+fun ItemView(
+    item: DetailItemChoose,
+    onRemove: () -> Unit,
+) {
+    val dismissState =
+        rememberSwipeToDismissBoxState(
+            confirmValueChange = {
+                if (it == SwipeToDismissBoxValue.EndToStart || it == SwipeToDismissBoxValue.StartToEnd) {
+                    onRemove()
+                    true
+                } else {
+                    false
+                }
+            },
+            positionalThreshold = { 150f },
+        )
 
     SwipeToDismissBox(
         state = dismissState,
-        backgroundContent = { DismissBackground(dismissState = dismissState) }
+        backgroundContent = { DismissBackground(dismissState = dismissState) },
     ) {
         ItemRow(
             imgUrl = item.imgUrl[0],
@@ -210,14 +235,16 @@ fun ItemRow(
     description: String,
 ) {
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = Ivory, // Card background color
-            contentColor = Color.Black, // Card content color,e.g.text
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = Ivory, // Card background color
+                contentColor = Color.Black, // Card content color,e.g.text
+            ),
         shape = MaterialTheme.shapes.medium,
-        modifier = Modifier
-            .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
-            .fillMaxWidth(),
+        modifier =
+            Modifier
+                .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
+                .fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -226,19 +253,21 @@ fun ItemRow(
             AsyncImage(
                 model = imgUrl,
                 contentDescription = "",
-                modifier = Modifier
-                    .height(80.dp)
-                    .width(80.dp)
-                    .weight(0.2f)
-                    .padding(8.dp)
-                    .clip(shape = RoundedCornerShape(16.dp))
-                    .align(Alignment.CenterVertically),
+                modifier =
+                    Modifier
+                        .height(80.dp)
+                        .width(80.dp)
+                        .weight(0.2f)
+                        .padding(8.dp)
+                        .clip(shape = RoundedCornerShape(16.dp))
+                        .align(Alignment.CenterVertically),
             )
             Column(
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .weight(0.6f)
-                    .padding(start = 16.dp),
+                modifier =
+                    Modifier
+                        .weight(0.6f)
+                        .padding(start = 16.dp),
             ) {
                 Text(text = name)
                 Text(
@@ -257,9 +286,10 @@ fun ItemRow(
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = End,
-                modifier = Modifier
-                    .weight(0.2f)
-                    .padding(end = 8.dp),
+                modifier =
+                    Modifier
+                        .weight(0.2f)
+                        .padding(end = 8.dp),
             ) {
                 Text(text = "x$count")
                 Text(text = unitPrice.formatToPrice())
@@ -271,15 +301,17 @@ fun ItemRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DismissBackground(dismissState: SwipeToDismissBoxState) {
-    val color = when (dismissState.dismissDirection) {
-        SwipeToDismissBoxValue.StartToEnd -> Color(0xFFFF1744)
-        else -> Color.Transparent
-    }
+    val color =
+        when (dismissState.dismissDirection) {
+            SwipeToDismissBoxValue.StartToEnd -> Color(0xFFFF1744)
+            else -> Color.Transparent
+        }
     Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color)
-            .padding(12.dp, 8.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(color)
+                .padding(12.dp, 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
